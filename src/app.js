@@ -8,19 +8,21 @@
 import { dateKey, seedFor } from './seed.js';
 import * as wordGuess from './games/word-guess.js';
 import * as numberPyramid from './games/number-pyramid.js';
+import * as magicSquare from './games/magic-square.js';
 import * as progressStore from './progress.js';
 
 const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
   '': document.getElementById('home'),
   'mystery-word': document.getElementById('view-mystery-word'),
   'number-pyramid': document.getElementById('view-number-pyramid'),
+  'magic-square': document.getElementById('view-magic-square'),
 };
 
 // Games are started the first time they are opened, then kept, so
@@ -109,9 +111,16 @@ function startNumberPyramid() {
   numberPyramid.render(game, puzzle, () => finishGame('number-pyramid'));
 }
 
+function startMagicSquare() {
+  const game = document.getElementById('game-magic-square');
+  const puzzle = magicSquare.generate(seedFor(today, 'magic-square'));
+  magicSquare.render(game, puzzle, () => finishGame('magic-square'));
+}
+
 const STARTERS = {
   'mystery-word': startMysteryWord,
   'number-pyramid': startNumberPyramid,
+  'magic-square': startMagicSquare,
 };
 
 // ---------- Moving between screens ----------

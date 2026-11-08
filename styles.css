@@ -314,6 +314,65 @@ body {
   background: var(--star);
 }
 
+/* ---------- Magic Square ----------
+   Squares share the brick states from Number Pyramid (np-given, np-blank,
+   np-selected, np-found, np-shown) and its number pad. This section comes
+   BEFORE Number Pyramid on purpose: equally specific rules that come later
+   win, so the shared states must come after the plain .ms-cell style. */
+
+.ms-target {
+  margin: 4px auto 0;
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 2px solid var(--star);
+  background: var(--surface);
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.ms-target-number {
+  font-size: 1.35rem;
+}
+
+.ms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, clamp(72px, 22vw, 92px));
+  gap: 8px;
+  justify-content: center;
+  margin: auto 0;
+}
+
+.ms-cell {
+  height: clamp(60px, 9.5dvh, 92px);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.7rem;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+
+/* The line a hint points to glows gold. */
+.ms-hint-line {
+  box-shadow: 0 0 0 4px var(--star);
+}
+
+.ms-message {
+  min-height: 1.5em;
+  margin: 10px 0;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.ms-finished .np-pad {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 /* ---------- Number Pyramid ---------- */
 
 .np-pyramid {
