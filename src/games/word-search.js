@@ -67,24 +67,30 @@ function countSpots(grid, word) {
 /** True if one word is inside the other, either way round ("star" in "starfish"). */
 const overlaps = (a, b) => a.includes(b) || b.includes(a) || a.includes(reverse(b)) || b.includes(reverse(a));
 
-/** Try to hide the words in an empty grid. Returns { grid, placed } or null. */
+/** Every place `word` fits in the grid so far (empty squares or matching letters). */
+function spotsFor(grid, word) {
+  const spots = [];
+  for (const [dr, dc] of PLACE) {
+    for (let r = 0; r + dr * (word.length - 1) < SIZE; r++) {
+      for (let c = 0; c + dc * (word.length - 1) < SIZE; c++) {
+        const cells = [...word].map((_, i) => [r + dr * i, c + dc * i]);
+        if (cells.every(([rr, cc], i) => grid[rr][cc] === null || grid[rr][cc] === word[i])) spots.push(cells);
+      }
+    }
+  }
+  return spots;
+}
+
+/** Hide the words in an empty grid, each in a random spot where it fits. Returns { grid, placed } or null. */
 function layOut(random, words) {
   const grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
   const placed = [];
   for (const word of words) {
-    let done = false;
-    for (let attempt = 0; attempt < 200 && !done; attempt++) {
-      const [dr, dc] = random.pick(PLACE);
-      const r = random.int(0, SIZE - 1 - dr * (word.length - 1));
-      const c = random.int(0, SIZE - 1 - dc * (word.length - 1));
-      const cells = [...word].map((_, i) => [r + dr * i, c + dc * i]);
-      if (cells.every(([rr, cc], i) => grid[rr][cc] === null || grid[rr][cc] === word[i])) {
-        cells.forEach(([rr, cc], i) => { grid[rr][cc] = word[i]; });
-        placed.push({ word, cells });
-        done = true;
-      }
-    }
-    if (!done) return null;
+    const spots = spotsFor(grid, word);
+    if (!spots.length) return null;
+    const cells = random.pick(spots);
+    cells.forEach(([r, c], i) => { grid[r][c] = word[i]; });
+    placed.push({ word, cells });
   }
   return { grid, placed };
 }
@@ -94,6 +100,8 @@ export function generate(seed, themes, dayNumber) {
   const random = createRandom(seed);
   const theme = themeForDay(themes, dayNumber);
 
+  // Laying out words always works on a 15x15 grid; the loop is for the
+  // rare filler that spells a word by accident (verify catches it).
   for (let round = 0; round < 100; round++) {
     // Pick 10 words, none hiding inside another.
     const words = [];

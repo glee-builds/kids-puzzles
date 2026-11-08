@@ -9,7 +9,7 @@
 // Cells are named by level and position: "0-0" is the bottom-left brick,
 // "3-0" is the top brick.
 
-import { createRandom } from '../seed.js';
+import { createRandom, combinations } from '../seed.js';
 import { make, button, liveMessage, wiggle } from '../ui.js';
 
 export const LEVEL_SIZES = [4, 3, 2, 1];
@@ -82,23 +82,31 @@ export function isSolvable(hidden) {
   return hidden.every((id) => known.has(id));
 }
 
+// Every set of blank bricks that can be worked out, with at least one
+// blank on the bottom row and one above it, listed once.
+const BLANK_SETS = combinations(allCells(), BLANKS).filter((hidden) =>
+  hidden.some((id) => id.startsWith('0-')) && hidden.some((id) => !id.startsWith('0-')) && isSolvable(hidden));
+
+const LOW = 2;   // smallest bottom brick
+const HIGH = 25; // biggest bottom brick
+
 /** Make today's pyramid from a seed. */
 export function generate(seed) {
   const random = createRandom(seed);
-  for (let attempt = 0; attempt < 5000; attempt++) {
-    const base = Array.from({ length: LEVEL_SIZES[0] }, () => random.int(2, 25));
-    const values = buildValues(base);
-    const top = values[LEVEL_SIZES.length - 1][0];
-    if (top < MIN_TOP || top > MAX_TOP) continue;
-
-    const hidden = random.shuffle(allCells()).slice(0, BLANKS);
-    const inBottom = hidden.some((id) => id.startsWith('0-'));
-    const above = hidden.some((id) => !id.startsWith('0-'));
-    if (!inBottom || !above || !isSolvable(hidden)) continue;
-
-    return { values, hidden: hidden.sort() };
-  }
-  throw new Error('Could not make a pyramid for this seed.');
+  // With a bottom row of a, b, c, d the top is a + 3b + 3c + d. Pick the
+  // top, then the middle pair (b + c), then a; d is what's left.
+  const top = random.int(MIN_TOP, MAX_TOP);
+  // b + c must leave room for a + d, and b and c each must fit too.
+  const middleSum = random.int(
+    Math.max(2 * LOW, Math.ceil((top - 2 * HIGH) / 3)),
+    Math.min(2 * HIGH, Math.floor((top - 2 * LOW) / 3)),
+  );
+  const b = random.int(Math.max(LOW, middleSum - HIGH), Math.min(HIGH, middleSum - LOW));
+  const c = middleSum - b;
+  const rest = top - 3 * middleSum; // a + d
+  const a = random.int(Math.max(LOW, rest - HIGH), Math.min(HIGH, rest - LOW));
+  const values = buildValues([a, b, c, rest - a]);
+  return { values, hidden: [...random.pick(BLANK_SETS)].sort() };
 }
 
 export function answerFor(puzzle, id) {
