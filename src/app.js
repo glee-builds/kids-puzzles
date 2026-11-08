@@ -16,6 +16,7 @@ import * as skipMaze from './games/skip-maze.js';
 import * as numberLine from './games/number-line.js';
 import * as factFamilies from './games/fact-families.js';
 import * as progressStore from './progress.js';
+import { pondPads } from './pond.js';
 
 const today = dateKey();
 let progress = progressStore.load();
@@ -41,22 +42,59 @@ const VIEWS = {
 // leaving a game halfway and coming back keeps the guesses.
 const started = new Set();
 
-// ---------- Streak and card status ----------
+// ---------- The pond (streak) and card status ----------
 
-function streakText(days) {
-  if (days === 0) return 'Finish a puzzle to start a streak!';
-  // The streak counts days with any finished puzzle, so the words say
-  // "puzzles", not the name of one game.
-  if (days === 1) return '★ Puzzles 1 day';
-  return `★ Puzzles ${days} days in a row`;
+// Set when the frog hops while the app is open, so the home screen can
+// show the hop when the player comes back to it.
+let justHopped = false;
+
+function drawPond() {
+  // `|| 0` covers a phone still holding an older progress.js for a few minutes after an update.
+  const at = progress.totalDays || 0;
+  const doneToday = progress.lastDay === today;
+  const pond = document.getElementById('pond');
+  pond.replaceChildren();
+  for (const { number, kind } of pondPads(at, doneToday)) {
+    const spot = document.createElement('span');
+    spot.className = `pad pad-${kind}`;
+    if (kind === 'frog') {
+      const frog = document.createElement('img');
+      frog.className = 'pond-frog' + (justHopped ? ' pond-frog-hop' : '');
+      frog.src = 'assets/frog.svg';
+      frog.alt = '';
+      spot.append(frog);
+    }
+    if (number > 0) {
+      const label = document.createElement('span');
+      label.className = 'pad-number';
+      label.textContent = String(number);
+      spot.append(label);
+    }
+    pond.append(spot);
+  }
+  justHopped = false;
+  pond.setAttribute('aria-label', at === 0
+    ? 'The frog is on the bank of the pond.'
+    : `The frog is on lily pad ${at}.`);
+
+  // The words under the pond: where the frog is, and days in a row.
+  const days = progressStore.currentStreak(progress, today);
+  let caption;
+  if (at === 0) caption = 'Finish a puzzle and the frog hops onto a lily pad!';
+  else if (!doneToday) caption = 'Finish a puzzle to hop to the next lily pad!';
+  else caption = `The frog is on lily pad ${at}!`;
+  const captionNode = document.getElementById('pond-caption');
+  captionNode.textContent = caption;
+  if (days >= 2) {
+    const inARow = document.createElement('span');
+    inARow.className = 'pond-streak';
+    inARow.textContent = `★ ${days} days in a row`;
+    captionNode.append(inARow);
+  }
 }
 
 function updateHome() {
-  const days = progressStore.currentStreak(progress, today);
-  const streak = document.getElementById('streak');
-  streak.textContent = streakText(days);
-  streak.classList.toggle('streak-on', days > 0);
-
+  drawPond();
   for (const game of GAMES) {
     if (progressStore.isFinished(progress, today, game)) {
       document.getElementById(`status-${game}`).textContent = 'Done ✓';
@@ -65,13 +103,17 @@ function updateHome() {
 }
 
 function finishGame(game) {
+  const before = progress.totalDays || 0;
   progress = progressStore.recordFinish(progress, today, game);
   progressStore.save(progress);
+  const hopped = (progress.totalDays || 0) > before;
   updateHome();
+  justHopped = hopped; // show the hop when the home screen comes back
 
   const days = progress.streak;
-  document.getElementById('done-streak').textContent =
-    days === 1 ? '★ Day 1 of your puzzle streak!' : `★ Puzzles ${days} days in a row!`;
+  document.getElementById('done-streak').textContent = hopped
+    ? `The frog hopped to lily pad ${progress.totalDays}!`
+    : days >= 2 ? `★ Puzzles ${days} days in a row!` : `The frog is on lily pad ${progress.totalDays}!`;
   document.getElementById('done').hidden = false;
   celebrate();
 }
@@ -210,6 +252,8 @@ function show() {
   document.getElementById('done').hidden = true;
   window.scrollTo(0, 0);
 
+  if (current === '') drawPond();
+
   if (STARTERS[current] && !started.has(current)) {
     started.add(current);
     STARTERS[current]();
@@ -224,3 +268,20 @@ document.getElementById('done-close').addEventListener('click', () => {
 window.addEventListener('hashchange', show);
 updateHome();
 show();
+
+// ---------- Splash ----------
+
+// The splash covers the screen while the app starts. Keep it up long
+// enough to see (about 0.7 seconds), then fade it out.
+const SPLASH_MS = 700;
+function hideSplash() {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    splash.remove();
+    return;
+  }
+  splash.classList.add('splash-out');
+  setTimeout(() => splash.remove(), 400);
+}
+setTimeout(hideSplash, SPLASH_MS);

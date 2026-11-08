@@ -18,6 +18,9 @@
   --words-ink: #5644c4;  /* darker, for text on white */
   --numbers: #ff8a5c;    /* orange for numbers */
   --numbers-ink: #b8481a;
+  --water: #cdeef5;      /* the pond on the home screen */
+  --pad: #4cb062;
+  --bank: #d9c7a3;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -30,6 +33,8 @@
     --none: #67617f;
     --words-ink: #b4a8ff;
     --numbers-ink: #ffa47f;
+    --water: #22405a;
+    --bank: #6b5b45;
   }
 }
 
@@ -48,6 +53,37 @@ body {
   /* System fonts only: no outside network requests. */
   font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-text-size-adjust: 100%;
+}
+
+/* ---------- Splash ---------- */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--water);
+  transition: opacity 400ms ease;
+}
+
+.splash-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-frog {
+  width: 140px;
+}
+
+.splash-name {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--text);
 }
 
 /* ---------- Page layout ---------- */
@@ -186,23 +222,93 @@ body {
   color: var(--muted);
 }
 
-/* Streak badge under the title. */
-.streak {
-  display: inline-block;
-  margin: 6px 0 8px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--muted);
-  background: var(--surface);
-  border: 2px solid var(--border);
+/* The pond: lily pads in a strip of water, the frog on today's pad. */
+.pond {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 4px;
+  margin: 8px 0 4px;
+  padding: 30px 10px 22px; /* room for the frog above and numbers below */
+  border-radius: 18px;
+  background: var(--water);
 }
 
-.streak-on {
-  color: var(--text);
-  border-color: var(--star);
-  font-size: 1.1rem;
+.pad {
+  position: relative;
+  width: 38px;
+  height: 24px;
+  border-radius: 50%;
+  /* A lily pad: a green circle with a notch cut out. */
+  background: conic-gradient(from 150deg, transparent 0 34deg, var(--pad) 34deg);
+}
+
+.pad-bank {
+  border-radius: 10px;
+  background: var(--bank);
+}
+
+/* Pads already visited wear a small flower. */
+.pad-visited::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff9aa2;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+/* The next pad: a dashed ring, "hop here today". */
+.pad-next {
+  box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--star);
+}
+
+.pad-ahead {
+  opacity: 0.55;
+}
+
+.pond-frog {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: 40px;
+  transform: translateX(-50%);
+}
+
+.pond-frog-hop {
+  animation: pad-hop 700ms ease-out;
+}
+
+@keyframes pad-hop {
+  0% { transform: translate(-150%, 0); }
+  50% { transform: translate(-100%, -22px); }
+  100% { transform: translate(-50%, 0); }
+}
+
+.pad-number {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -18px;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.pond-caption {
+  margin: 4px 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pond-streak {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 .cards {
@@ -1720,6 +1826,7 @@ body {
   .np-wiggle,
   .nl-frog,
   .nl-frog-jump,
+  .pond-frog-hop,
   .done-card,
   .done-star {
     animation: none;

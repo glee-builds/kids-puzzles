@@ -93,3 +93,19 @@ test('save and load keep working when storage is blocked', () => {
   assert.doesNotThrow(() => save(emptyProgress(), blocked));
   assert.deepEqual(load(blocked), emptyProgress());
 });
+
+// --- total days (the lily pads) ---
+
+test('totalDays counts every puzzle day and never goes down', () => {
+  let p = recordFinish(emptyProgress(), '2026-11-08', 'maze');
+  p = recordFinish(p, '2026-11-08', 'maze-again');
+  p = recordFinish(p, '2026-11-09', 'maze');
+  p = recordFinish(p, '2026-11-20', 'maze'); // a gap: the streak starts over, totalDays doesn't
+  assert.equal(p.totalDays, 3);
+  assert.equal(p.streak, 1);
+});
+
+test('progress saved before totalDays starts from the days in its history', () => {
+  const old = { streak: 2, lastDay: '2026-11-08', finished: { '2026-11-07': ['maze'], '2026-11-08': ['maze'] } };
+  assert.equal(load(fakeStorage({ [STORAGE_KEY]: JSON.stringify(old) })).totalDays, 2);
+});
