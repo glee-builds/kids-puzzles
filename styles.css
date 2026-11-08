@@ -55,6 +55,37 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* ---------- Splash ---------- */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--water);
+  transition: opacity 400ms ease;
+}
+
+.splash-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-frog {
+  width: 140px;
+}
+
+.splash-name {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
 /* ---------- Page layout ---------- */
 
 .app {
