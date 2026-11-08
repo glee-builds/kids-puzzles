@@ -1,4 +1,6 @@
-# kids-puzzles
+# kids-puzzles (Lily Pad)
+
+**Lily Pad** is the name players see. The repo and web address stay `kids-puzzles`.
 
 A daily puzzle app for an early reader, played on a parent's phone. Each day serves a short set of puzzles (5 to 10 minutes) mixing simple 3 to 4 letter word games with mazes and matching puzzles, plus a streak counter for coming back each day. It is a plain HTML, CSS, and JavaScript web app with no framework, no build step, no accounts, and no network requests. Puzzles are generated in the browser from today's date, and progress is saved on the phone.
 

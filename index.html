@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#fff7ec">
-  <title>Puzzle Time</title>
+  <title>Lily Pad</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
     <!-- Home: pick a puzzle -->
     <section id="home" class="view">
       <header class="top home-top">
-        <h1>Puzzle Time</h1>
+        <h1 class="brand"><img class="brand-frog" src="assets/frog.svg" alt="">Lily Pad</h1>
         <p class="streak" id="streak"></p>
         <p class="subtitle">Pick a puzzle!</p>
       </header>
@@ -81,7 +81,7 @@
 
         <a class="card card-play" href="#number-line">
           <span class="card-art" aria-hidden="true">
-            <span class="hop-art"><span class="hop-frog">🐸</span></span>
+            <span class="hop-art"><img class="hop-frog" src="assets/frog.svg" alt=""></span>
           </span>
           <span class="card-name">Number Line Hop</span>
           <span class="card-status" id="status-number-line">Play</span>
@@ -207,7 +207,7 @@
   <!-- Celebration card, shared by every game. -->
   <section id="done" class="done" role="dialog" aria-labelledby="done-title" hidden>
     <div class="done-card">
-      <div class="done-star" aria-hidden="true">★</div>
+      <img class="done-star" src="assets/frog.svg" alt="">
       <p class="done-title" id="done-title">You did it!</p>
       <p class="done-streak" id="done-streak"></p>
       <p class="done-note">Come back tomorrow for new puzzles.</p>
