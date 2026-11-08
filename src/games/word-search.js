@@ -229,7 +229,7 @@ export function render(container, puzzle, onDone) {
     return [word, li];
   }));
 
-  const hintButton = button('lw-button ws-hint', 'Hint', () => {
+  const hintButton = button('lw-button hint-button', 'Hint', () => {
     const result = hint(state);
     if (!result.word) return;
     state = result.state;
@@ -276,7 +276,7 @@ export function render(container, puzzle, onDone) {
     }
     draw();
     if (state.status === 'won') {
-      container.classList.add('ws-finished');
+      container.classList.add('finished');
       onDone({ status: state.status });
     }
   }

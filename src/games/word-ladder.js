@@ -248,7 +248,7 @@ export function render(container, puzzle, onDone) {
     keyboard.append(row);
   }
 
-  const buttons = make('div', 'wl-buttons');
+  const buttons = make('div', 'button-row');
   const backButton = button('lw-button', '↩ Back', () => {
     state = back(state);
     selected = null;
@@ -304,7 +304,7 @@ export function render(container, puzzle, onDone) {
     }
     draw();
     if (state.status === 'won') {
-      container.classList.add('wl-finished');
+      container.classList.add('finished');
       onDone({ status: state.status });
     }
   }
@@ -330,7 +330,7 @@ export function render(container, puzzle, onDone) {
     }
     draw();
     if (state.status === 'won') {
-      container.classList.add('wl-finished');
+      container.classList.add('finished');
       onDone({ status: state.status });
     }
   }

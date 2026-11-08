@@ -262,7 +262,7 @@ export function render(container, puzzle, onDone) {
 
   function finish() {
     document.removeEventListener('keydown', onKeydown);
-    container.classList.add('wg-finished');
+    container.classList.add('finished');
     onDone({ status: state.status, guesses: state.guesses.length });
   }
 

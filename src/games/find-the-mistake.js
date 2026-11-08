@@ -237,7 +237,7 @@ export function render(container, puzzle, onDone) {
   const bubble = make('p', 'fm-bubble');
   talk.append(frog, bubble);
 
-  const count = make('p', 'fm-count');
+  const count = make('p', 'count-line');
   const question = make('p', 'fm-question');
   const list = make('ol', 'fm-steps');
   const message = liveMessage('fm-message');
@@ -257,7 +257,7 @@ export function render(container, puzzle, onDone) {
     pad.append(key);
   }
 
-  const nextButton = button('button fm-next', '', goNext);
+  const nextButton = button('button next-button', '', goNext);
 
   container.append(talk, count, question, list, message, pad, nextButton);
 

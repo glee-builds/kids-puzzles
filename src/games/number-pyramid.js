@@ -325,7 +325,7 @@ export function render(container, puzzle, onDone) {
     if (state.status === 'won') {
       message.textContent = 'You built the pyramid!';
       document.removeEventListener('keydown', onKeydown);
-      container.classList.add('np-finished');
+      container.classList.add('finished');
       onDone({ status: state.status });
     }
   }

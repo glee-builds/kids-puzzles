@@ -157,12 +157,12 @@ export function render(container, puzzle, onDone) {
   container.replaceChildren();
   container.classList.add('wc');
 
-  const count = make('p', 'wc-count');
+  const count = make('p', 'count-line');
   const card = make('div', 'wc-card');
   const ask = make('p', 'wc-ask');
   const choices = make('div', 'wc-choices');
   const message = liveMessage('wc-message');
-  const nextButton = button('button wc-next', '', goNext);
+  const nextButton = button('button next-button', '', goNext);
 
   container.append(count, card, ask, choices, message, nextButton);
 

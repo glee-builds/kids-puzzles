@@ -188,7 +188,7 @@ export function render(container, puzzle, onDone) {
         targets: () => boxNodes,
         onDrop: (k) => place(i, k),
         onTap: () => placeFirstEmpty(i),
-        classes: { ghost: 'ls-ghost', lifted: 'ls-tile-lifted', over: 'ls-box-over' },
+        classes: { ghost: 'ls-ghost', lifted: 'ls-tile-lifted' },
       });
       tray.append(tile);
       return tile;
@@ -270,7 +270,7 @@ export function render(container, puzzle, onDone) {
         busy = false;
         if (state.status === 'won') {
           message.textContent = 'You unscrambled every word!';
-          container.classList.add('ls-finished');
+          container.classList.add('finished');
           draw(true);
           onDone({ status: state.status });
           return;

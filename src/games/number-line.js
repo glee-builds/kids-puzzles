@@ -275,7 +275,7 @@ export function render(container, puzzle, onDone) {
       });
       message.textContent = 'The frog finished all its hops!';
       document.removeEventListener('keydown', onKeydown);
-      container.classList.add('nl-finished');
+      container.classList.add('finished');
       onDone({ status: state.status });
     }
   }
