@@ -18,6 +18,7 @@ import * as numberLine from './games/number-line.js';
 import * as factFamilies from './games/fact-families.js';
 import * as findTheMistake from './games/find-the-mistake.js';
 import * as wordProblems from './games/word-problems.js';
+import * as wordClues from './games/word-clues.js';
 import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
 
@@ -25,7 +26,7 @@ const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'word-ladder', 'maze', 'number-line', 'fact-families', 'find-the-mistake', 'word-problems'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'word-ladder', 'maze', 'number-line', 'fact-families', 'find-the-mistake', 'word-problems', 'word-clues'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -42,6 +43,7 @@ const VIEWS = {
   'fact-families': document.getElementById('view-fact-families'),
   'find-the-mistake': document.getElementById('view-find-the-mistake'),
   'word-problems': document.getElementById('view-word-problems'),
+  'word-clues': document.getElementById('view-word-clues'),
 };
 
 // Games are started the first time they are opened, then kept, so
@@ -283,6 +285,22 @@ async function startWordProblems() {
   }
 }
 
+// Word Clues words are dealt two a day from the same start date.
+async function startWordClues() {
+  const game = document.getElementById('game-word-clues');
+  try {
+    const response = await fetch('data/rich-words.json');
+    if (!response.ok) throw new Error('Could not load data/rich-words.json');
+    const { words } = await response.json();
+    const day = progressStore.daysBetween(STORY_START, today);
+    const puzzle = wordClues.generate(seedFor(today, 'word-clues'), words, day);
+    wordClues.render(game, puzzle, () => finishGame('word-clues'));
+  } catch (error) {
+    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
 const STARTERS = {
   'mystery-word': startMysteryWord,
   'number-pyramid': startNumberPyramid,
@@ -296,6 +314,7 @@ const STARTERS = {
   'fact-families': startFactFamilies,
   'find-the-mistake': startFindTheMistake,
   'word-problems': startWordProblems,
+  'word-clues': startWordClues,
 };
 
 // ---------- Moving between screens ----------
