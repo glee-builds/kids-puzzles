@@ -25,7 +25,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
   - `verify(puzzle)`: confirm a puzzle is valid and solvable
   - `render(container, puzzle, onDone)`: draw it and call `onDone` when finished
 
-  Adding a game means adding one file.
+  Adding a game means adding its file, its card on the home screen in `index.html`, and one line in the `GAMES` list in `src/app.js` (title, legend, and the data it needs). The game's screen is built from that line.
 - **Testing:** Node's built-in test runner (`node --test`), no test libraries. One test file per game in `tests/`, plus seed tests. GitHub Actions runs tests on every pull request (Phase 2).
 
 ## Phone-first design rules
@@ -48,9 +48,9 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 ## Repo layout
 
 ```
-index.html          home screen: today's set, streak
+index.html          home screen: the game cards, streak
 styles.css
-src/app.js          daily set, streak, navigation
+src/app.js          the GAMES list, game screens, streak, navigation
 src/seed.js         date -> repeatable random numbers
 src/games/          one file per game
 src/ui.js           screen helpers the games share (buttons, tracing, drag-or-tap)

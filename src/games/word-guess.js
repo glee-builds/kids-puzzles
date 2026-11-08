@@ -170,6 +170,16 @@ export function render(container, puzzle, onDone) {
   container.replaceChildren();
   container.classList.add('wg');
 
+  // The color key: what each tile color (and mark) means.
+  const legend = make('p', 'legend');
+  for (const [mark, meaning] of [['here', 'right spot'], ['elsewhere', 'other spot'], ['none', 'not in word']]) {
+    const swatch = make('span', `swatch mark-${mark}`);
+    swatch.setAttribute('aria-hidden', 'true');
+    const item = make('span', 'legend-item');
+    item.append(swatch, meaning);
+    legend.append(item);
+  }
+
   // Board: one row per try, one tile per letter.
   const board = make('div', 'wg-board');
   board.style.setProperty('--letters', puzzle.length);
@@ -212,7 +222,7 @@ export function render(container, puzzle, onDone) {
     keyboard.append(row);
   });
 
-  container.append(board, message, keyboard);
+  container.append(legend, board, message, keyboard);
 
   function typeLetter(letter) {
     if (state.status !== 'playing' || typed.length >= puzzle.length) return;

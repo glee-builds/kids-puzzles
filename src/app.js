@@ -6,47 +6,12 @@
 // phone's back gesture returns to the home screen too.
 
 import { dateKey, seedFor } from './seed.js';
-import * as wordGuess from './games/word-guess.js';
-import * as numberPyramid from './games/number-pyramid.js';
-import * as magicSquare from './games/magic-square.js';
-import * as letterScramble from './games/letter-scramble.js';
-import * as storyOrder from './games/story-order.js';
-import * as wordSearch from './games/word-search.js';
-import * as wordLadder from './games/word-ladder.js';
-import * as maze from './games/maze.js';
-import * as numberLine from './games/number-line.js';
-import * as factFamilies from './games/fact-families.js';
-import * as findTheMistake from './games/find-the-mistake.js';
-import * as wordProblems from './games/word-problems.js';
-import * as wordClues from './games/word-clues.js';
-import * as fixSentence from './games/fix-sentence.js';
 import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
+import { make } from './ui.js';
 
 const today = dateKey();
 let progress = progressStore.load();
-
-// Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'word-ladder', 'maze', 'number-line', 'fact-families', 'find-the-mistake', 'word-problems', 'word-clues', 'fix-sentence'];
-
-// Screens that exist. Anything else in the address shows the home screen.
-const VIEWS = {
-  '': document.getElementById('home'),
-  'mystery-word': document.getElementById('view-mystery-word'),
-  'number-pyramid': document.getElementById('view-number-pyramid'),
-  'magic-square': document.getElementById('view-magic-square'),
-  'story-order': document.getElementById('view-story-order'),
-  'letter-scramble': document.getElementById('view-letter-scramble'),
-  'word-search': document.getElementById('view-word-search'),
-  'word-ladder': document.getElementById('view-word-ladder'),
-  maze: document.getElementById('view-maze'),
-  'number-line': document.getElementById('view-number-line'),
-  'fact-families': document.getElementById('view-fact-families'),
-  'find-the-mistake': document.getElementById('view-find-the-mistake'),
-  'word-problems': document.getElementById('view-word-problems'),
-  'word-clues': document.getElementById('view-word-clues'),
-  'fix-sentence': document.getElementById('view-fix-sentence'),
-};
 
 // Games are started the first time they are opened, then kept, so
 // leaving a game halfway and coming back keeps the guesses.
@@ -105,7 +70,7 @@ function drawPond() {
 
 function updateHome() {
   drawPond();
-  for (const game of GAMES) {
+  for (const game of Object.keys(GAMES)) {
     if (progressStore.isFinished(progress, today, game)) {
       document.getElementById(`status-${game}`).textContent = 'Done ✓';
     }
@@ -152,189 +117,88 @@ function celebrate() {
 
 // ---------- Games ----------
 
-async function loadWords(path) {
+async function loadJson(path) {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`Could not load ${path}`);
-  const list = await response.json();
-  return Object.values(list.words).flat();
+  return response.json();
 }
 
-async function startMysteryWord() {
-  const game = document.getElementById('game');
-  try {
-    const words = await loadWords('data/words/level-3.json');
-    const puzzle = wordGuess.generate(seedFor(today, 'word-guess'), words);
-    wordGuess.render(game, puzzle, () => finishGame('mystery-word'));
-  } catch (error) {
-    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
-    console.error(error);
-  }
+/** The words in one or more lists from data/words/, as one list. */
+async function words(...names) {
+  const lists = await Promise.all(names.map((name) => loadJson(`data/words/${name}.json`)));
+  return lists.flatMap((list) => Object.values(list.words).flat());
 }
 
-function startNumberPyramid() {
-  const game = document.getElementById('game-number-pyramid');
-  const puzzle = numberPyramid.generate(seedFor(today, 'number-pyramid'));
-  numberPyramid.render(game, puzzle, () => finishGame('number-pyramid'));
-}
+/** One part of a data file, e.g. part('stories', 'stories'). */
+const part = async (name, key) => (await loadJson(`data/${name}.json`))[key];
 
-function startMagicSquare() {
-  const game = document.getElementById('game-magic-square');
-  const puzzle = magicSquare.generate(seedFor(today, 'magic-square'));
-  magicSquare.render(game, puzzle, () => finishGame('magic-square'));
-}
+// Stories, themes, words, and sentences are dealt from a deck counted from
+// this date, so none repeats until the whole deck has been used.
+const DAY = progressStore.daysBetween('2026-01-01', today);
 
-// Stories are dealt two a day from a fixed start date, so none repeats
-// until all of them have been used.
-const STORY_START = '2026-01-01';
-
-async function startStoryOrder() {
-  const game = document.getElementById('game-story-order');
-  try {
-    const response = await fetch('data/stories.json');
-    if (!response.ok) throw new Error('Could not load data/stories.json');
-    const { stories } = await response.json();
-    const day = progressStore.daysBetween(STORY_START, today);
-    const puzzle = storyOrder.generate(seedFor(today, 'story-order'), stories, day);
-    storyOrder.render(game, puzzle, () => finishGame('story-order'));
-  } catch (error) {
-    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
-    console.error(error);
-  }
-}
-
-async function startLetterScramble() {
-  const game = document.getElementById('game-letter-scramble');
-  try {
-    const lists = await Promise.all([
-      loadWords('data/words/level-1.json'),
-      loadWords('data/words/level-2.json'),
-    ]);
-    const puzzle = letterScramble.generate(seedFor(today, 'letter-scramble'), lists.flat());
-    letterScramble.render(game, puzzle, () => finishGame('letter-scramble'));
-  } catch (error) {
-    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
-    console.error(error);
-  }
-}
-
-// Word Search themes are dealt one a day from the same start date.
-async function startWordSearch() {
-  const game = document.getElementById('game-word-search');
-  try {
-    const response = await fetch('data/search-themes.json');
-    if (!response.ok) throw new Error('Could not load data/search-themes.json');
-    const { themes } = await response.json();
-    const day = progressStore.daysBetween(STORY_START, today);
-    const puzzle = wordSearch.generate(seedFor(today, 'word-search'), themes, day);
-    wordSearch.render(game, puzzle, () => finishGame('word-search'));
-  } catch (error) {
-    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
-    console.error(error);
-  }
-}
-
-async function startWordLadder() {
-  const game = document.getElementById('game-word-ladder');
-  try {
-    const [ladder, ...phonics] = await Promise.all([
-      loadWords('data/words/ladder.json'),
-      loadWords('data/words/level-1.json'),
-      loadWords('data/words/level-2.json'),
-    ]);
-    const puzzle = wordLadder.generate(seedFor(today, 'word-ladder'), ladder, phonics.flat());
-    wordLadder.render(game, puzzle, () => finishGame('word-ladder'));
-  } catch (error) {
-    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
-    console.error(error);
-  }
-}
-
-function startMaze() {
-  const game = document.getElementById('game-maze');
-  const puzzle = maze.generate(seedFor(today, 'maze'));
-  maze.render(game, puzzle, () => finishGame('maze'));
-}
-
-function startNumberLine() {
-  const game = document.getElementById('game-number-line');
-  const puzzle = numberLine.generate(seedFor(today, 'number-line'));
-  numberLine.render(game, puzzle, () => finishGame('number-line'));
-}
-
-function startFactFamilies() {
-  const game = document.getElementById('game-fact-families');
-  const puzzle = factFamilies.generate(seedFor(today, 'fact-families'));
-  factFamilies.render(game, puzzle, () => finishGame('fact-families'));
-}
-
-function startFindTheMistake() {
-  const game = document.getElementById('game-find-the-mistake');
-  const puzzle = findTheMistake.generate(seedFor(today, 'find-the-mistake'));
-  findTheMistake.render(game, puzzle, () => finishGame('find-the-mistake'));
-}
-
-async function startWordProblems() {
-  const game = document.getElementById('game-word-problems');
-  try {
-    const response = await fetch('data/word-problems.json');
-    if (!response.ok) throw new Error('Could not load data/word-problems.json');
-    const { problems } = await response.json();
-    const puzzle = wordProblems.generate(seedFor(today, 'word-problems'), problems);
-    wordProblems.render(game, puzzle, () => finishGame('word-problems'));
-  } catch (error) {
-    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
-    console.error(error);
-  }
-}
-
-// Word Clues words are dealt two a day from the same start date.
-async function startWordClues() {
-  const game = document.getElementById('game-word-clues');
-  try {
-    const response = await fetch('data/rich-words.json');
-    if (!response.ok) throw new Error('Could not load data/rich-words.json');
-    const { words } = await response.json();
-    const day = progressStore.daysBetween(STORY_START, today);
-    const puzzle = wordClues.generate(seedFor(today, 'word-clues'), words, day);
-    wordClues.render(game, puzzle, () => finishGame('word-clues'));
-  } catch (error) {
-    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
-    console.error(error);
-  }
-}
-
-// Fix the Sentence sentences are dealt four a day from the same start date.
-async function startFixSentence() {
-  const game = document.getElementById('game-fix-sentence');
-  try {
-    const response = await fetch('data/fix-sentences.json');
-    if (!response.ok) throw new Error('Could not load data/fix-sentences.json');
-    const { sentences } = await response.json();
-    const day = progressStore.daysBetween(STORY_START, today);
-    const puzzle = fixSentence.generate(seedFor(today, 'fix-sentence'), sentences, day);
-    fixSentence.render(game, puzzle, () => finishGame('fix-sentence'));
-  } catch (error) {
-    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
-    console.error(error);
-  }
-}
-
-const STARTERS = {
-  'mystery-word': startMysteryWord,
-  'number-pyramid': startNumberPyramid,
-  'magic-square': startMagicSquare,
-  'story-order': startStoryOrder,
-  'letter-scramble': startLetterScramble,
-  'word-search': startWordSearch,
-  'word-ladder': startWordLadder,
-  maze: startMaze,
-  'number-line': startNumberLine,
-  'fact-families': startFactFamilies,
-  'find-the-mistake': startFindTheMistake,
-  'word-problems': startWordProblems,
-  'word-clues': startWordClues,
-  'fix-sentence': startFixSentence,
+// Every game, by the name used in its address (#maze) and in saved
+// progress. Each has:
+//   title, legend  shown at the top of its screen
+//   file           its file in src/games/, if not the same as the name
+//                  (also the name its daily seed uses)
+//   data           what its generate() needs after the seed, if anything
+// Adding a game: add its file in src/games/, its card in index.html, and
+// one line here.
+const GAMES = {
+  'mystery-word': { title: 'Mystery Word', file: 'word-guess', data: () => [words('level-3')] },
+  'letter-scramble': { title: 'Letter Scramble', legend: 'Put the letters back in order', data: () => [words('level-1', 'level-2')] },
+  'story-order': { title: 'Story Order', legend: 'Put the story in order', data: () => [part('stories', 'stories'), DAY] },
+  'word-search': { title: 'Word Search', legend: 'Find the hidden words', data: () => [part('search-themes', 'themes'), DAY] },
+  'word-ladder': { title: 'Word Ladder', legend: 'Change one letter at a time', data: () => [words('ladder'), words('level-1', 'level-2')] },
+  'word-clues': { title: 'Word Clues', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY] },
+  'fix-sentence': { title: 'Fix the Sentence', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY] },
+  'number-pyramid': { title: 'Number Pyramid', legend: 'Each brick = the two bricks under it, added' },
+  'magic-square': { title: 'Magic Square', legend: 'Rows, columns, and diagonals all add up the same' },
+  'number-line': { title: 'Number Line Hop', legend: 'Where will the frog land?' },
+  'fact-families': { title: 'Fact Families', legend: 'Three numbers make four facts. Drag them in!' },
+  'find-the-mistake': { title: 'Find the Mistake', legend: 'The frog got one step wrong. Find it and fix it!' },
+  'word-problems': { title: 'Think It Through', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')] },
+  maze: { title: 'Maze', legend: 'Trace from the green dot to the star' },
 };
+
+/** A game's screen: a back button, its title and legend, and room for the game. */
+function makeScreen(name, { title, legend }) {
+  const screen = make('section', 'view');
+  screen.id = `view-${name}`;
+  screen.hidden = true;
+  const top = make('header', 'top game-top');
+  const back = make('a', 'back', '←');
+  back.href = '#';
+  back.setAttribute('aria-label', 'Back to puzzles');
+  top.append(back, make('h1', '', title));
+  if (legend) top.append(make('p', 'legend', legend));
+  const area = make('main', 'game');
+  area.id = `game-${name}`;
+  area.append(make('p', 'loading', 'Getting today\'s puzzle…'));
+  screen.append(top, area);
+  return screen;
+}
+
+/** Load a game's file and data, make today's puzzle, and draw it. */
+async function startGame(name) {
+  const { file = name, data = () => [] } = GAMES[name];
+  const area = document.getElementById(`game-${name}`);
+  try {
+    const [game, extras] = await Promise.all([import(`./games/${file}.js`), Promise.all(data())]);
+    const puzzle = game.generate(seedFor(today, file), ...extras);
+    game.render(area, puzzle, () => finishGame(name));
+  } catch (error) {
+    area.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
+// Build every game's screen, and list the screens that exist. Anything
+// else in the address shows the home screen.
+const VIEWS = { '': document.getElementById('home') };
+for (const [name, game] of Object.entries(GAMES)) {
+  VIEWS[name] = document.querySelector('.app').appendChild(makeScreen(name, game));
+}
 
 // ---------- Moving between screens ----------
 
@@ -351,9 +215,9 @@ function show() {
 
   if (current === '') drawPond();
 
-  if (STARTERS[current] && !started.has(current)) {
+  if (current in GAMES && !started.has(current)) {
     started.add(current);
-    STARTERS[current]();
+    startGame(current);
   }
 }
 
