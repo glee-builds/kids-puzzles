@@ -506,6 +506,26 @@ button {
   color: #ffffff;
 }
 
+.ladder-art {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 6px;
+  border-left: 3px solid var(--words);
+  border-right: 3px solid var(--words);
+}
+
+.ladder-art span {
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+}
+
+.ladder-art b {
+  color: var(--words-ink);
+}
+
 .bricks {
   display: flex;
   flex-direction: column;
@@ -918,6 +938,135 @@ button {
 
 .ws-finished .ws-hint {
   opacity: 0.5;
+}
+
+/* ---------- Word Ladder ---------- */
+
+.wl-goal {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--words-ink);
+}
+
+/* The ladder: rails on both sides, one word per rung. Scrolls if the
+   player takes a long way round. */
+.wl-rungs {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 4px 14px;
+  border-left: 4px solid var(--bank);
+  border-right: 4px solid var(--bank);
+}
+
+.wl-rung {
+  display: flex;
+  gap: 4px;
+}
+
+.wl-tile {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* The letter that changed on this step. */
+.wl-tile-new {
+  border-color: var(--words);
+  color: var(--words-ink);
+}
+
+.wl-rung-start .wl-tile {
+  background: var(--words);
+  border-color: var(--words);
+  color: #ffffff;
+}
+
+/* The end word wears a star in the tile border color. */
+.wl-rung-end .wl-tile {
+  border-color: var(--star);
+  border-width: 3px;
+}
+
+.wl-rung-end::after {
+  content: "★";
+  align-self: center;
+  margin-left: 4px;
+  color: var(--star);
+}
+
+.wl-rung-empty .wl-tile {
+  border-style: dashed;
+  background: transparent;
+}
+
+/* The word to change: big tiles to tap. */
+.wl-tile-big {
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  font: inherit;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text);
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+/* The picked letter: purple with a raised outline, so it's not color alone. */
+.wl-tile-picked {
+  background: var(--words);
+  border-color: var(--words);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px var(--text);
+}
+
+.wl-message {
+  min-height: 2.6em;
+  margin: 8px 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+.wl-keyboard .wg-key {
+  height: 48px;
+}
+
+.wl-keyboard[hidden] {
+  display: none;
+}
+
+.wl-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.wl-buttons .lw-button {
+  min-width: 110px;
+}
+
+.wl-buttons .lw-button[hidden] {
+  display: none;
 }
 
 /* ---------- Number Line Hop ---------- */
