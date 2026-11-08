@@ -322,6 +322,19 @@ body {
   animation: pop 120ms ease-out;
 }
 
+/* Clue row before the last try: known letters faint, missing letter "?". */
+.wg-row-current .wg-tile-clue {
+  color: var(--muted);
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.wg-row-current .wg-tile-clue-missing {
+  color: var(--elsewhere);
+  opacity: 1;
+  border-color: var(--elsewhere);
+}
+
 .wg-message {
   min-height: 1.5em;
   margin: 8px 0;
