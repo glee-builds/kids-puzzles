@@ -309,7 +309,7 @@ export function render(container, puzzle, onDone) {
     if (state.status === 'won') {
       message.textContent = 'Every line adds up. Magic!';
       document.removeEventListener('keydown', onKeydown);
-      container.classList.add('ms-finished');
+      container.classList.add('finished');
       onDone({ status: state.status });
     }
   }

@@ -42,6 +42,11 @@
   box-sizing: border-box;
 }
 
+/* Anything hidden stays hidden, even if its own rule sets display. */
+[hidden] {
+  display: none !important;
+}
+
 /* Andika: a font made for children learning to read, with the "a" and "g"
    kids learn to write. The files live in this repo (assets/fonts, with its
    license), so there are still no outside network requests. Weights above
@@ -131,10 +136,6 @@ button {
   font-weight: 700;
 }
 
-.load-problem[hidden] {
-  display: none;
-}
-
 /* ---------- Page layout ---------- */
 
 .app {
@@ -190,16 +191,79 @@ button {
   color: var(--muted);
 }
 
+/* The message line under a game (made by liveMessage in src/ui.js).
+   Games add a rule only for what differs. */
+.message {
+  min-height: 1.5em;
+  margin: 10px 0;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* A finished game fades its controls. */
+.finished :is(.np-pad, .wg-keyboard, .hint-button, .ls-buttons) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.hint-button {
+  margin: 10px auto 0;
+  min-width: 140px;
+}
+
+/* A row of buttons under a game (Back, Hint, Next). */
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.button-row .lw-button {
+  min-width: 130px;
+}
+
+/* "Problem 2 of 4" above a game. */
+.count-line {
+  margin: 6px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* The full-width Next button after each problem. */
+.next-button {
+  width: 100%;
+  border: none;
+  font: inherit;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+/* Dragging (dragOrTap in src/ui.js): the copy under the finger, and the
+   box it would land in. Games set the copy's size and color. */
+.drag-ghost {
+  position: fixed;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.3);
+  transform: translate(-50%, -70%) scale(1.1); /* just above the fingertip */
+  pointer-events: none;
+}
+
+.drop-over {
+  border-color: var(--star);
+  box-shadow: 0 0 0 3px var(--star);
+}
+
 /* ---------- Screens ---------- */
 
 .view {
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-.view[hidden] {
-  display: none;
 }
 
 .game-top {
@@ -674,11 +738,6 @@ button {
   background: var(--surface);
 }
 
-.ls-box-over {
-  border-color: var(--star);
-  box-shadow: 0 0 0 3px var(--star);
-}
-
 /* In the right place: green with a check, never color alone. */
 .ls-box-locked {
   border-color: var(--here);
@@ -716,23 +775,13 @@ button {
 }
 
 .ls-ghost {
-  position: fixed;
-  z-index: 50;
-  display: grid;
-  place-items: center;
   background: var(--elsewhere);
   color: #ffffff;
-  box-shadow: 0 6px 16px rgb(0 0 0 / 0.3);
-  transform: translate(-50%, -70%) scale(1.1); /* just above the fingertip */
-  pointer-events: none;
 }
 
 .ls-message {
   min-height: 2.6em;
   margin: 20px 0 auto; /* right under the letters; buttons at the bottom */
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 700;
 }
 
 .ls-buttons {
@@ -741,18 +790,11 @@ button {
   gap: 10px;
 }
 
-.ls-finished .ls-buttons {
-  opacity: 0.5;
-}
-
 /* ---------- Maze ---------- */
 
 .mz-message {
   min-height: 2.6em;
   margin: 4px 0 8px;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 700;
 }
 
 .mz-grid {
@@ -818,16 +860,6 @@ button {
   font-size: calc(var(--cell) * 0.45);
 }
 
-.mz-hint {
-  margin: 14px auto 0;
-  min-width: 140px;
-}
-
-.mz-finished .mz-hint {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 .hop-art {
   position: relative;
   width: 64px;
@@ -858,8 +890,7 @@ button {
 .ws-message {
   min-height: 1.4em;
   margin: 0 0 6px;
-  text-align: center;
-  font-weight: 700;
+  font-size: 1rem;
 }
 
 /* 15 squares across: as wide as the screen allows, up to 34px each. */
@@ -929,15 +960,6 @@ button {
   color: var(--here);
   text-decoration: none;
   display: inline-block;
-}
-
-.ws-hint {
-  margin: 10px auto 0;
-  min-width: 140px;
-}
-
-.ws-finished .ws-hint {
-  opacity: 0.5;
 }
 
 /* ---------- Word Ladder ---------- */
@@ -1042,31 +1064,11 @@ button {
 .wl-message {
   min-height: 2.6em;
   margin: 8px 0;
-  text-align: center;
-  font-weight: 700;
+  font-size: 1rem;
 }
 
 .wl-keyboard .wg-key {
   height: 48px;
-}
-
-.wl-keyboard[hidden] {
-  display: none;
-}
-
-.wl-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.wl-buttons .lw-button {
-  min-width: 110px;
-}
-
-.wl-buttons .lw-button[hidden] {
-  display: none;
 }
 
 /* ---------- Number Line Hop ---------- */
@@ -1179,14 +1181,6 @@ button {
 .nl-message {
   min-height: 2.6em;
   margin: 4px 0 8px;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.nl-finished .np-pad {
-  opacity: 0.5;
-  pointer-events: none;
 }
 
 .house-art {
@@ -1360,11 +1354,6 @@ button {
   background: var(--surface);
 }
 
-.ff-box-over {
-  border-color: var(--star);
-  box-shadow: 0 0 0 3px var(--star);
-}
-
 .ff-fact-good .ff-box,
 .ff-fact-shown .ff-box {
   border-color: var(--star);
@@ -1378,20 +1367,13 @@ button {
 
 /* The number under a dragging finger. */
 .ff-ghost {
-  position: fixed;
-  z-index: 50;
   width: 62px;
   height: 52px;
-  display: grid;
-  place-items: center;
   border-radius: 12px;
   background: var(--surface);
   color: var(--text);
   font-size: 1.5rem;
   font-weight: 800;
-  box-shadow: 0 6px 16px rgb(0 0 0 / 0.3);
-  transform: translate(-50%, -70%) scale(1.1); /* just above the fingertip */
-  pointer-events: none;
 }
 
 .ff-windows {
@@ -1442,11 +1424,7 @@ button {
 }
 
 .ff-message {
-  min-height: 1.5em;
   margin: 8px 0;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 700;
 }
 
 .ff-action {
@@ -1456,13 +1434,6 @@ button {
 }
 
 /* These set their own display, so "hidden" needs saying again. */
-.ff-action[hidden],
-.ff-lights[hidden],
-.ff-fact[hidden],
-.ff-windows[hidden],
-.ff-prompt[hidden] {
-  display: none;
-}
 
 /* ---------- Shared buttons ----------
    Named "lw-" because Letter Wheel used them first; every game uses them now. */
@@ -1522,13 +1493,6 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.so-slots[hidden],
-.so-pool[hidden],
-.so-paragraph[hidden],
-.so-buttons .lw-button[hidden] {
-  display: none;
 }
 
 .so-slot-row {
@@ -1627,22 +1591,7 @@ button {
 }
 
 .so-message {
-  min-height: 1.5em;
   margin: 12px 0 auto;
-  text-align: center;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.so-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.so-buttons .lw-button {
-  min-width: 150px;
 }
 
 /* ---------- Magic Square ----------
@@ -1689,19 +1638,6 @@ button {
 /* The line a hint points to glows gold. */
 .ms-hint-line {
   box-shadow: 0 0 0 4px var(--star);
-}
-
-.ms-message {
-  min-height: 1.5em;
-  margin: 10px 0;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
-.ms-finished .np-pad {
-  opacity: 0.5;
-  pointer-events: none;
 }
 
 /* ---------- Number Pyramid ---------- */
@@ -1778,14 +1714,6 @@ button {
   animation: wiggle 300ms ease-in-out;
 }
 
-.np-message {
-  min-height: 1.5em;
-  margin: 10px 0;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
 .np-pad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1814,11 +1742,6 @@ button {
   border-color: transparent;
   color: #ffffff;
   font-size: 1.2rem;
-}
-
-.np-finished .np-pad {
-  opacity: 0.5;
-  pointer-events: none;
 }
 
 @keyframes wiggle {
@@ -1884,11 +1807,7 @@ button {
 }
 
 .wg-message {
-  min-height: 1.5em;
   margin: 8px 0;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
 }
 
 /* ---------- On-screen QWERTY keyboard ----------
@@ -1946,11 +1865,6 @@ button {
   text-transform: none;
 }
 
-.wg-finished .wg-keyboard {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 /* ---------- End of the day ---------- */
 
 /* A card in the middle of the screen, over the finished puzzle, so it is
@@ -1964,10 +1878,6 @@ button {
   padding: 24px;
   background: rgba(29, 26, 43, 0.35);
   text-align: center;
-}
-
-.done[hidden] {
-  display: none;
 }
 
 .done-card {
@@ -2159,13 +2069,6 @@ button {
   font-weight: 700;
 }
 
-.fm-count {
-  margin: 10px 0 0;
-  text-align: center;
-  color: var(--muted);
-  font-weight: 700;
-}
-
 .fm-question {
   margin: 2px 0 8px;
   text-align: center;
@@ -2289,25 +2192,9 @@ button {
 
 .fm-message {
   min-height: 2.6em;
-  margin: 10px 0;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-.fm-next {
-  width: 100%;
-  border: none;
-  font: inherit;
-  font-size: 1.15rem;
-  cursor: pointer;
 }
 
 /* These set their own display, so "hidden" needs saying again. */
-.fm-pad[hidden],
-.fm-next[hidden] {
-  display: none;
-}
 
 /* ---------- Think It Through (word problems) ---------- */
 
@@ -2332,13 +2219,6 @@ button {
 .think-art .think-q {
   background: var(--numbers);
   color: #ffffff;
-}
-
-.wp-count {
-  margin: 0;
-  text-align: center;
-  color: var(--muted);
-  font-weight: 700;
 }
 
 /* The story, in a card. Numbers stand out so they're easy to find. */
@@ -2427,27 +2307,10 @@ button.wp-number {
 }
 
 .wp-message {
-  min-height: 1.5em;
   margin: 8px 0;
-  text-align: center;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.wp-next {
-  width: 100%;
-  border: none;
-  font: inherit;
-  font-size: 1.15rem;
-  cursor: pointer;
 }
 
 /* These set their own display, so "hidden" needs saying again. */
-.wp-pad[hidden],
-.wp-next[hidden],
-.wp-entry[hidden] {
-  display: none;
-}
 
 /* ---------- Word Clues ---------- */
 
@@ -2486,13 +2349,6 @@ button.wp-number {
   background: var(--words-ink);
   border-radius: 2px;
   transform: rotate(-45deg);
-}
-
-.wc-count {
-  margin: 0;
-  text-align: center;
-  color: var(--muted);
-  font-weight: 700;
 }
 
 .wc-card {
@@ -2572,26 +2428,6 @@ button.wp-number {
   cursor: default;
 }
 
-.wc-message {
-  min-height: 1.5em;
-  margin: 10px 0;
-  text-align: center;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.wc-next {
-  width: 100%;
-  border: none;
-  font: inherit;
-  font-size: 1.15rem;
-  cursor: pointer;
-}
-
-.wc-next[hidden] {
-  display: none;
-}
-
 /* ---------- Fix the Sentence ----------
    Reuses the frog's speech bubble from Find the Mistake (.fm-talk) and the
    choice buttons from Word Clues (.wc-choice). */
@@ -2615,13 +2451,6 @@ button.wp-number {
   border-radius: 6px;
   background: var(--words);
   color: #ffffff;
-}
-
-.fs-count {
-  margin: 10px 0 0;
-  text-align: center;
-  color: var(--muted);
-  font-weight: 700;
 }
 
 /* The sentence: one tile per word, wrapping like text. */
@@ -2709,23 +2538,3 @@ button.fs-word {
   gap: 8px;
 }
 
-.fs-message {
-  min-height: 1.5em;
-  margin: 10px 0;
-  text-align: center;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.fs-next {
-  width: 100%;
-  border: none;
-  font: inherit;
-  font-size: 1.15rem;
-  cursor: pointer;
-}
-
-.fs-next[hidden],
-.fs-ask[hidden] {
-  display: none;
-}

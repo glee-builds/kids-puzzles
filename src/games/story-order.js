@@ -153,7 +153,7 @@ export function render(container, puzzle, onDone) {
   const paragraph = make('p', 'so-paragraph');
   const message = liveMessage('so-message');
 
-  const buttons = make('div', 'so-buttons');
+  const buttons = make('div', 'button-row');
   const hintButton = button('lw-button', 'Hint', giveHint);
   const nextButton = button('lw-button lw-enter', 'Next story →', () => {
     reading = false;
@@ -219,7 +219,7 @@ export function render(container, puzzle, onDone) {
       message.textContent = CHEERS[cheerCount++ % CHEERS.length];
       if (state.status === 'won') {
         message.textContent = 'You put every story in order!';
-        container.classList.add('so-finished');
+        container.classList.add('finished');
         draw();
         onDone({ status: state.status });
         return;

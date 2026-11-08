@@ -146,12 +146,12 @@ export function render(container, puzzle, onDone) {
   const bubble = make('p', 'fm-bubble');
   talk.append(frog, bubble);
 
-  const count = make('p', 'fs-count');
+  const count = make('p', 'count-line');
   const line = make('div', 'fs-words');
   const ask = make('p', 'fs-ask');
   const choices = make('div', 'fs-choices');
   const message = liveMessage('fs-message');
-  const nextButton = button('button fs-next', '', goNext);
+  const nextButton = button('button next-button', '', goNext);
 
   container.append(talk, count, line, ask, choices, message, nextButton);
 

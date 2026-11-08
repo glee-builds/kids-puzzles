@@ -204,7 +204,7 @@ export function render(container, puzzle, onDone) {
       targets: () => boxNodes,
       onDrop: (k) => place(i, k),
       onTap: () => placeFirstEmpty(i),
-      classes: { ghost: 'ff-ghost', lifted: 'ff-num-lifted', over: 'ff-box-over' },
+      classes: { ghost: 'ff-ghost', lifted: 'ff-num-lifted' },
     });
     roof.append(tile);
     return tile;
@@ -319,7 +319,7 @@ export function render(container, puzzle, onDone) {
           ? 'The whole street is lit up!'
           : `House ${houseBefore + 1}: one family, four facts!`;
         if (state.status === 'won') {
-          container.classList.add('ff-finished');
+          container.classList.add('finished');
           draw();
           onDone({ status: state.status });
           return;

@@ -20,9 +20,9 @@ export function button(className, text, onClick) {
   return node;
 }
 
-/** A message line that screen readers announce when it changes. */
+/** A message line (styled by .message) that screen readers announce when it changes. */
 export function liveMessage(className, text) {
-  const node = make('p', className, text);
+  const node = make('p', `message ${className}`, text);
   node.setAttribute('aria-live', 'polite');
   return node;
 }
@@ -98,8 +98,9 @@ const DRAG_START = 8; // px a finger moves before a tap becomes a drag
  *   targets()       the boxes it can be dropped on
  *   onDrop(index)   dropped on targets()[index]
  *   onTap()         tapped (or pressed with a keyboard)
- *   classes         { ghost, lifted, over }: the copy that follows the
- *                   finger, the tile while it's away, a box under it
+ *   classes         { ghost, lifted }: extra classes for the copy that
+ *                   follows the finger (.drag-ghost), and for the tile
+ *                   while it's away. A box under the finger gets .drop-over.
  */
 export function dragOrTap(tile, { canStart, targets, onDrop, onTap, classes }) {
   let drag = null;
@@ -113,7 +114,7 @@ export function dragOrTap(tile, { canStart, targets, onDrop, onTap, classes }) {
     if (!drag) return;
     drag.ghost?.remove();
     tile.classList.remove(classes.lifted);
-    for (const box of targets()) box.classList.remove(classes.over);
+    for (const box of targets()) box.classList.remove('drop-over');
     drag = null;
   }
 
@@ -128,13 +129,13 @@ export function dragOrTap(tile, { canStart, targets, onDrop, onTap, classes }) {
     if (!drag || event.pointerId !== drag.id) return;
     if (!drag.ghost) {
       if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < DRAG_START) return;
-      drag.ghost = document.body.appendChild(make('div', classes.ghost, tile.textContent));
+      drag.ghost = document.body.appendChild(make('div', `drag-ghost ${classes.ghost}`, tile.textContent));
       tile.classList.add(classes.lifted);
     }
     drag.ghost.style.left = `${event.clientX}px`;
     drag.ghost.style.top = `${event.clientY}px`;
     const over = targetAt(event);
-    targets().forEach((box, k) => box.classList.toggle(classes.over, k === over));
+    targets().forEach((box, k) => box.classList.toggle('drop-over', k === over));
   });
 
   tile.addEventListener('pointerup', (event) => {

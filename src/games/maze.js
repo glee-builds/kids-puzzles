@@ -221,7 +221,7 @@ export function render(container, puzzle, onDone) {
     }
   }
 
-  const hintButton = button('lw-button mz-hint', 'Hint', () => {
+  const hintButton = button('lw-button hint-button', 'Hint', () => {
     if (state.status !== 'playing') return;
     hint = hintSquares(state);
     state = { ...state, hints: state.hints + 1 };
@@ -241,7 +241,7 @@ export function render(container, puzzle, onDone) {
     if (state.status === 'won') {
       message.textContent = 'You made it to the star!';
       draw();
-      container.classList.add('mz-finished');
+      container.classList.add('finished');
       onDone({ status: state.status });
       return;
     }

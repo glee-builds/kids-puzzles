@@ -232,7 +232,7 @@ export function render(container, puzzle, onDone) {
   container.replaceChildren();
   container.classList.add('wp');
 
-  const count = make('p', 'wp-count');
+  const count = make('p', 'count-line');
   const story = make('p', 'wp-story');
   const ask = make('p', 'wp-ask');
   const entry = make('p', 'wp-entry');
@@ -253,7 +253,7 @@ export function render(container, puzzle, onDone) {
     pad.append(key);
   }
 
-  const nextButton = button('button wp-next', '', goNext);
+  const nextButton = button('button next-button', '', goNext);
 
   container.append(count, story, ask, entry, message, pad, nextButton);
 
