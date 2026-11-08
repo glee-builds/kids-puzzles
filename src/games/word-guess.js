@@ -114,8 +114,9 @@ export function verify(puzzle) {
 // The screen: board, message line, and on-screen ABC keyboard.
 // ---------------------------------------------------------------------------
 
-// Alphabetical rows: early readers know ABC order, not a typewriter layout.
-const KEY_ROWS = ['abcdef', 'ghijkl', 'mnopqr', 'stuvwx'];
+// QWERTY rows, like a phone or computer keyboard. The bottom row also
+// holds Go (left) and Erase (right).
+const KEY_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
 
 const MARK_WORDS = {
   here: 'right spot',
@@ -175,18 +176,21 @@ export function render(container, puzzle, onDone) {
     row.append(key);
     return key;
   }
-  for (const letters of KEY_ROWS) {
+  KEY_ROWS.forEach((letters, index) => {
     const row = make('div', 'wg-key-row');
+    const isBottom = index === KEY_ROWS.length - 1;
+    if (index === 1) row.classList.add('wg-key-row-middle');
+    if (isBottom) {
+      const goKey = addKey(row, 'Go', submitGuess, 'wg-key-wide wg-key-go');
+      goKey.setAttribute('aria-label', 'Check my word');
+    }
     for (const letter of letters) keys[letter] = addKey(row, letter, () => typeLetter(letter));
+    if (isBottom) {
+      const backKey = addKey(row, '⌫', eraseLetter, 'wg-key-wide');
+      backKey.setAttribute('aria-label', 'Erase a letter');
+    }
     keyboard.append(row);
-  }
-  const lastRow = make('div', 'wg-key-row');
-  for (const letter of 'yz') keys[letter] = addKey(lastRow, letter, () => typeLetter(letter));
-  const backKey = addKey(lastRow, '⌫', eraseLetter, 'wg-key-wide');
-  backKey.setAttribute('aria-label', 'Erase a letter');
-  const goKey = addKey(lastRow, 'Go', submitGuess, 'wg-key-wide wg-key-go');
-  goKey.setAttribute('aria-label', 'Check my word');
-  keyboard.append(lastRow);
+  });
 
   container.append(board, message, keyboard);
 
