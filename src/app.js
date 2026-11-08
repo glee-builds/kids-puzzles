@@ -16,6 +16,7 @@ import * as wordLadder from './games/word-ladder.js';
 import * as maze from './games/maze.js';
 import * as numberLine from './games/number-line.js';
 import * as factFamilies from './games/fact-families.js';
+import * as findTheMistake from './games/find-the-mistake.js';
 import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
 
@@ -23,7 +24,7 @@ const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'word-ladder', 'maze', 'number-line', 'fact-families'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'word-ladder', 'maze', 'number-line', 'fact-families', 'find-the-mistake'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -38,6 +39,7 @@ const VIEWS = {
   maze: document.getElementById('view-maze'),
   'number-line': document.getElementById('view-number-line'),
   'fact-families': document.getElementById('view-fact-families'),
+  'find-the-mistake': document.getElementById('view-find-the-mistake'),
 };
 
 // Games are started the first time they are opened, then kept, so
@@ -259,6 +261,12 @@ function startFactFamilies() {
   factFamilies.render(game, puzzle, () => finishGame('fact-families'));
 }
 
+function startFindTheMistake() {
+  const game = document.getElementById('game-find-the-mistake');
+  const puzzle = findTheMistake.generate(seedFor(today, 'find-the-mistake'));
+  findTheMistake.render(game, puzzle, () => finishGame('find-the-mistake'));
+}
+
 const STARTERS = {
   'mystery-word': startMysteryWord,
   'number-pyramid': startNumberPyramid,
@@ -270,6 +278,7 @@ const STARTERS = {
   maze: startMaze,
   'number-line': startNumberLine,
   'fact-families': startFactFamilies,
+  'find-the-mistake': startFindTheMistake,
 };
 
 // ---------- Moving between screens ----------
