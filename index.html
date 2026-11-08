@@ -18,8 +18,10 @@
         <p class="subtitle">Pick a puzzle!</p>
       </header>
 
-      <nav class="cards" aria-label="Puzzles">
-        <a class="card card-play" href="#mystery-word">
+      <section class="group group-words" aria-labelledby="group-words">
+        <h2 class="group-title" id="group-words">Words</h2>
+        <nav class="cards" aria-label="Words puzzles">
+        <a class="card card-play card-words" href="#mystery-word">
           <span class="card-art" aria-hidden="true">
             <span class="mini mini-a">A</span><span class="mini mini-q">?</span>
           </span>
@@ -27,7 +29,28 @@
           <span class="card-status" id="status-mystery-word">Play</span>
         </a>
 
-        <a class="card card-play" href="#number-pyramid">
+        <a class="card card-play card-words" href="#letter-scramble">
+          <span class="card-art" aria-hidden="true">
+            <span class="scramble-art"><span>t</span><span>a</span><span>c</span></span>
+          </span>
+          <span class="card-name">Letter Scramble</span>
+          <span class="card-status" id="status-letter-scramble">Play</span>
+        </a>
+
+        <a class="card card-play card-words" href="#letter-wheel">
+          <span class="card-art" aria-hidden="true">
+            <span class="wheel"><span>e</span></span>
+          </span>
+          <span class="card-name">Letter Wheel</span>
+          <span class="card-status" id="status-letter-wheel">Play</span>
+        </a>
+        </nav>
+      </section>
+
+      <section class="group group-numbers" aria-labelledby="group-numbers">
+        <h2 class="group-title" id="group-numbers">Numbers</h2>
+        <nav class="cards" aria-label="Numbers puzzles">
+        <a class="card card-play card-numbers" href="#number-pyramid">
           <span class="card-art" aria-hidden="true">
             <span class="bricks">
               <span class="brick-row"><span>9</span></span>
@@ -38,7 +61,7 @@
           <span class="card-status" id="status-number-pyramid">Play</span>
         </a>
 
-        <a class="card card-play" href="#magic-square">
+        <a class="card card-play card-numbers" href="#magic-square">
           <span class="card-art" aria-hidden="true">
             <span class="square-art"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
           </span>
@@ -46,40 +69,7 @@
           <span class="card-status" id="status-magic-square">Play</span>
         </a>
 
-        <a class="card card-play" href="#letter-wheel">
-          <span class="card-art" aria-hidden="true">
-            <span class="wheel"><span>e</span></span>
-          </span>
-          <span class="card-name">Letter Wheel</span>
-          <span class="card-status" id="status-letter-wheel">Play</span>
-        </a>
-
-
-        <a class="card card-play" href="#letter-scramble">
-          <span class="card-art" aria-hidden="true">
-            <span class="scramble-art"><span>t</span><span>a</span><span>c</span></span>
-          </span>
-          <span class="card-name">Letter Scramble</span>
-          <span class="card-status" id="status-letter-scramble">Play</span>
-        </a>
-
-        <a class="card card-play" href="#maze">
-          <span class="card-art" aria-hidden="true">
-            <span class="maze-art"></span>
-          </span>
-          <span class="card-name">Maze</span>
-          <span class="card-status" id="status-maze">Play</span>
-        </a>
-
-        <a class="card card-play" href="#skip-maze">
-          <span class="card-art" aria-hidden="true">
-            <span class="skip-art"><span>2</span><span>4</span><span>6</span></span>
-          </span>
-          <span class="card-name">Skip Count Maze</span>
-          <span class="card-status" id="status-skip-maze">Play</span>
-        </a>
-
-        <a class="card card-play" href="#number-line">
+        <a class="card card-play card-numbers" href="#number-line">
           <span class="card-art" aria-hidden="true">
             <span class="hop-art"><img class="hop-frog" src="assets/frog.svg" alt=""></span>
           </span>
@@ -87,14 +77,31 @@
           <span class="card-status" id="status-number-line">Play</span>
         </a>
 
-        <a class="card card-play" href="#fact-families">
+        <a class="card card-play card-numbers" href="#fact-families">
           <span class="card-art" aria-hidden="true">
             <span class="house-art"><span class="house-art-roof"></span><span class="house-art-body"><span></span><span></span></span></span>
           </span>
           <span class="card-name">Fact Families</span>
           <span class="card-status" id="status-fact-families">Play</span>
         </a>
-      </nav>
+
+        <a class="card card-play card-numbers" href="#skip-maze">
+          <span class="card-art" aria-hidden="true">
+            <span class="skip-art"><span>2</span><span>4</span><span>6</span></span>
+          </span>
+          <span class="card-name">Skip Count Maze</span>
+          <span class="card-status" id="status-skip-maze">Play</span>
+        </a>
+
+        <a class="card card-play card-numbers" href="#maze">
+          <span class="card-art" aria-hidden="true">
+            <span class="maze-art"></span>
+          </span>
+          <span class="card-name">Maze</span>
+          <span class="card-status" id="status-maze">Play</span>
+        </a>
+        </nav>
+      </section>
     </section>
 
     <!-- Mystery Word -->
