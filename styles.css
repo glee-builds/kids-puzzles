@@ -2043,3 +2043,143 @@ button {
 .fm-next[hidden] {
   display: none;
 }
+
+/* ---------- Think It Through (word problems) ---------- */
+
+/* Card: two numbers and a question mark. */
+.think-art {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.think-art span {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--numbers);
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.think-art .think-q {
+  background: var(--numbers);
+  color: #ffffff;
+}
+
+.wp-count {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* The story, in a card. Numbers stand out so they're easy to find. */
+.wp-story {
+  margin: 10px 0;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  font-size: 1.3rem;
+  line-height: 2.1;
+}
+
+.wp-number {
+  display: inline-block;
+  min-width: 44px;
+  margin: 0 2px;
+  padding: 0 8px;
+  border: 2px solid var(--numbers);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* While picking, numbers are buttons: tall enough to tap. */
+button.wp-number {
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* A number that is needed: teal with a check. */
+.wp-needed {
+  border-color: var(--here);
+}
+
+.wp-needed::after {
+  content: " ✓";
+  color: var(--here);
+}
+
+/* The number that doesn't matter: crossed out, with a cross. */
+.wp-extra {
+  border-style: dashed;
+  border-color: var(--muted);
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.wp-extra::after {
+  content: " ✗";
+  text-decoration: none;
+}
+
+.wp-ask {
+  margin: 0;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.wp-entry {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.wp-typed {
+  display: inline-block;
+  min-width: 2.5em;
+  border-bottom: 3px dashed var(--go);
+}
+
+/* The number sentence that solves it: teal when found, purple when shown. */
+.wp-worked {
+  color: var(--here);
+}
+
+.wp-shown {
+  color: var(--elsewhere);
+}
+
+.wp-message {
+  min-height: 1.5em;
+  margin: 8px 0;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.wp-next {
+  width: 100%;
+  border: none;
+  font: inherit;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+/* These set their own display, so "hidden" needs saying again. */
+.wp-pad[hidden],
+.wp-next[hidden],
+.wp-entry[hidden] {
+  display: none;
+}
