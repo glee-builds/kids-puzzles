@@ -3,10 +3,17 @@
   --bg: #fff7ec;
   --text: #2b2440;
   --muted: #6b6280;
-  --tile-a: #ff8a5c;
-  --tile-b: #4fb8a8;
-  --tile-c: #8e7cf0;
-  --tile-text: #ffffff;
+  --surface: #ffffff;
+  --border: #e3dccf;
+
+  /* Letter marks: color AND a symbol, never color alone. */
+  --here: #1f9e89;       /* teal, with a check mark */
+  --elsewhere: #7b68e0;  /* purple, with a two-way arrow */
+  --none: #b9b3c6;       /* gray, no symbol */
+  --mark-text: #ffffff;
+
+  --go: #ff8a5c;
+  --star: #ffb627;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,6 +21,9 @@
     --bg: #1d1a2b;
     --text: #f6f1ff;
     --muted: #b7aecb;
+    --surface: #2c2840;
+    --border: #463f60;
+    --none: #67617f;
   }
 }
 
@@ -24,7 +34,6 @@
 html,
 body {
   margin: 0;
-  height: 100%;
 }
 
 body {
@@ -35,52 +44,246 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
-.hello {
-  min-height: 100%;
+/* ---------- Page layout ---------- */
+
+.app {
+  max-width: 440px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: max(8px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom));
+}
+
+.top {
+  text-align: center;
+}
+
+.top h1 {
+  font-size: 1.6rem;
+  margin: 4px 0 2px;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.swatch {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.game {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading {
+  margin: auto;
+  color: var(--muted);
+}
+
+/* ---------- Mystery Word board ---------- */
+
+.wg {
+  --tile: clamp(40px, 7.2dvh, 64px);
+}
+
+.wg-board {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  gap: 6px;
+  margin: auto 0;
 }
 
-.badge {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 28px;
+.wg-row {
+  display: grid;
+  grid-template-columns: repeat(var(--letters), var(--tile));
+  gap: 6px;
 }
 
-.tile {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+.wg-tile {
+  position: relative;
+  width: var(--tile);
+  height: var(--tile);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
   display: grid;
   place-items: center;
-  font-size: 2rem;
+  font-size: calc(var(--tile) * 0.55);
   font-weight: 800;
-  color: var(--tile-text);
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
 }
 
-.tile-a { background: var(--tile-a); transform: rotate(-6deg); }
-.tile-b { background: var(--tile-b); transform: translateY(-6px); }
-.tile-c { background: var(--tile-c); transform: rotate(6deg); }
-
-h1 {
-  font-size: 3rem;
-  margin: 0 0 8px;
+.wg-row-current .wg-tile {
+  border-color: var(--muted);
 }
 
-.lead {
-  font-size: 1.5rem;
+.wg-tile-typed {
+  animation: pop 120ms ease-out;
+}
+
+.wg-message {
+  min-height: 1.5em;
+  margin: 8px 0;
+  text-align: center;
+  font-size: 1.15rem;
   font-weight: 700;
-  margin: 0 0 12px;
 }
 
-.note {
-  font-size: 1.125rem;
-  color: var(--muted);
+/* ---------- On-screen QWERTY keyboard ----------
+   Ten keys fit across a phone, so keys are narrower than 48px (about
+   31px). They are extra tall (58px) to make them easier to hit. */
+
+.wg-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 -10px; /* use a little more of the screen width */
+}
+
+.wg-key-row {
+  display: flex;
+  gap: 4px;
+}
+
+/* The middle row is inset by half a key, like a real keyboard. */
+.wg-key-row-middle {
+  padding: 0 5%;
+}
+
+.wg-key {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 58px;
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.wg-key:active {
+  transform: translateY(2px);
+}
+
+.wg-key-wide {
+  flex-grow: 1.5;
+  font-size: 1.1rem;
+}
+
+.wg-key-go {
+  background: var(--go);
+  border-color: transparent;
+  color: #ffffff;
+  text-transform: none;
+}
+
+.wg-finished .wg-keyboard {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ---------- End of the day ---------- */
+
+.done {
+  text-align: center;
+  padding: 12px 0 4px;
+}
+
+.done-star {
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--star);
+  animation: star 700ms ease-out;
+}
+
+.done-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 6px 0 2px;
+}
+
+.done-note {
   margin: 0;
-  max-width: 20em;
+  color: var(--muted);
+}
+
+/* ---------- Letter marks (shared by tiles, keys, and the legend) ----------
+   These come last on purpose: when two rules are equally specific, the
+   later one wins, so marks must come after the plain tile and key styles. */
+
+.mark-here,
+.mark-elsewhere,
+.mark-none {
+  color: var(--mark-text);
+  border-color: transparent;
+}
+
+.mark-here { background: var(--here); }
+.mark-elsewhere { background: var(--elsewhere); }
+.mark-none { background: var(--none); }
+
+.mark-here::after,
+.mark-elsewhere::after {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 0.42em;
+  line-height: 1;
+}
+
+.mark-here::after { content: "✓"; }
+.mark-elsewhere::after { content: "↔"; }
+
+.swatch.mark-here::after,
+.swatch.mark-elsewhere::after {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+}
+
+@keyframes pop {
+  from { transform: scale(1.12); }
+  to { transform: scale(1); }
+}
+
+@keyframes star {
+  0% { transform: scale(0) rotate(-90deg); opacity: 0; }
+  70% { transform: scale(1.25) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wg-tile-typed,
+  .done-star {
+    animation: none;
+  }
 }

@@ -1,0 +1,12 @@
+{
+  "level": 2,
+  "name": "Short vowels with blends",
+  "about": "Four-letter words with one short vowel, built with blends and letter pairs (fr, st, sh, ch, th, ck). Grouped by vowel to make review easier.",
+  "words": {
+    "a": ["back", "band", "bath", "camp", "clap", "crab", "flag", "glad", "grab", "hand", "lamp", "land", "mask", "math", "path", "plan", "sand", "snap", "swam", "that"],
+    "e": ["bell", "belt", "bend", "best", "desk", "help", "left", "melt", "nest", "next", "rest", "sled", "step", "tent", "test", "then", "vest", "well", "west", "when"],
+    "i": ["chip", "crib", "dish", "drip", "fish", "gift", "grin", "hill", "kick", "kiss", "lift", "milk", "mint", "pink", "ship", "sing", "sink", "skip", "slip", "swim", "this", "trip", "wind", "wish", "with"],
+    "o": ["chop", "crop", "doll", "drop", "flop", "frog", "golf", "lock", "long", "moth", "plot", "pond", "rock", "shop", "sock", "song", "spot", "stop"],
+    "u": ["bump", "club", "drum", "duck", "dust", "gulp", "hunt", "hush", "jump", "just", "much", "must", "plug", "plum", "puff", "rush", "snug", "such", "tuck"]
+  }
+}

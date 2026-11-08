@@ -8,15 +8,28 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="hello">
-    <div class="badge" aria-hidden="true">
-      <span class="tile tile-a">A</span>
-      <span class="tile tile-b">B</span>
-      <span class="tile tile-c">C</span>
-    </div>
-    <h1>Hello!</h1>
-    <p class="lead">Puzzles coming soon.</p>
-    <p class="note">New word games and mazes every day.</p>
-  </main>
+  <div class="app">
+    <header class="top">
+      <h1>Mystery Word</h1>
+      <p class="legend">
+        <span class="legend-item"><span class="swatch mark-here" aria-hidden="true"></span>right spot</span>
+        <span class="legend-item"><span class="swatch mark-elsewhere" aria-hidden="true"></span>other spot</span>
+        <span class="legend-item"><span class="swatch mark-none" aria-hidden="true"></span>not in word</span>
+      </p>
+    </header>
+
+    <main id="game" class="game">
+      <p class="loading">Getting today's puzzle…</p>
+    </main>
+
+    <section id="done" class="done" hidden>
+      <div class="done-star" aria-hidden="true">★</div>
+      <p class="done-title">All done for today!</p>
+      <p class="done-note">Come back tomorrow for a new mystery word.</p>
+    </section>
+  </div>
+
+  <noscript>This puzzle needs JavaScript turned on.</noscript>
+  <script type="module" src="src/app.js"></script>
 </body>
 </html>

@@ -14,6 +14,13 @@ python3 -m http.server 8000
 
 Then open http://localhost:8000 in a browser. Press `Ctrl+C` in the terminal to stop the server.
 
+### On a phone, before it goes live
+
+1. Start the server as above, on the Mac.
+2. Connect the phone to the same Wi-Fi as the Mac.
+3. On the phone, open `http://<mac-name>.local:8000`. Find the Mac's name in System Settings → General → Sharing → Local hostname (for example `Mac-mini.local`).
+4. If macOS asks whether Python may accept incoming connections, click **Allow**.
+
 ## Run the tests
 
 From this folder, run:
