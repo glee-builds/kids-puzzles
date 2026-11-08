@@ -14,6 +14,10 @@
 
   --go: #ff8a5c;
   --star: #ffb627;
+  --words: #7b68e0;      /* home sections: purple for words */
+  --words-ink: #5644c4;  /* darker, for text on white */
+  --numbers: #ff8a5c;    /* orange for numbers */
+  --numbers-ink: #b8481a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +28,8 @@
     --surface: #2c2840;
     --border: #463f60;
     --none: #67617f;
+    --words-ink: #b4a8ff;
+    --numbers-ink: #ffa47f;
   }
 }
 
@@ -203,9 +209,29 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin: auto 0;
-  padding: 8px 0 16px;
+  padding: 0 0 16px;
 }
+
+/* Words and Numbers sections, each with its own color. */
+.group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 8px;
+  font-size: 1.25rem;
+}
+
+.group-title::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.group-words .group-title { color: var(--words-ink); }
+.group-words .group-title::before { background: var(--words); }
+.group-numbers .group-title { color: var(--numbers-ink); }
+.group-numbers .group-title::before { background: var(--numbers); border-radius: 50%; }
 
 .card {
   display: flex;
@@ -249,6 +275,13 @@ body {
 .card-play .card-status {
   color: var(--here);
 }
+
+.card-words { border-color: var(--words); box-shadow: 0 4px 0 var(--words); }
+.card-words:active { box-shadow: 0 1px 0 var(--words); }
+.card-words .card-status { color: var(--words-ink); }
+.card-numbers { border-color: var(--numbers); box-shadow: 0 4px 0 var(--numbers); }
+.card-numbers:active { box-shadow: 0 1px 0 var(--numbers); }
+.card-numbers .card-status { color: var(--numbers-ink); }
 
 /* Small drawings on each card, made from shapes (no image files). */
 .card-art {
