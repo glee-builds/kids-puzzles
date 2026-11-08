@@ -1,0 +1,36 @@
+{
+  "about": "Story problems for Think It Through, written for this app at about a 2nd to 3rd grade reading level. {a}, {b}, and {c} are filled in with numbers by the code, which also works out every answer. Kinds: extra-add is a + b, and extra-sub is a - b, with {c} as an extra number the question doesn't need; two-add-sub is a + b - c; two-sub-sub is a - b - c; two-add-add is a + b + c. Characters are made up.",
+  "problems": [
+    { "kind": "extra-add", "text": "Robo has {a} red bolts and {b} blue bolts. Robo is {c} days old. How many bolts does Robo have in all?" },
+    { "kind": "extra-add", "text": "The Tigers scored {a} goals in May and {b} goals in June. Their coach has {c} whistles. How many goals did the Tigers score in all?" },
+    { "kind": "extra-add", "text": "A farm has {a} hens and {b} ducks. The barn has {c} windows. How many birds are on the farm?" },
+    { "kind": "extra-add", "text": "Captain Spark saved {a} cats on Monday and {b} cats on Tuesday. The captain has {c} capes. How many cats were saved in all?" },
+    { "kind": "extra-add", "text": "A big tank has {a} fish and a small tank has {b} fish. Each tank has {c} plants. How many fish are there in all?" },
+    { "kind": "extra-add", "text": "A robot shop made {a} robots in the morning and {b} robots after lunch. The shop has {c} workers. How many robots did the shop make?" },
+
+    { "kind": "extra-sub", "text": "There are {a} kids at soccer practice and {c} cones on the field. Then {b} kids go home early. How many kids are still at practice?" },
+    { "kind": "extra-sub", "text": "A monkey picked {a} bananas from a tree that was {c} feet tall. The monkey ate {b} bananas. How many bananas are left?" },
+    { "kind": "extra-sub", "text": "Zip the robot had {a} batteries and {c} wheels. Zip used up {b} batteries. How many batteries does Zip have now?" },
+    { "kind": "extra-sub", "text": "The hero club had {a} masks and {c} members. Then {b} masks got lost. How many masks are left?" },
+    { "kind": "extra-sub", "text": "A pond had {a} frogs and {c} lily pads. Then {b} frogs hopped away. How many frogs are still in the pond?" },
+    { "kind": "extra-sub", "text": "Coach had {a} balls in a bag and {c} whistles. Then {b} balls rolled away. How many balls are still in the bag?" },
+
+    { "kind": "two-add-sub", "text": "Robo had {a} bolts. Robo found {b} more. Then Robo used {c} bolts to fix a wheel. How many bolts does Robo have now?" },
+    { "kind": "two-add-sub", "text": "The team had {a} water bottles. Coach brought {b} more. The players drank {c} of them. How many water bottles are left?" },
+    { "kind": "two-add-sub", "text": "A zoo had {a} parrots. Then {b} more parrots came. Later, {c} parrots moved to a new zoo. How many parrots does the zoo have now?" },
+    { "kind": "two-add-sub", "text": "Captain Spark had {a} stars on a cape. The captain sewed on {b} more. Then {c} stars fell off. How many stars are on the cape now?" },
+    { "kind": "two-add-sub", "text": "A frog caught {a} flies in the morning and {b} flies at lunch. The frog ate {c} of them. How many flies are left?" },
+
+    { "kind": "two-sub-sub", "text": "A robot had {a} stickers. It gave {b} to Bolt and {c} to Zip. How many stickers does the robot have left?" },
+    { "kind": "two-sub-sub", "text": "There were {a} fans at the game. At half time, {b} fans left. Then {c} more left at the end. How many fans stayed?" },
+    { "kind": "two-sub-sub", "text": "A farmer had {a} eggs. The farmer sold {b} eggs and cooked {c} eggs. How many eggs are left?" },
+    { "kind": "two-sub-sub", "text": "The hero had {a} gadgets. The hero lost {b} in a storm and gave {c} to a friend. How many gadgets are left?" },
+    { "kind": "two-sub-sub", "text": "A pet shop had {a} puppies. On Saturday, {b} went to new homes. On Sunday, {c} more went. How many puppies are still at the shop?" },
+
+    { "kind": "two-add-add", "text": "The Tigers scored {a} goals, then {b} goals, then {c} goals in three games. How many goals did they score in all?" },
+    { "kind": "two-add-add", "text": "A robot stacked {a} red blocks, {b} blue blocks, and {c} green blocks. How many blocks did it stack?" },
+    { "kind": "two-add-add", "text": "A pond has {a} big frogs, {b} small frogs, and {c} baby frogs. How many frogs are in the pond?" },
+    { "kind": "two-add-add", "text": "Three heroes saved {a}, {b}, and {c} kittens. How many kittens did they save in all?" },
+    { "kind": "two-add-add", "text": "A zoo keeper fed {a} seals, {b} otters, and {c} penguins. How many animals did the keeper feed?" }
+  ]
+}
