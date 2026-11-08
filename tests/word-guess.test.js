@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { generate, start, check, markGuess, verify, MAX_GUESSES } from '../src/games/word-guess.js';
+import { generate, start, check, markGuess, verify, clue, MAX_GUESSES } from '../src/games/word-guess.js';
 
 const level1 = JSON.parse(
   readFileSync(new URL('../data/words/level-1.json', import.meta.url), 'utf8'),
@@ -114,6 +114,45 @@ test('check: refuses a guess of the wrong length or with non-letters', () => {
 test('check: refuses a guess after the puzzle is finished', () => {
   const won = check(start(catPuzzle), 'cat');
   assert.throws(() => check(won, 'dog'));
+});
+
+// --- clue ---
+
+const meltPuzzle = { answer: 'melt', length: 4, maxGuesses: MAX_GUESSES };
+
+function guessMany(puzzle, words) {
+  return words.reduce((state, word) => check(state, word), start(puzzle));
+}
+
+test('clue: no clue before the 5th guess', () => {
+  assert.equal(clue(guessMany(meltPuzzle, ['frog', 'dish', 'hunt', 'bask'])), null);
+});
+
+test('clue: after 5 wrong guesses, the word appears with exactly one letter missing', () => {
+  const state = guessMany(meltPuzzle, ['frog', 'dish', 'hunt', 'bask', 'pond']);
+  const hint = clue(state);
+  assert.equal(hint.length, 4);
+  assert.equal(hint.filter((letter) => letter === null).length, 1);
+  hint.forEach((letter, i) => {
+    if (letter !== null) assert.equal(letter, 'melt'[i]);
+  });
+});
+
+test('clue: the missing letter is one not yet found in the right spot', () => {
+  // "best" finds e (spot 2) and t (spot 4); m and l are still unknown.
+  const state = guessMany(meltPuzzle, ['best', 'frog', 'dish', 'hunt', 'bask']);
+  assert.deepEqual(clue(state), [null, 'e', 'l', 't']);
+});
+
+test('clue: if every spot was already found, the last letter is hidden', () => {
+  // "mesh" finds m and e; "salt" finds l and t. All four spots are known.
+  const state = guessMany(meltPuzzle, ['mesh', 'salt', 'frog', 'dish', 'hunt']);
+  assert.deepEqual(clue(state), ['m', 'e', 'l', null]);
+});
+
+test('clue: no clue once the puzzle is finished', () => {
+  const won = guessMany(meltPuzzle, ['frog', 'dish', 'hunt', 'bask', 'melt']);
+  assert.equal(clue(won), null);
 });
 
 // --- verify ---

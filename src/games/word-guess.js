@@ -110,6 +110,35 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
+/**
+ * A clue for the last try. After the second-to-last guess (the 5th of 6),
+ * if the word isn't found yet, show the word with one letter missing, for
+ * example ['m', 'e', null, 't'] for "melt".
+ *
+ * The missing letter is one the player has not yet found in the right spot,
+ * so there is still something to work out. Returns null when there is no clue.
+ */
+export function clue(state) {
+  const { answer, maxGuesses } = state.puzzle;
+  if (state.status !== 'playing' || state.guesses.length !== maxGuesses - 1) {
+    return null;
+  }
+
+  const found = new Set();
+  for (const guess of state.guesses) {
+    guess.marks.forEach((mark, i) => {
+      if (mark === 'here') found.add(i);
+    });
+  }
+
+  const notFound = [...answer].map((_, i) => i).filter((i) => !found.has(i));
+  // Every spot was found in some guess: hide the last letter anyway, so the
+  // clue still asks for one letter.
+  const hidden = notFound.length > 0 ? notFound[0] : answer.length - 1;
+
+  return [...answer].map((letter, i) => (i === hidden ? null : letter));
+}
+
 // ---------------------------------------------------------------------------
 // The screen: board, message line, and on-screen ABC keyboard.
 // ---------------------------------------------------------------------------
@@ -223,6 +252,8 @@ export function render(container, puzzle, onDone) {
     } else if (state.status === 'revealed') {
       message.textContent = `The word was ${puzzle.answer.toUpperCase()}. Great trying!`;
       finish();
+    } else if (clue(state)) {
+      message.textContent = 'Clue: just one letter is missing!';
     } else {
       message.textContent = CHEERS[(state.guesses.length - 1) % CHEERS.length];
     }
@@ -236,6 +267,7 @@ export function render(container, puzzle, onDone) {
 
   function draw() {
     const best = {};
+    const hint = clue(state);
     tiles.forEach((rowTiles, r) => {
       const guess = state.guesses[r];
       const isCurrent = !guess && r === state.guesses.length && state.status === 'playing';
@@ -243,6 +275,13 @@ export function render(container, puzzle, onDone) {
       rowTiles.forEach((tile, c) => {
         const letter = word[c] || '';
         const mark = guess ? guess.marks[c] : '';
+        if (isCurrent && hint && !letter) {
+          // Clue row: known letters show faintly; the missing one shows "?".
+          tile.textContent = hint[c] || '?';
+          tile.className = 'wg-tile wg-tile-clue' + (hint[c] ? '' : ' wg-tile-clue-missing');
+          tile.setAttribute('aria-label', hint[c] ? `clue: ${hint[c]}` : 'clue: missing letter');
+          return;
+        }
         tile.textContent = letter;
         tile.className = 'wg-tile' + (mark ? ` mark-${mark}` : '') + (letter && !mark ? ' wg-tile-typed' : '');
         tile.setAttribute('aria-label', letter ? (mark ? `${letter}, ${MARK_WORDS[mark]}` : letter) : 'empty');
