@@ -484,6 +484,48 @@ button {
 .story-art span:nth-child(2) { width: 46px; }
 .story-art span:nth-child(3) { width: 52px; }
 
+.search-art {
+  display: grid;
+  grid-template-columns: repeat(3, 18px);
+  gap: 2px;
+}
+
+.search-art span {
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.search-art .search-art-hit {
+  background: var(--words);
+  color: #ffffff;
+}
+
+.ladder-art {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 6px;
+  border-left: 3px solid var(--words);
+  border-right: 3px solid var(--words);
+}
+
+.ladder-art span {
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+}
+
+.ladder-art b {
+  color: var(--words-ink);
+}
+
 .bricks {
   display: flex;
   flex-direction: column;
@@ -802,6 +844,229 @@ button {
   left: 18px;
   top: 4px;
   width: 30px;
+}
+
+/* ---------- Word Search ---------- */
+
+.ws-theme {
+  margin: 0;
+  text-align: center;
+  font-size: 1.25rem;
+  color: var(--words-ink);
+}
+
+.ws-message {
+  min-height: 1.4em;
+  margin: 0 0 6px;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* 15 squares across: as wide as the screen allows, up to 34px each. */
+.ws-grid {
+  --cell: min(calc((100vw - 24px) / 15), calc(52dvh / 15), 34px);
+  display: grid;
+  grid-template-columns: repeat(15, var(--cell));
+  grid-auto-rows: var(--cell);
+  justify-content: center;
+  touch-action: none; /* tracing must not scroll the page */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ws-cell {
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--cell) * 0.62);
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Found words: teal squares, and a check in the list below. */
+.ws-found {
+  background: color-mix(in srgb, var(--here) 30%, transparent);
+}
+
+.ws-pick {
+  background: var(--words);
+  color: #ffffff;
+  border-radius: 4px;
+}
+
+.ws-glow {
+  background: var(--star);
+  border-radius: 4px;
+}
+
+.ws-words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ws-word {
+  padding: 1px 8px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}
+
+.ws-word-found {
+  border-color: var(--here);
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.ws-word-found::before {
+  content: "✓ ";
+  color: var(--here);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.ws-hint {
+  margin: 10px auto 0;
+  min-width: 140px;
+}
+
+.ws-finished .ws-hint {
+  opacity: 0.5;
+}
+
+/* ---------- Word Ladder ---------- */
+
+.wl-goal {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--words-ink);
+}
+
+/* The ladder: rails on both sides, one word per rung. Scrolls if the
+   player takes a long way round. */
+.wl-rungs {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 4px 14px;
+  border-left: 4px solid var(--bank);
+  border-right: 4px solid var(--bank);
+}
+
+.wl-rung {
+  display: flex;
+  gap: 4px;
+}
+
+.wl-tile {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* The letter that changed on this step. */
+.wl-tile-new {
+  border-color: var(--words);
+  color: var(--words-ink);
+}
+
+.wl-rung-start .wl-tile {
+  background: var(--words);
+  border-color: var(--words);
+  color: #ffffff;
+}
+
+/* The end word wears a star in the tile border color. */
+.wl-rung-end .wl-tile {
+  border-color: var(--star);
+  border-width: 3px;
+}
+
+.wl-rung-end::after {
+  content: "★";
+  align-self: center;
+  margin-left: 4px;
+  color: var(--star);
+}
+
+.wl-rung-empty .wl-tile {
+  border-style: dashed;
+  background: transparent;
+}
+
+/* The word to change: big tiles to tap. */
+.wl-tile-big {
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  font: inherit;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text);
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+/* The picked letter: purple with a raised outline, so it's not color alone. */
+.wl-tile-picked {
+  background: var(--words);
+  border-color: var(--words);
+  color: #ffffff;
+  box-shadow: 0 0 0 3px var(--text);
+}
+
+.wl-message {
+  min-height: 2.6em;
+  margin: 8px 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+.wl-keyboard .wg-key {
+  height: 48px;
+}
+
+.wl-keyboard[hidden] {
+  display: none;
+}
+
+.wl-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.wl-buttons .lw-button {
+  min-width: 110px;
+}
+
+.wl-buttons .lw-button[hidden] {
+  display: none;
 }
 
 /* ---------- Number Line Hop ---------- */
