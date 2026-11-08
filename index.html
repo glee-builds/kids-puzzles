@@ -59,6 +59,20 @@
           <span class="card-name">Story Order</span>
           <span class="card-status" id="status-story-order">Play</span>
         </a>
+        <a class="card card-play card-words" href="#word-search">
+          <span class="card-art" aria-hidden="true">
+            <span class="search-art"><span>c</span><span class="search-art-hit">a</span><span>x</span><span>q</span><span class="search-art-hit">n</span><span>o</span><span>e</span><span class="search-art-hit">t</span><span>p</span></span>
+          </span>
+          <span class="card-name">Word Search</span>
+          <span class="card-status" id="status-word-search">Play</span>
+        </a>
+        <a class="card card-play card-words" href="#word-ladder">
+          <span class="card-art" aria-hidden="true">
+            <span class="ladder-art"><span>c<b>a</b>t</span><span>c<b>o</b>t</span><span>c<b>o</b>g</span></span>
+          </span>
+          <span class="card-name">Word Ladder</span>
+          <span class="card-status" id="status-word-ladder">Play</span>
+        </a>
         </nav>
       </section>
 
@@ -178,6 +192,28 @@
       </header>
 
       <main id="game-letter-scramble" class="game"></main>
+    </section>
+
+    <!-- Word Search -->
+    <section id="view-word-search" class="view" hidden>
+      <header class="top game-top">
+        <a class="back" href="#" aria-label="Back to puzzles">←</a>
+        <h1>Word Search</h1>
+        <p class="legend">Find the hidden words</p>
+      </header>
+
+      <main id="game-word-search" class="game"></main>
+    </section>
+
+    <!-- Word Ladder -->
+    <section id="view-word-ladder" class="view" hidden>
+      <header class="top game-top">
+        <a class="back" href="#" aria-label="Back to puzzles">←</a>
+        <h1>Word Ladder</h1>
+        <p class="legend">Change one letter at a time</p>
+      </header>
+
+      <main id="game-word-ladder" class="game"></main>
     </section>
 
     <!-- Maze -->
