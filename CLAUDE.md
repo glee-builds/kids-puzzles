@@ -20,7 +20,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
 - **Difficulty:** lives in data, not code. Hand-curated word lists by level in `data/words/` (JSON).
 - **Game modules:** each game is one file in `src/games/` that exports:
-  - `generate(seed)`: build a puzzle
+  - `generate(seed, words)`: build a puzzle (word games get their word list passed in)
   - `check(state, answer)`: judge a move or answer
   - `verify(puzzle)`: confirm a puzzle is valid and solvable
   - `render(container, puzzle, onDone)`: draw it and call `onDone` when finished
