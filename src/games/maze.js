@@ -9,6 +9,7 @@
 // made of these flags: N (wall above), E (right), S (below), W (left).
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage, trace } from '../ui.js';
 
 export const SIZE = 8;
 export const N = 1;
@@ -189,25 +190,16 @@ export function verify(puzzle) {
 // The screen: the maze grid, a message line, and a Hint button.
 // ---------------------------------------------------------------------------
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let hint = [];
-  let tracing = false;
   let wrongTurnSaid = false;
 
   container.replaceChildren();
   container.classList.add('mz');
 
-  const message = make('p', 'mz-message', 'Put your finger on the green dot and trace to the star.');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('mz-message', 'Put your finger on the green dot and trace to the star.');
 
   const grid = make('div', 'mz-grid');
   grid.style.setProperty('--size', puzzle.size);
@@ -229,9 +221,7 @@ export function render(container, puzzle, onDone) {
     }
   }
 
-  const hintButton = make('button', 'lw-button mz-hint', 'Hint');
-  hintButton.type = 'button';
-  hintButton.addEventListener('click', () => {
+  const hintButton = button('lw-button mz-hint', 'Hint', () => {
     if (state.status !== 'playing') return;
     hint = hintSquares(state);
     state = { ...state, hints: state.hints + 1 };
@@ -243,19 +233,12 @@ export function render(container, puzzle, onDone) {
 
   container.append(message, grid, hintButton);
 
-  function squareAt(x, y) {
-    const node = document.elementFromPoint(x, y);
-    const cell = node && node.closest('.mz-cell');
-    return cell && grid.contains(cell) ? [Number(cell.dataset.r), Number(cell.dataset.c)] : null;
-  }
-
   function moveTo(square) {
     const before = state.path.length;
     state = step(state, square);
     if (state.path.length === before) return;
     hint = hint.filter((h) => !state.path.some((p) => same(p, h)));
     if (state.status === 'won') {
-      tracing = false;
       message.textContent = 'You made it to the star!';
       draw();
       container.classList.add('mz-finished');
@@ -273,9 +256,8 @@ export function render(container, puzzle, onDone) {
 
   // Finger (or mouse) tracing. Moving fast can skip squares, so fill in the
   // squares between the last one and the finger, one step at a time.
-  function follow(event) {
-    const target = squareAt(event.clientX, event.clientY);
-    if (!target) return;
+  function follow(target) {
+    if (state.status !== 'playing') return;
     // Only fill small gaps (a quick finger). A big jump is ignored, so the
     // maze never walks itself toward a far-away finger.
     const end = state.path[state.path.length - 1];
@@ -302,37 +284,25 @@ export function render(container, puzzle, onDone) {
     }
   }
 
-  grid.addEventListener('pointerdown', (event) => {
-    if (state.status !== 'playing') return;
-    const square = squareAt(event.clientX, event.clientY);
-    if (!square) return;
-    const end = state.path[state.path.length - 1];
-    if (same(square, end) || canMove(puzzle, end, square) || state.path.some((p) => same(p, square))) {
-      tracing = true;
-      try {
-        // Keep receiving finger moves even if the finger slides off the grid.
-        grid.setPointerCapture(event.pointerId);
-      } catch {
-        // Some browsers refuse; tracing still works while over the grid.
-      }
-      // Tapping a square already on the path cuts the path back to it.
+  trace(grid, {
+    // Tracing starts from the end of the path, a square next to it, or a
+    // square on the path (which cuts the path back to it).
+    onStart(square) {
+      if (state.status !== 'playing') return false;
+      const end = state.path[state.path.length - 1];
       const onPath = state.path.findIndex((p) => same(p, square));
+      if (onPath === -1 && !canMove(puzzle, end, square)) {
+        message.textContent = 'Start from the end of your path.';
+        return false;
+      }
       if (onPath >= 0 && onPath < state.path.length - 1) {
         state = { ...state, path: state.path.slice(0, onPath + 1) };
         draw();
-      } else {
-        follow(event);
       }
-    } else {
-      message.textContent = 'Start from the end of your path.';
-    }
+      return true;
+    },
+    onMove: follow,
   });
-  grid.addEventListener('pointermove', (event) => {
-    if (tracing) follow(event);
-  });
-  const stop = () => { tracing = false; };
-  grid.addEventListener('pointerup', stop);
-  grid.addEventListener('pointercancel', stop);
 
   function draw() {
     const pathKeys = new Set(state.path.map(key));

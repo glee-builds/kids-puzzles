@@ -53,6 +53,7 @@ styles.css
 src/app.js          daily set, streak, navigation
 src/seed.js         date -> repeatable random numbers
 src/games/          one file per game
+src/ui.js           screen helpers the games share (buttons, tracing, drag-or-tap)
 data/words/         curated word lists by level (JSON)
 tests/              one test file per game, plus seed tests
 docs/decisions.md   decisions log

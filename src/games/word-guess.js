@@ -8,6 +8,7 @@
 // This file holds the game's rules only. The screen comes later, in render().
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage } from '../ui.js';
 
 export const MAX_GUESSES = 6;
 
@@ -158,13 +159,6 @@ const MARK_RANK = { none: 1, elsewhere: 2, here: 3 };
 
 const CHEERS = ['Good try!', 'Nice thinking!', 'Keep going!', 'Getting closer!', 'You can do it!'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /**
  * Draw the game inside `container`. Calls onDone({ status, guesses })
  * once, when the word is found or revealed.
@@ -192,16 +186,13 @@ export function render(container, puzzle, onDone) {
     tiles.push(rowTiles);
   }
 
-  const message = make('p', 'wg-message', `Find the ${puzzle.length}-letter mystery word!`);
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('wg-message', `Find the ${puzzle.length}-letter mystery word!`);
 
   // Keyboard.
   const keyboard = make('div', 'wg-keyboard');
   const keys = {};
   function addKey(row, label, onTap, extraClass = '') {
-    const key = make('button', `wg-key ${extraClass}`.trim(), label);
-    key.type = 'button';
-    key.addEventListener('click', onTap);
+    const key = button(`wg-key ${extraClass}`.trim(), label, onTap);
     row.append(key);
     return key;
   }

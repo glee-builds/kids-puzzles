@@ -10,6 +10,7 @@
 // repeats until the whole bank has been used.
 
 import { createRandom, hashString } from '../seed.js';
+import { make, button, liveMessage, wiggle, progressDots } from '../ui.js';
 
 export const STORIES_PER_DAY = 2;
 export const SENTENCES = 4;
@@ -125,13 +126,6 @@ export function verify(puzzle) {
 const CHEERS = ['That\'s the story!', 'Great reading!', 'You got the order!'];
 const ORDINALS = ['first', 'second', 'third', 'last'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -144,36 +138,24 @@ export function render(container, puzzle, onDone) {
   container.replaceChildren();
   container.classList.add('so');
 
-  const dots = make('div', 'so-dots');
-  const dotNodes = puzzle.items.map(() => {
-    const dot = make('span', 'so-dot');
-    dots.append(dot);
-    return dot;
-  });
+  const dots = progressDots(puzzle.items.length);
   const title = make('h2', 'so-title');
   const slotList = make('ol', 'so-slots');
   const slotNodes = Array.from({ length: SENTENCES }, (_, k) => {
     const li = make('li', 'so-slot-row');
     const number = make('span', 'so-number', String(k + 1));
-    const slot = make('button', 'so-slot');
-    slot.type = 'button';
-    slot.addEventListener('click', () => sendBack(k));
+    const slot = button('so-slot', '', () => sendBack(k));
     li.append(number, slot);
     slotList.append(li);
     return slot;
   });
   const pool = make('div', 'so-pool');
   const paragraph = make('p', 'so-paragraph');
-  const message = make('p', 'so-message');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('so-message');
 
   const buttons = make('div', 'so-buttons');
-  const hintButton = make('button', 'lw-button', 'Hint');
-  hintButton.type = 'button';
-  hintButton.addEventListener('click', giveHint);
-  const nextButton = make('button', 'lw-button lw-enter', 'Next story →');
-  nextButton.type = 'button';
-  nextButton.addEventListener('click', () => {
+  const hintButton = button('lw-button', 'Hint', giveHint);
+  const nextButton = button('lw-button lw-enter', 'Next story →', () => {
     reading = false;
     shownIndex = state.index;
     slots = Array(SENTENCES).fill(null);
@@ -181,7 +163,7 @@ export function render(container, puzzle, onDone) {
   });
   buttons.append(hintButton, nextButton);
 
-  container.append(dots, title, slotList, pool, paragraph, message, buttons);
+  container.append(dots.node, title, slotList, pool, paragraph, message, buttons);
 
   const canPlay = () => state.status === 'playing' && !busy && !reading;
 
@@ -250,19 +232,14 @@ export function render(container, puzzle, onDone) {
     message.textContent = right > 0
       ? 'Not yet! The green ones are in the right place.'
       : 'Not yet! Think about what has to happen first.';
-    slotList.classList.remove('np-wiggle');
-    void slotList.offsetWidth; // restart the wiggle
-    slotList.classList.add('np-wiggle');
+    wiggle(slotList);
     draw();
   }
 
   function draw() {
     const item = puzzle.items[shownIndex];
     title.textContent = item.title;
-    dotNodes.forEach((dot, i) => {
-      const done = i < state.index || state.status === 'won' || (reading && i === shownIndex);
-      dot.className = 'so-dot' + (done ? ' so-dot-done' : i === shownIndex ? ' so-dot-now' : '');
-    });
+    dots.update((i) => i < state.index || state.status === 'won' || (reading && i === shownIndex), shownIndex);
 
     slotList.hidden = reading;
     pool.hidden = reading;
@@ -282,8 +259,7 @@ export function render(container, puzzle, onDone) {
     pool.replaceChildren();
     for (const p of item.mixed) {
       if (slots.includes(p)) continue;
-      const card = make('button', 'so-card', item.sentences[p]);
-      card.type = 'button';
+      const card = button('so-card', item.sentences[p]);
       card.disabled = !canPlay();
       card.addEventListener('click', () => place(p));
       pool.append(card);

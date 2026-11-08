@@ -6,6 +6,7 @@
 // stays between 0 and 100.
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage } from '../ui.js';
 
 export const HOPS = 5;
 export const MIN = 0;
@@ -149,13 +150,6 @@ export function windowFor(from, to) {
 
 const CHEERS = ['Hop! Yes!', 'Great counting!', 'You got it!', 'Nice jump!', 'Correct!'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -182,13 +176,11 @@ export function render(container, puzzle, onDone) {
   line.append(ticks, frog);
 
   const card = make('div', 'nl-card');
-  const message = make('p', 'nl-message', 'Where will the frog land?');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('nl-message', 'Where will the frog land?');
 
   const pad = make('div', 'np-pad');
   for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
-    const key = make('button', 'np-key', label);
-    key.type = 'button';
+    const key = button('np-key', label);
     if (label === 'Check') {
       key.classList.add('np-key-check');
       key.addEventListener('click', submit);
