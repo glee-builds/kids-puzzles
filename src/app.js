@@ -12,13 +12,14 @@ import * as magicSquare from './games/magic-square.js';
 import * as letterWheel from './games/letter-wheel.js';
 import * as maze from './games/maze.js';
 import * as numberLine from './games/number-line.js';
+import * as factFamilies from './games/fact-families.js';
 import * as progressStore from './progress.js';
 
 const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'letter-wheel', 'maze', 'number-line'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'letter-wheel', 'maze', 'number-line', 'fact-families'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -29,6 +30,7 @@ const VIEWS = {
   'letter-wheel': document.getElementById('view-letter-wheel'),
   maze: document.getElementById('view-maze'),
   'number-line': document.getElementById('view-number-line'),
+  'fact-families': document.getElementById('view-fact-families'),
 };
 
 // Games are started the first time they are opened, then kept, so
@@ -150,6 +152,12 @@ function startNumberLine() {
   numberLine.render(game, puzzle, () => finishGame('number-line'));
 }
 
+function startFactFamilies() {
+  const game = document.getElementById('game-fact-families');
+  const puzzle = factFamilies.generate(seedFor(today, 'fact-families'));
+  factFamilies.render(game, puzzle, () => finishGame('fact-families'));
+}
+
 const STARTERS = {
   'mystery-word': startMysteryWord,
   'number-pyramid': startNumberPyramid,
@@ -157,6 +165,7 @@ const STARTERS = {
   'letter-wheel': startLetterWheel,
   maze: startMaze,
   'number-line': startNumberLine,
+  'fact-families': startFactFamilies,
 };
 
 // ---------- Moving between screens ----------
