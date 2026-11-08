@@ -436,16 +436,28 @@ button {
 .mini-a { background: var(--here); transform: rotate(-6deg); }
 .mini-q { background: var(--elsewhere); transform: rotate(6deg); }
 
-.wheel {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  border: 6px dotted var(--go);
-  display: grid;
-  place-items: center;
-  font-size: 1.4rem;
-  font-weight: 800;
+/* Story Order card: three numbered strips. */
+.story-art {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
+
+.story-art span {
+  width: 58px;
+  height: 14px;
+  padding-left: 4px;
+  border-radius: 4px;
+  background: var(--words);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  line-height: 14px;
+  text-align: left;
+}
+
+.story-art span:nth-child(2) { width: 46px; }
+.story-art span:nth-child(3) { width: 52px; }
 
 .bricks {
   display: flex;
@@ -1267,109 +1279,8 @@ button {
   display: none;
 }
 
-/* ---------- Letter Wheel ---------- */
-
-.lw-slots {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px 14px;
-  margin: 4px 0;
-}
-
-.lw-slot {
-  display: flex;
-  gap: 3px;
-}
-
-.lw-slot-letter {
-  width: 26px;
-  height: 30px;
-  border-bottom: 3px solid var(--border);
-  display: grid;
-  place-items: center;
-  font-size: 1.2rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.lw-slot-found {
-  border-bottom-color: var(--here);
-  color: var(--here);
-}
-
-.lw-slot-hint {
-  border-bottom-color: var(--elsewhere);
-  color: var(--elsewhere);
-}
-
-.lw-typed {
-  min-height: 1.4em;
-  margin: 6px 0 0;
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-}
-
-.lw-message {
-  min-height: 1.5em;
-  margin: 4px 0 8px;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-
-/* Center tile in the middle; five tiles spaced around a circle. */
-.lw-wheel {
-  --size: min(clamp(250px, 42dvh, 310px), 88vw);
-  --tile: 64px;
-  position: relative;
-  width: var(--size);
-  height: var(--size);
-  margin: auto;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 2px solid var(--border);
-}
-
-.lw-tile {
-  position: absolute;
-  left: calc(50% - var(--tile) / 2);
-  top: calc(50% - var(--tile) / 2);
-  width: var(--tile);
-  height: var(--tile);
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font: inherit;
-  font-size: 1.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  touch-action: manipulation;
-  cursor: pointer;
-  /* Turn to this tile's angle, step out from the center, turn back upright. */
-  transform: rotate(calc(var(--i) * 72deg)) translateY(calc(var(--size) / -2 + var(--tile) / 2 + 8px)) rotate(calc(var(--i) * -72deg));
-}
-
-.lw-center {
-  transform: none;
-  background: var(--go);
-  border-color: transparent;
-  color: #ffffff;
-}
-
-.lw-tile:disabled {
-  opacity: 0.35;
-}
-
-.lw-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1.4fr 1.2fr 1.4fr;
-  gap: 8px;
-  margin-top: 12px;
-}
+/* ---------- Shared buttons ----------
+   Named "lw-" because Letter Wheel used them first; every game uses them now. */
 
 .lw-button {
   min-height: 52px;
@@ -1390,10 +1301,163 @@ button {
   color: #ffffff;
 }
 
-.lw-finished .lw-wheel,
-.lw-finished .lw-buttons {
-  opacity: 0.5;
-  pointer-events: none;
+/* ---------- Story Order ---------- */
+
+.so-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 2px 0 4px;
+}
+
+.so-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+}
+
+.so-dot-now { border-color: var(--text); }
+
+.so-dot-done {
+  border-color: var(--here);
+  background: var(--here);
+}
+
+.so-title {
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 1.3rem;
+}
+
+.so-slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.so-slots[hidden],
+.so-pool[hidden],
+.so-paragraph[hidden],
+.so-buttons .lw-button[hidden] {
+  display: none;
+}
+
+.so-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.so-number {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--words);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.so-slot,
+.so-card {
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.3;
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.so-slot {
+  position: relative;
+  border: 2px dashed var(--muted);
+  background: transparent;
+  color: var(--text);
+  min-height: 36px;
+}
+
+.so-slot-filled {
+  border-style: solid;
+  border-color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+/* In the right spot: green with a check, never color alone. */
+.so-slot-locked {
+  border-color: var(--here);
+  background: var(--here);
+  color: #ffffff;
+  padding-right: 28px;
+  cursor: default;
+}
+
+.so-slot-locked::after {
+  content: "✓";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 800;
+}
+
+.so-pool {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.so-card {
+  border: none;
+  background: color-mix(in srgb, var(--words) 18%, var(--surface));
+  color: var(--text);
+  box-shadow: 0 3px 0 var(--words);
+  cursor: pointer;
+}
+
+.so-card:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--words);
+}
+
+/* A finished story, read as one paragraph. */
+.so-paragraph {
+  margin: 4px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 2px solid var(--here);
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.so-message {
+  min-height: 1.5em;
+  margin: 12px 0 auto;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.so-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.so-buttons .lw-button {
+  min-width: 150px;
 }
 
 /* ---------- Magic Square ----------
