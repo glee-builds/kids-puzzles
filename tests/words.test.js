@@ -34,6 +34,37 @@ test('no level 1 word appears twice', () => {
   }
 });
 
+const level2 = loadList('level-2.json');
+const allLevel2Words = Object.values(level2.words).flat();
+
+test('level 2 has a level number and some words', () => {
+  assert.equal(level2.level, 2);
+  assert.ok(allLevel2Words.length >= 50, `only ${allLevel2Words.length} words`);
+});
+
+test('every level 2 word is four lowercase letters', () => {
+  for (const word of allLevel2Words) {
+    assert.match(word, /^[a-z]{4}$/, `"${word}" is not four lowercase letters`);
+  }
+});
+
+test('no level 2 word appears twice', () => {
+  const seen = new Set();
+  for (const word of allLevel2Words) {
+    assert.ok(!seen.has(word), `"${word}" appears more than once`);
+    seen.add(word);
+  }
+});
+
+test('every level 2 word has exactly one vowel, filed under that vowel', () => {
+  for (const [vowel, words] of Object.entries(level2.words)) {
+    for (const word of words) {
+      const vowelsInWord = [...word].filter((letter) => 'aeiou'.includes(letter));
+      assert.deepEqual(vowelsInWord, [vowel], `"${word}" is filed under "${vowel}"`);
+    }
+  }
+});
+
 test('every level 1 word is consonant, vowel, consonant, filed under its vowel', () => {
   const vowels = 'aeiou';
   for (const [vowel, words] of Object.entries(level1.words)) {
