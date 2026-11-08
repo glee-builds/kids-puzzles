@@ -167,6 +167,25 @@ body {
   color: var(--muted);
 }
 
+/* Streak badge under the title. */
+.streak {
+  display: inline-block;
+  margin: 6px 0 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  border: 2px solid var(--border);
+}
+
+.streak-on {
+  color: var(--text);
+  border-color: var(--star);
+  font-size: 1.1rem;
+}
+
 .cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -392,27 +411,100 @@ body {
 
 /* ---------- End of the day ---------- */
 
+/* A card in the middle of the screen, over the finished puzzle, so it is
+   always seen without scrolling. */
 .done {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(29, 26, 43, 0.35);
   text-align: center;
-  padding: 12px 0 4px;
+}
+
+.done[hidden] {
+  display: none;
+}
+
+.done-card {
+  width: 100%;
+  max-width: 340px;
+  padding: 24px 20px 16px;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 3px solid var(--star);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: card-in 300ms ease-out;
 }
 
 .done-star {
-  font-size: 3.5rem;
+  font-size: 4.5rem;
   line-height: 1;
   color: var(--star);
   animation: star 700ms ease-out;
 }
 
 .done-title {
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 800;
   margin: 6px 0 2px;
+}
+
+.link-button {
+  display: block;
+  margin: 8px auto 0;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@keyframes card-in {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .done-note {
   margin: 0;
   color: var(--muted);
+}
+
+.done-streak {
+  margin: 2px 0 6px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--star);
+}
+
+/* Falling stars across the whole screen. They can't be tapped, so they
+   never block a button. Skipped for phones set to reduce motion. */
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -40px;
+  animation-name: fall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
 }
 
 /* ---------- Letter marks (shared by tiles, keys, and the legend) ----------
@@ -464,6 +556,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .wg-tile-typed,
+  .done-card,
   .done-star {
     animation: none;
   }

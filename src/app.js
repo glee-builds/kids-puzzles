@@ -1,4 +1,5 @@
-// app.js: the home screen, moving between screens, and starting games.
+// app.js: the home screen, moving between screens, starting games,
+// the streak, and the end-of-puzzle celebration.
 //
 // Each screen has its own address after the #, like #mystery-word.
 // An empty address shows the home screen. Using the address means the
@@ -6,6 +7,10 @@
 
 import { dateKey, seedFor } from './seed.js';
 import * as wordGuess from './games/word-guess.js';
+import * as progressStore from './progress.js';
+
+const today = dateKey();
+let progress = progressStore.load();
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -16,6 +21,62 @@ const VIEWS = {
 // Games are started the first time they are opened, then kept, so
 // leaving a game halfway and coming back keeps the guesses.
 const started = new Set();
+
+// ---------- Streak and card status ----------
+
+function streakText(days) {
+  if (days === 0) return 'Finish a puzzle to start a streak!';
+  if (days === 1) return '★ 1 day';
+  return `★ ${days} days in a row`;
+}
+
+function updateHome() {
+  const days = progressStore.currentStreak(progress, today);
+  const streak = document.getElementById('streak');
+  streak.textContent = streakText(days);
+  streak.classList.toggle('streak-on', days > 0);
+
+  if (progressStore.isFinished(progress, today, 'mystery-word')) {
+    const status = document.getElementById('status-mystery-word');
+    status.textContent = 'Done ✓';
+  }
+}
+
+function finishGame(game) {
+  progress = progressStore.recordFinish(progress, today, game);
+  progressStore.save(progress);
+  updateHome();
+
+  const days = progress.streak;
+  document.getElementById('done-streak').textContent =
+    days === 1 ? '★ Day 1 of your streak!' : `★ ${days} days in a row!`;
+  document.getElementById('done').hidden = false;
+  celebrate();
+}
+
+// ---------- Celebration: falling stars ----------
+
+const CONFETTI_COLORS = ['#ffb627', '#1f9e89', '#7b68e0', '#ff8a5c'];
+
+function celebrate() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const layer = document.getElementById('confetti');
+  layer.replaceChildren();
+  for (let i = 0; i < 30; i++) {
+    const piece = document.createElement('span');
+    piece.className = 'confetti-piece';
+    piece.textContent = i % 3 === 0 ? '★' : '●';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    piece.style.fontSize = `${14 + Math.random() * 18}px`;
+    piece.style.animationDelay = `${Math.random() * 0.6}s`;
+    piece.style.animationDuration = `${1.8 + Math.random() * 1.2}s`;
+    layer.append(piece);
+  }
+  setTimeout(() => layer.replaceChildren(), 3500);
+}
+
+// ---------- Games ----------
 
 async function loadWords(path) {
   const response = await fetch(path);
@@ -28,13 +89,8 @@ async function startMysteryWord() {
   const game = document.getElementById('game');
   try {
     const words = await loadWords('data/words/level-2.json');
-    const puzzle = wordGuess.generate(seedFor(dateKey(), 'word-guess'), words);
-    wordGuess.render(game, puzzle, () => {
-      document.getElementById('done').hidden = false;
-      const status = document.getElementById('status-mystery-word');
-      status.textContent = 'Done ✓';
-      status.classList.add('card-status-done');
-    });
+    const puzzle = wordGuess.generate(seedFor(today, 'word-guess'), words);
+    wordGuess.render(game, puzzle, () => finishGame('mystery-word'));
   } catch (error) {
     game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
     console.error(error);
@@ -44,6 +100,8 @@ async function startMysteryWord() {
 const STARTERS = {
   'mystery-word': startMysteryWord,
 };
+
+// ---------- Moving between screens ----------
 
 function show() {
   const name = location.hash.slice(1);
@@ -60,5 +118,11 @@ function show() {
   }
 }
 
+// "See my puzzle" closes the celebration card to look at the finished board.
+document.getElementById('done-close').addEventListener('click', () => {
+  document.getElementById('done').hidden = true;
+});
+
 window.addEventListener('hashchange', show);
+updateHome();
 show();
