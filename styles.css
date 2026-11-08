@@ -2114,3 +2114,197 @@ button {
     transition: none;
   }
 }
+
+/* ---------- Find the Mistake ---------- */
+
+/* Card: a wrong sum with a mark beside it. */
+.oops-art {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.oops-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--go);
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+/* The frog and what it says. */
+.fm-talk {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fm-frog {
+  width: 52px;
+  height: 52px;
+  flex: none;
+}
+
+.fm-bubble {
+  margin: 0;
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.fm-count {
+  margin: 10px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.fm-question {
+  margin: 2px 0 8px;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.fm-question-done {
+  color: var(--here);
+}
+
+/* The frog's steps: each one is a big button to tap. */
+.fm-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fm-step {
+  position: relative;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 44px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: left;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.fm-step:disabled {
+  cursor: default;
+}
+
+.fm-result {
+  margin-left: 0.3em;
+}
+
+.fm-tag {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.fm-mark {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+/* A step the player checked and found right: teal outline with a check. */
+.fm-ok {
+  border-color: var(--here);
+}
+
+.fm-ok .fm-mark,
+.fm-fixed .fm-mark {
+  background: var(--here);
+}
+
+/* The wrong step: orange with a cross, and the number being typed. */
+.fm-wrong {
+  border-width: 3px;
+  border-color: var(--go);
+}
+
+.fm-wrong .fm-mark {
+  background: var(--go);
+}
+
+.fm-old {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.fm-typed {
+  display: inline-block;
+  min-width: 1.6em;
+  border-bottom: 3px dashed var(--go);
+  text-align: center;
+}
+
+/* Fixed by the player: teal with a check. Filled in after 3 tries: purple. */
+.fm-fixed {
+  border-color: var(--here);
+  background: color-mix(in srgb, var(--here) 12%, var(--surface));
+}
+
+.fm-shown {
+  border-color: var(--elsewhere);
+}
+
+.fm-shown .fm-mark {
+  background: var(--elsewhere);
+}
+
+/* Later steps that changed once the mistake was fixed. */
+.fm-changed .fm-result {
+  color: var(--here);
+}
+
+.fm-message {
+  min-height: 2.6em;
+  margin: 10px 0;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.fm-next {
+  width: 100%;
+  border: none;
+  font: inherit;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+/* These set their own display, so "hidden" needs saying again. */
+.fm-pad[hidden],
+.fm-next[hidden] {
+  display: none;
+}
