@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { dateKey, seedFor } from '../src/seed.js';
 import {
-  generate, verify, factsFor, start, check, hint, currentWindow, HOUSES, MAX_TRIES, FIRST_HOUSE_MAX,
+  generate, verify, factsFor, start, check, hint, prompt, currentWindow, HOUSES, MAX_TRIES, FIRST_HOUSE_MAX,
 } from '../src/games/fact-families.js';
 
 const seedForDay = (key) => seedFor(key, 'fact-families');
@@ -104,4 +104,21 @@ test('hint: the rule first, then the first number of a missing fact', () => {
 test('hint: take-away windows say to start with the biggest number', () => {
   const state = check(check(start(fixed), [7, 8, 15]), [8, 7, 15]);
   assert.equal(hint(state), 'In a take-away fact, start with the biggest number.');
+});
+
+// --- prompts ---
+
+test('prompt: adding facts first, then take-away, then nothing once won', () => {
+  let state = start(fixed);
+  assert.match(prompt(state), /adding fact/);
+  state = check(state, [7, 8, 15]);
+  assert.match(prompt(state), /Switch the order/);
+  state = check(state, [8, 7, 15]);
+  assert.match(prompt(state), /take-away/);
+  state = check(check(state, [15, 7, 8]), [15, 8, 7]);
+  assert.match(prompt(state), /adding fact/); // the next house starts over
+  for (const { a, b, c } of fixed.houses.slice(1)) {
+    for (const fact of [[a, b, c], [b, a, c], [c, a, b], [c, b, a]]) state = check(state, fact);
+  }
+  assert.equal(prompt(state), '');
 });

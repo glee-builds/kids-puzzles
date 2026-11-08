@@ -592,7 +592,7 @@ body {
 
 .ff-house {
   width: min(320px, 100%);
-  margin: auto;
+  margin: 24px auto 0; /* the instructions sit right under the house */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -631,18 +631,131 @@ body {
   grid-column: 1 / 3;
 }
 
+.ff-num {
+  touch-action: none; /* dragging a number must not scroll the page */
+}
+
 .ff-num:disabled {
   opacity: 0.45;
 }
 
-.ff-windows {
+.ff-house-lit .ff-num:disabled {
+  opacity: 1;
+}
+
+/* A number that is in a box (or being dragged) leaves a dashed gap. */
+.ff-num-used,
+.ff-num-lifted {
+  background: transparent;
+  color: transparent;
+  outline: 3px dashed var(--surface);
+  outline-offset: -3px;
+}
+
+/* The house below the roof: lights, then the fact being built. */
+.ff-body {
   width: 94%;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
   padding: 10px;
   background: var(--elsewhere);
   border-radius: 0 0 12px 12px;
+}
+
+.ff-lights {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ff-light {
+  width: 30px;
+  height: 20px;
+  border-radius: 5px;
+  background: #3b3355;
+}
+
+.ff-light-lit,
+.ff-light-shown {
+  background: var(--star);
+}
+
+.ff-light-shown {
+  opacity: 0.75;
+}
+
+.ff-fact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ff-op {
+  color: #ffffff;
+  font-size: 1.7rem;
+  font-weight: 800;
+  min-width: 18px;
+  text-align: center;
+}
+
+.ff-box {
+  width: 64px;
+  height: 56px;
+  border: 3px dashed #d9d2f5;
+  border-radius: 12px;
+  background: #3b3355;
+  color: var(--text);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.ff-box-filled {
+  border-style: solid;
+  border-color: var(--surface);
+  background: var(--surface);
+}
+
+.ff-box-over {
+  border-color: var(--star);
+  box-shadow: 0 0 0 3px var(--star);
+}
+
+.ff-fact-good .ff-box,
+.ff-fact-shown .ff-box {
+  border-color: var(--star);
+  background: var(--star);
+  color: #2b2440;
+}
+
+.ff-fact-shown .ff-box {
+  opacity: 0.75;
+}
+
+/* The number under a dragging finger. */
+.ff-ghost {
+  position: fixed;
+  z-index: 50;
+  width: 62px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.5rem;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.3);
+  transform: translate(-50%, -70%) scale(1.1); /* just above the fingertip */
+  pointer-events: none;
+}
+
+.ff-windows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .ff-window {
@@ -657,12 +770,6 @@ body {
   font-size: 0.98rem;
   font-weight: 800;
   white-space: nowrap;
-}
-
-.ff-window-now {
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: 0 0 0 3px var(--go);
 }
 
 /* Lit: warm light and a check mark. Filled in after 3 misses: light, no check. */
@@ -680,26 +787,39 @@ body {
   opacity: 0.75;
 }
 
-.ff-house-lit .ff-windows {
+.ff-house-lit .ff-body {
   box-shadow: 0 0 24px var(--star);
 }
 
+.ff-prompt {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 1.05rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .ff-message {
-  min-height: 2.6em;
+  min-height: 1.5em;
   margin: 8px 0;
   text-align: center;
   font-size: 1.1rem;
   font-weight: 700;
 }
 
-.ff-erase {
-  margin: 0 auto;
-  min-width: 140px;
+.ff-action {
+  display: block;
+  margin: auto auto 0; /* buttons at the bottom of the screen */
+  min-width: 160px;
 }
 
-.ff-finished .ff-erase {
-  opacity: 0.5;
-  pointer-events: none;
+/* These set their own display, so "hidden" needs saying again. */
+.ff-action[hidden],
+.ff-lights[hidden],
+.ff-fact[hidden],
+.ff-windows[hidden],
+.ff-prompt[hidden] {
+  display: none;
 }
 
 /* ---------- Letter Wheel ---------- */
