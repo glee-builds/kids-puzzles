@@ -10,6 +10,7 @@ import * as wordGuess from './games/word-guess.js';
 import * as numberPyramid from './games/number-pyramid.js';
 import * as magicSquare from './games/magic-square.js';
 import * as letterWheel from './games/letter-wheel.js';
+import * as letterScramble from './games/letter-scramble.js';
 import * as maze from './games/maze.js';
 import * as skipMaze from './games/skip-maze.js';
 import * as numberLine from './games/number-line.js';
@@ -20,7 +21,7 @@ const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'letter-wheel', 'maze', 'skip-maze', 'number-line', 'fact-families'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'letter-wheel', 'letter-scramble', 'maze', 'skip-maze', 'number-line', 'fact-families'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -29,6 +30,7 @@ const VIEWS = {
   'number-pyramid': document.getElementById('view-number-pyramid'),
   'magic-square': document.getElementById('view-magic-square'),
   'letter-wheel': document.getElementById('view-letter-wheel'),
+  'letter-scramble': document.getElementById('view-letter-scramble'),
   maze: document.getElementById('view-maze'),
   'skip-maze': document.getElementById('view-skip-maze'),
   'number-line': document.getElementById('view-number-line'),
@@ -144,6 +146,21 @@ async function startLetterWheel() {
   }
 }
 
+async function startLetterScramble() {
+  const game = document.getElementById('game-letter-scramble');
+  try {
+    const lists = await Promise.all([
+      loadWords('data/words/level-1.json'),
+      loadWords('data/words/level-2.json'),
+    ]);
+    const puzzle = letterScramble.generate(seedFor(today, 'letter-scramble'), lists.flat());
+    letterScramble.render(game, puzzle, () => finishGame('letter-scramble'));
+  } catch (error) {
+    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
 function startMaze() {
   const game = document.getElementById('game-maze');
   const puzzle = maze.generate(seedFor(today, 'maze'));
@@ -173,6 +190,7 @@ const STARTERS = {
   'number-pyramid': startNumberPyramid,
   'magic-square': startMagicSquare,
   'letter-wheel': startLetterWheel,
+  'letter-scramble': startLetterScramble,
   maze: startMaze,
   'skip-maze': startSkipMaze,
   'number-line': startNumberLine,
