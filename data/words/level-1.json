@@ -1,0 +1,12 @@
+{
+  "level": 1,
+  "name": "Short vowels",
+  "about": "Three-letter words: consonant, short vowel, consonant. Grouped by vowel to make review easier.",
+  "words": {
+    "a": ["bag", "bat", "cab", "can", "cap", "cat", "dad", "fan", "ham", "hat", "jam", "lap", "map", "mat", "nap", "pan", "rag", "ram", "tag", "van", "wag"],
+    "e": ["bed", "hen", "jet", "leg", "men", "net", "pen", "pet", "red", "ten", "vet", "web", "wet", "yes"],
+    "i": ["big", "bin", "dig", "fig", "fin", "fix", "kid", "lid", "lip", "mix", "pig", "pin", "sip", "sit", "six", "tin", "wig", "win", "zip"],
+    "o": ["box", "cot", "dog", "dot", "fog", "fox", "hop", "hot", "jog", "log", "mom", "mop", "pot", "top"],
+    "u": ["bug", "bun", "bus", "cub", "cup", "fun", "gum", "hug", "jug", "mud", "mug", "nut", "pup", "rub", "rug", "run", "sun", "tub"]
+  }
+}
