@@ -46,13 +46,13 @@
           <span class="card-status" id="status-magic-square">Play</span>
         </a>
 
-        <div class="card card-soon" aria-disabled="true">
+        <a class="card card-play" href="#letter-wheel">
           <span class="card-art" aria-hidden="true">
             <span class="wheel"><span>e</span></span>
           </span>
           <span class="card-name">Letter Wheel</span>
-          <span class="card-status">Coming soon</span>
-        </div>
+          <span class="card-status" id="status-letter-wheel">Play</span>
+        </a>
 
       </nav>
     </section>
@@ -94,6 +94,17 @@
       </header>
 
       <main id="game-magic-square" class="game"></main>
+    </section>
+
+    <!-- Letter Wheel -->
+    <section id="view-letter-wheel" class="view" hidden>
+      <header class="top game-top">
+        <a class="back" href="#" aria-label="Back to puzzles">←</a>
+        <h1>Letter Wheel</h1>
+        <p class="legend">Every word uses the middle letter</p>
+      </header>
+
+      <main id="game-letter-wheel" class="game"></main>
     </section>
 
   </div>

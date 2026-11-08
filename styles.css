@@ -314,6 +314,135 @@ body {
   background: var(--star);
 }
 
+/* ---------- Letter Wheel ---------- */
+
+.lw-slots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 14px;
+  margin: 4px 0;
+}
+
+.lw-slot {
+  display: flex;
+  gap: 3px;
+}
+
+.lw-slot-letter {
+  width: 26px;
+  height: 30px;
+  border-bottom: 3px solid var(--border);
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.lw-slot-found {
+  border-bottom-color: var(--here);
+  color: var(--here);
+}
+
+.lw-slot-hint {
+  border-bottom-color: var(--elsewhere);
+  color: var(--elsewhere);
+}
+
+.lw-typed {
+  min-height: 1.4em;
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+
+.lw-message {
+  min-height: 1.5em;
+  margin: 4px 0 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Center tile in the middle; five tiles spaced around a circle. */
+.lw-wheel {
+  --size: min(clamp(250px, 42dvh, 310px), 88vw);
+  --tile: 64px;
+  position: relative;
+  width: var(--size);
+  height: var(--size);
+  margin: auto;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border);
+}
+
+.lw-tile {
+  position: absolute;
+  left: calc(50% - var(--tile) / 2);
+  top: calc(50% - var(--tile) / 2);
+  width: var(--tile);
+  height: var(--tile);
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  cursor: pointer;
+  /* Turn to this tile's angle, step out from the center, turn back upright. */
+  transform: rotate(calc(var(--i) * 72deg)) translateY(calc(var(--size) / -2 + var(--tile) / 2 + 8px)) rotate(calc(var(--i) * -72deg));
+}
+
+.lw-center {
+  transform: none;
+  background: var(--go);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.lw-tile:disabled {
+  opacity: 0.35;
+}
+
+.lw-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1.2fr 1.4fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lw-button {
+  min-height: 52px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 800;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.lw-enter {
+  background: var(--go);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.lw-finished .lw-wheel,
+.lw-finished .lw-buttons {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 /* ---------- Magic Square ----------
    Squares share the brick states from Number Pyramid (np-given, np-blank,
    np-selected, np-found, np-shown) and its number pad. This section comes

@@ -9,13 +9,14 @@ import { dateKey, seedFor } from './seed.js';
 import * as wordGuess from './games/word-guess.js';
 import * as numberPyramid from './games/number-pyramid.js';
 import * as magicSquare from './games/magic-square.js';
+import * as letterWheel from './games/letter-wheel.js';
 import * as progressStore from './progress.js';
 
 const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'letter-wheel'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -23,6 +24,7 @@ const VIEWS = {
   'mystery-word': document.getElementById('view-mystery-word'),
   'number-pyramid': document.getElementById('view-number-pyramid'),
   'magic-square': document.getElementById('view-magic-square'),
+  'letter-wheel': document.getElementById('view-letter-wheel'),
 };
 
 // Games are started the first time they are opened, then kept, so
@@ -117,10 +119,26 @@ function startMagicSquare() {
   magicSquare.render(game, puzzle, () => finishGame('magic-square'));
 }
 
+async function startLetterWheel() {
+  const game = document.getElementById('game-letter-wheel');
+  try {
+    const lists = await Promise.all([
+      loadWords('data/words/level-1.json'),
+      loadWords('data/words/level-2.json'),
+    ]);
+    const puzzle = letterWheel.generate(seedFor(today, 'letter-wheel'), lists.flat());
+    letterWheel.render(game, puzzle, () => finishGame('letter-wheel'));
+  } catch (error) {
+    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
 const STARTERS = {
   'mystery-word': startMysteryWord,
   'number-pyramid': startNumberPyramid,
   'magic-square': startMagicSquare,
+  'letter-wheel': startLetterWheel,
 };
 
 // ---------- Moving between screens ----------
