@@ -268,3 +268,20 @@ document.getElementById('done-close').addEventListener('click', () => {
 window.addEventListener('hashchange', show);
 updateHome();
 show();
+
+// ---------- Splash ----------
+
+// The splash covers the screen while the app starts. Keep it up long
+// enough to see (about 0.7 seconds), then fade it out.
+const SPLASH_MS = 700;
+function hideSplash() {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    splash.remove();
+    return;
+  }
+  splash.classList.add('splash-out');
+  setTimeout(() => splash.remove(), 400);
+}
+setTimeout(hideSplash, SPLASH_MS);
