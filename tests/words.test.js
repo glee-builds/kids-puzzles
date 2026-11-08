@@ -76,3 +76,37 @@ test('every level 1 word is consonant, vowel, consonant, filed under its vowel',
     }
   }
 });
+
+const level3 = loadList('level-3.json');
+const allLevel3Words = Object.values(level3.words).flat();
+
+test('level 3 has a level number and plenty of words', () => {
+  assert.equal(level3.level, 3);
+  assert.ok(allLevel3Words.length >= 100, `only ${allLevel3Words.length} words`);
+});
+
+test('every level 3 word is five lowercase letters', () => {
+  for (const word of allLevel3Words) {
+    assert.match(word, /^[a-z]{5}$/, `"${word}" is not five lowercase letters`);
+  }
+});
+
+test('no level 3 word appears twice', () => {
+  const seen = new Set();
+  for (const word of allLevel3Words) {
+    assert.ok(!seen.has(word), `"${word}" appears more than once`);
+    seen.add(word);
+  }
+});
+
+test('every level 3 word has the spelling pattern of its group', () => {
+  for (const [pattern, words] of Object.entries(level3.words)) {
+    // "a_e" means a, one consonant, then a final e (plate). Others are letters in a row (ai, sh).
+    const rule = pattern.includes('_')
+      ? new RegExp(`${pattern[0]}[^aeiou]e$`)
+      : new RegExp(pattern);
+    for (const word of words) {
+      assert.match(word, rule, `"${word}" is filed under "${pattern}"`);
+    }
+  }
+});

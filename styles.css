@@ -1581,7 +1581,8 @@ button {
 /* ---------- Mystery Word board ---------- */
 
 .wg {
-  --tile: clamp(40px, 7.2dvh, 64px);
+  /* Fits 5 letters across a narrow phone, and 6 rows on a short one. */
+  --tile: clamp(40px, min(7.2dvh, calc((100vw - 56px) / 5)), 64px);
 }
 
 .wg-board {

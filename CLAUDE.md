@@ -34,7 +34,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - Word games use a custom on-screen letter keyboard, never the system keyboard.
 - Feedback uses color plus a shape or icon, never color alone.
 - Use original names, visuals, and colors. Do not use names, logos, or color schemes from existing commercial games.
-- Words are 3 to 4 letters at an early-reader level.
+- Word games are aimed at about a 2nd to 3rd grade reading level (changed 2026-11-08; see `docs/decisions.md`). Mystery Word uses 5-letter words from `data/words/level-3.json`; Letter Scramble still uses the 3 to 4 letter lists.
 - No timers and no penalties. Use encouraging messages and one celebration at the end of the daily set.
 - No crosswords for now (too small on a phone). Mazes use finger tracing.
 
