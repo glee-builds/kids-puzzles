@@ -161,6 +161,19 @@ body {
   font-size: 2.2rem;
 }
 
+/* The app name with the frog beside it. */
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.brand-frog {
+  width: 52px;
+  height: auto;
+}
+
 .subtitle {
   margin: 0;
   font-size: 1.2rem;
@@ -587,8 +600,8 @@ body {
 .hop-frog {
   position: absolute;
   left: 18px;
-  top: 0;
-  font-size: 1.6rem;
+  top: 4px;
+  width: 30px;
 }
 
 /* ---------- Skip Count Maze ---------- */
@@ -758,8 +771,7 @@ body {
 .nl-frog {
   position: absolute;
   top: 18px;
-  font-size: 2.2rem;
-  line-height: 1;
+  width: 44px;
   transform: translateX(-50%);
   transition: left 500ms ease-in-out;
 }
@@ -1557,9 +1569,8 @@ body {
 }
 
 .done-star {
-  font-size: 4.5rem;
-  line-height: 1;
-  color: var(--star);
+  width: 96px;
+  height: auto;
   animation: star 700ms ease-out;
 }
 

@@ -176,8 +176,9 @@ export function render(container, puzzle, onDone) {
 
   const line = make('div', 'nl-line');
   const ticks = make('div', 'nl-ticks');
-  const frog = make('div', 'nl-frog', '🐸');
-  frog.setAttribute('aria-hidden', 'true');
+  const frog = make('img', 'nl-frog');
+  frog.src = 'assets/frog.svg';
+  frog.alt = ''; // the line's label already says where the frog is
   line.append(ticks, frog);
 
   const card = make('div', 'nl-card');
