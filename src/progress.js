@@ -8,12 +8,14 @@
 //   - Finishing again on the same day does not count twice.
 //   - Playing on the very next day adds one. Missing a day starts over at 1.
 //   - Finishing counts whether the word was found or shown: no penalties.
+//   - totalDays counts every day with a finished puzzle, ever. It never goes
+//     down, so the frog on the lily pads never hops backward.
 
 export const STORAGE_KEY = 'kids-puzzles.progress';
 const KEEP_DAYS = 14; // how many days of "finished" history to keep
 
 export function emptyProgress() {
-  return { streak: 0, lastDay: null, finished: {} };
+  return { streak: 0, totalDays: 0, lastDay: null, finished: {} };
 }
 
 /** Whole days from one "YYYY-MM-DD" to another (b minus a). */
@@ -26,9 +28,11 @@ export function daysBetween(a, b) {
 /** Record that `game` was finished on `day`. Returns new progress. */
 export function recordFinish(progress, day, game) {
   let streak = progress.streak;
+  let totalDays = progress.totalDays;
   if (progress.lastDay !== day) {
     const gap = progress.lastDay ? daysBetween(progress.lastDay, day) : null;
     streak = gap === 1 ? progress.streak + 1 : 1;
+    totalDays += 1;
   }
 
   const finished = {};
@@ -38,7 +42,7 @@ export function recordFinish(progress, day, game) {
   const today = finished[day] || [];
   finished[day] = today.includes(game) ? today : [...today, game];
 
-  return { streak, lastDay: day, finished };
+  return { streak, totalDays, lastDay: day, finished };
 }
 
 /**
@@ -60,7 +64,9 @@ export function load(storage = globalThis.localStorage) {
   try {
     const saved = JSON.parse(storage.getItem(STORAGE_KEY));
     if (saved && typeof saved.streak === 'number' && typeof saved.finished === 'object') {
-      return { ...emptyProgress(), ...saved };
+      // Saved before totalDays existed: start from the days in the history.
+      const totalDays = typeof saved.totalDays === 'number' ? saved.totalDays : Object.keys(saved.finished).length;
+      return { ...emptyProgress(), ...saved, totalDays };
     }
   } catch {
     // Private browsing or damaged data: start fresh.
