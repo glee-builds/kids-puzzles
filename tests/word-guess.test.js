@@ -14,25 +14,21 @@ const words = Object.values(level1.words).flat();
 // --- generate ---
 
 test('generate picks a word from the list', () => {
-  const puzzle = generate(seedFor('2026-11-08', 'word-guess'), words);
+  const puzzle = generate(seedFor('2026-11-08', 'word-guess'), words, 0);
   assert.ok(words.includes(puzzle.answer));
   assert.equal(puzzle.length, 3);
   assert.equal(puzzle.maxGuesses, MAX_GUESSES);
 });
 
 test('generate gives the same word for the same day', () => {
-  const a = generate(seedFor('2026-11-08', 'word-guess'), words);
-  const b = generate(seedFor('2026-11-08', 'word-guess'), words);
+  const a = generate(seedFor('2026-11-08', 'word-guess'), words, 5);
+  const b = generate(seedFor('2026-11-08', 'word-guess'), words, 5);
   assert.equal(a.answer, b.answer);
 });
 
-test('generate gives a variety of words across a month', () => {
-  const answers = new Set();
-  for (let day = 1; day <= 30; day++) {
-    const key = `2026-11-${String(day).padStart(2, '0')}`;
-    answers.add(generate(seedFor(key, 'word-guess'), words).answer);
-  }
-  assert.ok(answers.size >= 20, `only ${answers.size} different words in 30 days`);
+test('no word repeats until every word in the list has been used', () => {
+  const answers = words.map((_, day) => generate(0, words, day).answer);
+  assert.equal(new Set(answers).size, words.length);
 });
 
 // --- markGuess ---

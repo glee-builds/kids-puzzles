@@ -7,7 +7,7 @@
 //
 // This file holds the game's rules only. The screen comes later, in render().
 
-import { createRandom } from '../seed.js';
+import { dealForDay } from '../seed.js';
 import { make, button, liveMessage } from '../ui.js';
 
 export const MAX_GUESSES = 6;
@@ -16,8 +16,11 @@ export const MAX_GUESSES = 6;
  * Make today's puzzle. `seed` comes from seed.js, and `words` is a flat
  * list of possible answers (for example, every word in level-1.json).
  */
-export function generate(seed, words) {
-  const answer = createRandom(seed).pick(words);
+// The word is dealt from a deck, one a day, so no word repeats until the
+// whole list has been used. (The seed isn't needed; every game's generate
+// takes one so they all work the same way.)
+export function generate(seed, words, dayNumber) {
+  const [answer] = dealForDay(words, 1, dayNumber, 'word-guess');
   return { answer, length: answer.length, maxGuesses: MAX_GUESSES };
 }
 

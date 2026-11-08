@@ -3,7 +3,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay } from './helpers.js';
 import {
   generate, verify, start, change, back, hint, current, stepsLeft,
   shortestLadder, acceptedWords,
@@ -44,11 +45,10 @@ test('plurals of 3-letter words are accepted, but not used to start or end', () 
 // --- making puzzles ---
 
 test('every day for two years makes a 3-step and a 4-step ladder from phonics words', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key) => {
     const result = verify(generate(seedForDay(key), LADDER, PHONICS));
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
-  }
+  });
 });
 
 test('verify catches a ladder that is too short', () => {

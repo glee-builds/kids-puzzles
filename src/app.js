@@ -145,7 +145,7 @@ const DAY = progressStore.daysBetween('2026-01-01', today);
 // Adding a game: add its file in src/games/, its card in index.html, and
 // one line here.
 const GAMES = {
-  'mystery-word': { title: 'Mystery Word', file: 'word-guess', data: () => [words('level-3')] },
+  'mystery-word': { title: 'Mystery Word', file: 'word-guess', data: () => [words('level-3'), DAY] },
   'letter-scramble': { title: 'Letter Scramble', legend: 'Put the letters back in order', data: () => [words('level-1', 'level-2')] },
   'story-order': { title: 'Story Order', legend: 'Put the story in order', data: () => [part('stories', 'stories'), DAY] },
   'word-search': { title: 'Word Search', legend: 'Find the hidden words', data: () => [part('search-themes', 'themes'), DAY] },

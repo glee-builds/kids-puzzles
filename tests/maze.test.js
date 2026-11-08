@@ -2,7 +2,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay, dayKey } from './helpers.js';
 import {
   generate, verify, solution, canMove, start, step, hintSquares, offRoute, SIZE, N, E, S, W,
 } from '../src/games/maze.js';
@@ -33,18 +34,17 @@ test('generate gives the same maze for the same day', () => {
 });
 
 test('every day for two years makes a perfect maze with one route to the star', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key) => {
     const puzzle = generate(seedForDay(key));
     const result = verify(puzzle);
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
     assert.equal(puzzle.size, SIZE);
-  }
+  });
 });
 
 test('routes are long enough to be a real maze', () => {
   for (let day = 0; day < 100; day++) {
-    const route = solution(generate(seedForDay(dateKey(new Date(2026, 10, 1 + day)))));
+    const route = solution(generate(seedForDay(dayKey(day))));
     // The shortest possible route corner to corner is 2 * SIZE - 1 squares.
     assert.ok(route.length >= 2 * SIZE - 1, `route of ${route.length}`);
   }

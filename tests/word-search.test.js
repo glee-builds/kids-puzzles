@@ -3,7 +3,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay } from './helpers.js';
 import {
   generate, verify, start, check, hint, lineBetween, themeForDay,
   SIZE, WORDS_PER_DAY, MIN_WORD, MAX_WORD,
@@ -37,12 +38,11 @@ test('no theme repeats until every theme has been used', () => {
 // --- making puzzles ---
 
 test('every day for two years makes a valid 15x15 grid with 10 words', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key, day) => {
     const puzzle = generate(seedForDay(key), THEMES, day);
     const result = verify(puzzle);
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
-  }
+  });
 });
 
 test('the same day always makes the same grid', () => {

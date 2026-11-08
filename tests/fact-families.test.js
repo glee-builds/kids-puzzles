@@ -2,7 +2,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay } from './helpers.js';
 import {
   generate, verify, factsFor, start, check, hint, prompt, currentWindow, HOUSES, MAX_TRIES, FIRST_HOUSE_MAX,
 } from '../src/games/fact-families.js';
@@ -22,14 +23,13 @@ test('generate gives the same street for the same day', () => {
 });
 
 test('every day for two years makes a valid street', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key) => {
     const puzzle = generate(seedForDay(key));
     const result = verify(puzzle);
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
     assert.equal(puzzle.houses.length, HOUSES);
     assert.ok(puzzle.houses[0].c <= FIRST_HOUSE_MAX);
-  }
+  });
 });
 
 test('verify catches a wrong sum, a double, and a too-big number', () => {

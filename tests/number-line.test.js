@@ -2,7 +2,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay } from './helpers.js';
 import {
   generate, verify, positions, start, check, hint, windowFor, HOPS, MAX_TRIES,
 } from '../src/games/number-line.js';
@@ -32,13 +33,12 @@ test('generate gives the same hops for the same day', () => {
 });
 
 test('every day for two years makes valid hops between 0 and 100', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key) => {
     const puzzle = generate(seedForDay(key));
     const result = verify(puzzle);
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
     assert.equal(puzzle.hops.length, HOPS);
-  }
+  });
 });
 
 test('verify catches hops that leave 0 to 100 or are all the same kind', () => {

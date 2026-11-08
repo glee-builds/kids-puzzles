@@ -9,7 +9,7 @@
 // The words are dealt in a fixed shuffled order, two a day, so none
 // repeats until the whole list has been used.
 
-import { createRandom, hashString } from '../seed.js';
+import { createRandom, dealForDay } from '../seed.js';
 import { make, button, liveMessage } from '../ui.js';
 
 export const WORDS_PER_DAY = 2;
@@ -18,12 +18,7 @@ export const MAX_SENTENCE = 60; // characters
 export const MAX_USE = 70;
 
 /** The words for a day number (days since a fixed start date). */
-export function wordsForDay(words, dayNumber) {
-  const order = createRandom(hashString('word-clues-deck')).shuffle(words.map((_, i) => i));
-  const n = order.length;
-  const start = ((dayNumber * WORDS_PER_DAY) % n + n) % n;
-  return Array.from({ length: WORDS_PER_DAY }, (_, k) => words[order[(start + k) % n]]);
-}
+export const wordsForDay = (words, dayNumber) => dealForDay(words, WORDS_PER_DAY, dayNumber, 'word-clues');
 
 const escape = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const wholeWord = (word) => new RegExp(`\\b${escape(word)}\\b`, 'gi');

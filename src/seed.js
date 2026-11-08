@@ -91,3 +91,15 @@ export function combinations(list, k) {
   if (k === 0) return [[]];
   return list.flatMap((item, i) => combinations(list.slice(i + 1), k - 1).map((rest) => [item, ...rest]));
 }
+
+/**
+ * Deal `perDay` items a day from a deck, so none repeats until the whole
+ * deck has been used. The deck is shuffled the same way every time (by its
+ * `name`), and `dayNumber` counts days from a fixed start date.
+ */
+export function dealForDay(items, perDay, dayNumber, name) {
+  const order = createRandom(hashString(`${name}-deck`)).shuffle(items.map((_, i) => i));
+  const n = order.length;
+  const start = ((dayNumber * perDay) % n + n) % n;
+  return Array.from({ length: perDay }, (_, k) => items[order[(start + k) % n]]);
+}

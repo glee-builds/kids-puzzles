@@ -3,7 +3,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay } from './helpers.js';
 import {
   generate, verify, start, check, hint, current, wordsWithLetters, PLAN,
 } from '../src/games/letter-scramble.js';
@@ -35,13 +36,12 @@ test('generate gives the same words for the same day', () => {
 });
 
 test('every day for two years makes 4 valid scrambles', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key) => {
     const puzzle = generate(seedForDay(key), WORDS);
     const result = verify(puzzle);
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
     assert.deepEqual(puzzle.items.map((item) => item.word.length), PLAN);
-  }
+  });
 });
 
 test('verify catches a scramble that is already a word, or the wrong letters', () => {
