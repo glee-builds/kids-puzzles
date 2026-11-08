@@ -14,6 +14,7 @@
     <section id="home" class="view">
       <header class="top home-top">
         <h1>Puzzle Time</h1>
+        <p class="streak" id="streak"></p>
         <p class="subtitle">Pick a puzzle!</p>
       </header>
 
@@ -68,15 +69,22 @@
         <p class="loading">Getting today's puzzle…</p>
       </main>
 
-      <section id="done" class="done" hidden>
-        <div class="done-star" aria-hidden="true">★</div>
-        <p class="done-title">You did it!</p>
-        <p class="done-note">Come back tomorrow for a new mystery word.</p>
-        <a class="button" href="#">Pick another puzzle</a>
+      <section id="done" class="done" role="dialog" aria-labelledby="done-title" hidden>
+        <div class="done-card">
+          <div class="done-star" aria-hidden="true">★</div>
+          <p class="done-title" id="done-title">You did it!</p>
+          <p class="done-streak" id="done-streak"></p>
+          <p class="done-note">Come back tomorrow for a new mystery word.</p>
+          <a class="button" href="#">Pick another puzzle</a>
+          <button class="link-button" type="button" id="done-close">See my puzzle</button>
+        </div>
       </section>
     </section>
 
   </div>
+
+  <!-- Falling stars at the end of a puzzle. Filled in by app.js. -->
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
 
   <noscript>This puzzle needs JavaScript turned on.</noscript>
   <script type="module" src="src/app.js"></script>
