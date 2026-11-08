@@ -12,7 +12,6 @@ import * as magicSquare from './games/magic-square.js';
 import * as letterScramble from './games/letter-scramble.js';
 import * as storyOrder from './games/story-order.js';
 import * as maze from './games/maze.js';
-import * as skipMaze from './games/skip-maze.js';
 import * as numberLine from './games/number-line.js';
 import * as factFamilies from './games/fact-families.js';
 import * as progressStore from './progress.js';
@@ -22,7 +21,7 @@ const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'maze', 'skip-maze', 'number-line', 'fact-families'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'maze', 'number-line', 'fact-families'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -33,7 +32,6 @@ const VIEWS = {
   'story-order': document.getElementById('view-story-order'),
   'letter-scramble': document.getElementById('view-letter-scramble'),
   maze: document.getElementById('view-maze'),
-  'skip-maze': document.getElementById('view-skip-maze'),
   'number-line': document.getElementById('view-number-line'),
   'fact-families': document.getElementById('view-fact-families'),
 };
@@ -213,12 +211,6 @@ function startMaze() {
   maze.render(game, puzzle, () => finishGame('maze'));
 }
 
-function startSkipMaze() {
-  const game = document.getElementById('game-skip-maze');
-  const puzzle = skipMaze.generate(seedFor(today, 'skip-maze'));
-  skipMaze.render(game, puzzle, () => finishGame('skip-maze'));
-}
-
 function startNumberLine() {
   const game = document.getElementById('game-number-line');
   const puzzle = numberLine.generate(seedFor(today, 'number-line'));
@@ -238,7 +230,6 @@ const STARTERS = {
   'story-order': startStoryOrder,
   'letter-scramble': startLetterScramble,
   maze: startMaze,
-  'skip-maze': startSkipMaze,
   'number-line': startNumberLine,
   'fact-families': startFactFamilies,
 };
