@@ -17,6 +17,9 @@ import * as maze from './games/maze.js';
 import * as numberLine from './games/number-line.js';
 import * as factFamilies from './games/fact-families.js';
 import * as findTheMistake from './games/find-the-mistake.js';
+import * as wordProblems from './games/word-problems.js';
+import * as wordClues from './games/word-clues.js';
+import * as fixSentence from './games/fix-sentence.js';
 import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
 
@@ -24,7 +27,7 @@ const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'word-ladder', 'maze', 'number-line', 'fact-families', 'find-the-mistake'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'word-ladder', 'maze', 'number-line', 'fact-families', 'find-the-mistake', 'word-problems', 'word-clues', 'fix-sentence'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -40,6 +43,9 @@ const VIEWS = {
   'number-line': document.getElementById('view-number-line'),
   'fact-families': document.getElementById('view-fact-families'),
   'find-the-mistake': document.getElementById('view-find-the-mistake'),
+  'word-problems': document.getElementById('view-word-problems'),
+  'word-clues': document.getElementById('view-word-clues'),
+  'fix-sentence': document.getElementById('view-fix-sentence'),
 };
 
 // Games are started the first time they are opened, then kept, so
@@ -267,6 +273,52 @@ function startFindTheMistake() {
   findTheMistake.render(game, puzzle, () => finishGame('find-the-mistake'));
 }
 
+async function startWordProblems() {
+  const game = document.getElementById('game-word-problems');
+  try {
+    const response = await fetch('data/word-problems.json');
+    if (!response.ok) throw new Error('Could not load data/word-problems.json');
+    const { problems } = await response.json();
+    const puzzle = wordProblems.generate(seedFor(today, 'word-problems'), problems);
+    wordProblems.render(game, puzzle, () => finishGame('word-problems'));
+  } catch (error) {
+    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
+// Word Clues words are dealt two a day from the same start date.
+async function startWordClues() {
+  const game = document.getElementById('game-word-clues');
+  try {
+    const response = await fetch('data/rich-words.json');
+    if (!response.ok) throw new Error('Could not load data/rich-words.json');
+    const { words } = await response.json();
+    const day = progressStore.daysBetween(STORY_START, today);
+    const puzzle = wordClues.generate(seedFor(today, 'word-clues'), words, day);
+    wordClues.render(game, puzzle, () => finishGame('word-clues'));
+  } catch (error) {
+    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
+// Fix the Sentence sentences are dealt four a day from the same start date.
+async function startFixSentence() {
+  const game = document.getElementById('game-fix-sentence');
+  try {
+    const response = await fetch('data/fix-sentences.json');
+    if (!response.ok) throw new Error('Could not load data/fix-sentences.json');
+    const { sentences } = await response.json();
+    const day = progressStore.daysBetween(STORY_START, today);
+    const puzzle = fixSentence.generate(seedFor(today, 'fix-sentence'), sentences, day);
+    fixSentence.render(game, puzzle, () => finishGame('fix-sentence'));
+  } catch (error) {
+    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
 const STARTERS = {
   'mystery-word': startMysteryWord,
   'number-pyramid': startNumberPyramid,
@@ -279,6 +331,9 @@ const STARTERS = {
   'number-line': startNumberLine,
   'fact-families': startFactFamilies,
   'find-the-mistake': startFindTheMistake,
+  'word-problems': startWordProblems,
+  'word-clues': startWordClues,
+  'fix-sentence': startFixSentence,
 };
 
 // ---------- Moving between screens ----------
