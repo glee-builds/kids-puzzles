@@ -325,6 +325,171 @@ body {
   border: 4px solid var(--text);
 }
 
+/* ---------- Letter Scramble ---------- */
+
+.scramble-art {
+  display: flex;
+  gap: 3px;
+}
+
+.scramble-art span {
+  width: 20px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  background: var(--elsewhere);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.scramble-art span:nth-child(2) { transform: rotate(-10deg); }
+.scramble-art span:nth-child(3) { transform: rotate(8deg); }
+
+/* The day's words along the top: dots until spelled. */
+.ls-found {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 2px 0 6px;
+}
+
+.ls-found-word {
+  min-width: 52px;
+  padding: 4px 8px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.ls-found-now {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.ls-found-done {
+  border-color: var(--here);
+  background: var(--here);
+  color: #ffffff;
+}
+
+.ls-boxes,
+.ls-tray {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ls-boxes {
+  margin: auto 0 0;
+}
+
+.ls-tray {
+  margin: 28px 0 0;
+}
+
+.ls-box,
+.ls-tile,
+.ls-ghost {
+  width: 64px;
+  height: 72px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ls-box {
+  position: relative;
+  border: 3px dashed var(--muted);
+  background: transparent;
+  color: var(--text);
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.ls-box-filled {
+  border: 3px solid var(--text);
+  background: var(--surface);
+}
+
+.ls-box-over {
+  border-color: var(--star);
+  box-shadow: 0 0 0 3px var(--star);
+}
+
+/* In the right place: green with a check, never color alone. */
+.ls-box-locked {
+  border-color: var(--here);
+  background: var(--here);
+  color: #ffffff;
+}
+
+.ls-box-locked::after {
+  content: "✓";
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  font-size: 0.9rem;
+}
+
+.ls-tile {
+  border: none;
+  background: var(--elsewhere);
+  color: #ffffff;
+  touch-action: none; /* dragging a letter must not scroll the page */
+  cursor: grab;
+}
+
+/* A letter that is in a box (or being dragged) leaves a dashed gap. */
+.ls-tile-used,
+.ls-tile-lifted {
+  background: transparent;
+  color: transparent;
+  outline: 3px dashed var(--border);
+  outline-offset: -3px;
+}
+
+.ls-tile:disabled:not(.ls-tile-used) {
+  opacity: 0.6;
+}
+
+.ls-ghost {
+  position: fixed;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: var(--elsewhere);
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.3);
+  transform: translate(-50%, -70%) scale(1.1); /* just above the fingertip */
+  pointer-events: none;
+}
+
+.ls-message {
+  min-height: 2.6em;
+  margin: 20px 0 auto; /* right under the letters; buttons at the bottom */
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.ls-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ls-finished .ls-buttons {
+  opacity: 0.5;
+}
+
 /* ---------- Maze ---------- */
 
 .mz-message {
