@@ -45,8 +45,8 @@ test('every day for two years makes a perfect maze with one route to the star', 
 test('routes are long enough to be a real maze', () => {
   for (let day = 0; day < 100; day++) {
     const route = solution(generate(seedForDay(dateKey(new Date(2026, 10, 1 + day)))));
-    // The shortest possible route across a 7x7 grid is 13 squares.
-    assert.ok(route.length >= 13, `route of ${route.length}`);
+    // The shortest possible route corner to corner is 2 * SIZE - 1 squares.
+    assert.ok(route.length >= 2 * SIZE - 1, `route of ${route.length}`);
   }
 });
 

@@ -41,8 +41,10 @@ const started = new Set();
 
 function streakText(days) {
   if (days === 0) return 'Finish a puzzle to start a streak!';
-  if (days === 1) return '★ 1 day';
-  return `★ ${days} days in a row`;
+  // The streak counts days with any finished puzzle, so the words say
+  // "puzzles", not the name of one game.
+  if (days === 1) return '★ Puzzles 1 day';
+  return `★ Puzzles ${days} days in a row`;
 }
 
 function updateHome() {
@@ -65,7 +67,7 @@ function finishGame(game) {
 
   const days = progress.streak;
   document.getElementById('done-streak').textContent =
-    days === 1 ? '★ Day 1 of your streak!' : `★ ${days} days in a row!`;
+    days === 1 ? '★ Day 1 of your puzzle streak!' : `★ Puzzles ${days} days in a row!`;
   document.getElementById('done').hidden = false;
   celebrate();
 }

@@ -10,7 +10,7 @@
 
 import { createRandom } from '../seed.js';
 
-export const SIZE = 7;
+export const SIZE = 8;
 export const N = 1;
 export const E = 2;
 export const S = 4;
