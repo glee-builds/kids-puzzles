@@ -9,6 +9,7 @@
 // forward, so only that one step is wrong.
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage } from '../ui.js';
 
 export const PROBLEMS = 4;
 export const MAX_TRIES = 3; // after this many misses the fix fills itself in
@@ -220,13 +221,6 @@ export function hint(state) {
 
 const CHEERS = ['You fixed it!', 'Great checking!', 'Nice work!', 'You got it!'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -246,13 +240,11 @@ export function render(container, puzzle, onDone) {
   const count = make('p', 'fm-count');
   const question = make('p', 'fm-question');
   const list = make('ol', 'fm-steps');
-  const message = make('p', 'fm-message');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('fm-message');
 
   const pad = make('div', 'np-pad fm-pad');
   for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
-    const key = make('button', 'np-key', label);
-    key.type = 'button';
+    const key = button('np-key', label);
     if (label === 'Check') {
       key.classList.add('np-key-check');
       key.addEventListener('click', submit);
@@ -265,9 +257,7 @@ export function render(container, puzzle, onDone) {
     pad.append(key);
   }
 
-  const nextButton = make('button', 'button fm-next');
-  nextButton.type = 'button';
-  nextButton.addEventListener('click', goNext);
+  const nextButton = button('button fm-next', '', goNext);
 
   container.append(talk, count, question, list, message, pad, nextButton);
 
@@ -344,8 +334,7 @@ export function render(container, puzzle, onDone) {
     list.replaceChildren();
     shown.forEach((line, i) => {
       const row = make('li');
-      const button = make('button', 'fm-step');
-      button.type = 'button';
+      const stepButton = button('fm-step');
       const isMistake = i === problem.mistake && state.phase !== 'find';
       const isLast = i === shown.length - 1;
 
@@ -358,32 +347,32 @@ export function render(container, puzzle, onDone) {
       } else {
         result.textContent = String(line.result);
       }
-      button.append(sum, result);
-      if (isLast) button.append(make('span', 'fm-tag', 'answer'));
+      stepButton.append(sum, result);
+      if (isLast) stepButton.append(make('span', 'fm-tag', 'answer'));
 
       let mark = '';
       let label = `${line.left} ${line.op} ${line.right} = ${line.result}`;
       if (isMistake && fixed) {
-        button.classList.add(state.revealed ? 'fm-shown' : 'fm-fixed');
+        stepButton.classList.add(state.revealed ? 'fm-shown' : 'fm-fixed');
         mark = '✓';
         label += state.revealed ? ', filled in' : ', fixed';
       } else if (isMistake) {
-        button.classList.add('fm-wrong');
+        stepButton.classList.add('fm-wrong');
         mark = '✗';
         label = `${line.left} ${line.op} ${line.right}, the wrong step, typing ${typed || 'nothing yet'}`;
       } else if (state.checked.includes(i)) {
-        button.classList.add('fm-ok');
+        stepButton.classList.add('fm-ok');
         mark = '✓';
         label += ', this step is right';
       } else if (fixed && line.result !== before[i].result) {
-        button.classList.add('fm-changed');
+        stepButton.classList.add('fm-changed');
         label += ', changed';
       }
-      if (mark) button.append(make('span', 'fm-mark', mark));
-      button.setAttribute('aria-label', label);
-      button.disabled = state.phase !== 'find' || state.checked.includes(i);
-      button.addEventListener('click', () => pick(i));
-      row.append(button);
+      if (mark) stepButton.append(make('span', 'fm-mark', mark));
+      stepButton.setAttribute('aria-label', label);
+      stepButton.disabled = state.phase !== 'find' || state.checked.includes(i);
+      stepButton.addEventListener('click', () => pick(i));
+      row.append(stepButton);
       list.append(row);
     });
 

@@ -13,6 +13,7 @@
 // word the player makes isn't turned away. Hints prefer phonics words.
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage, wiggle, progressDots } from '../ui.js';
 
 export const LENGTHS = [3, 4];  // one ladder of each, in this order
 const ABC = 'abcdefghijklmnopqrstuvwxyz';
@@ -211,13 +212,6 @@ export function hint(state) {
 const KEY_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
 const ORDINALS = ['first', 'second', 'third', 'fourth'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** One rung: a word as a row of small letter tiles. `changed` marks the new letter. */
 function rung(word, className, changed = -1) {
   const row = make('div', `wl-rung ${className}`.trim());
@@ -238,45 +232,31 @@ export function render(container, puzzle, onDone) {
   container.replaceChildren();
   container.classList.add('wl');
 
-  const dots = make('div', 'so-dots');
-  const dotNodes = puzzle.ladders.map(() => {
-    const dot = make('span', 'so-dot');
-    dots.append(dot);
-    return dot;
-  });
+  const dots = progressDots(puzzle.ladders.length);
   const goal = make('p', 'wl-goal');
   const rungs = make('div', 'wl-rungs');
-  const message = make('p', 'wl-message');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('wl-message');
 
   const keyboard = make('div', 'wg-keyboard wl-keyboard');
   for (const [index, letters] of KEY_ROWS.entries()) {
     const row = make('div', 'wg-key-row');
     if (index === 1) row.classList.add('wg-key-row-middle');
     for (const letter of letters) {
-      const key = make('button', 'wg-key wl-key', letter);
-      key.type = 'button';
-      key.addEventListener('click', () => typeLetter(letter));
+      const key = button('wg-key wl-key', letter, () => typeLetter(letter));
       row.append(key);
     }
     keyboard.append(row);
   }
 
   const buttons = make('div', 'wl-buttons');
-  const backButton = make('button', 'lw-button', '↩ Back');
-  backButton.type = 'button';
-  backButton.addEventListener('click', () => {
+  const backButton = button('lw-button', '↩ Back', () => {
     state = back(state);
     selected = null;
     message.textContent = 'Back one step.';
     draw();
   });
-  const hintButton = make('button', 'lw-button', 'Hint');
-  hintButton.type = 'button';
-  hintButton.addEventListener('click', giveHint);
-  const nextButton = make('button', 'lw-button lw-enter', 'Next ladder →');
-  nextButton.type = 'button';
-  nextButton.addEventListener('click', () => {
+  const hintButton = button('lw-button', 'Hint', giveHint);
+  const nextButton = button('lw-button lw-enter', 'Next ladder →', () => {
     reading = false;
     shownIndex = state.index;
     selected = null;
@@ -285,7 +265,7 @@ export function render(container, puzzle, onDone) {
   });
   buttons.append(backButton, hintButton, nextButton);
 
-  container.append(dots, goal, rungs, message, keyboard, buttons);
+  container.append(dots.node, goal, rungs, message, keyboard, buttons);
 
   const canPlay = () => state.status === 'playing' && !reading;
   const big = (word) => word.toUpperCase();
@@ -356,18 +336,13 @@ export function render(container, puzzle, onDone) {
   }
 
   function wiggle() {
-    rungs.classList.remove('np-wiggle');
-    void rungs.offsetWidth; // restart the wiggle
-    rungs.classList.add('np-wiggle');
+    wiggle(rungs);
   }
 
   function draw() {
     const { start: from, end } = puzzle.ladders[shownIndex];
     goal.textContent = `${big(from)} → ${big(end)}`;
-    dotNodes.forEach((dot, i) => {
-      const done = i < state.solved.length;
-      dot.className = 'so-dot' + (done ? ' so-dot-done' : i === shownIndex ? ' so-dot-now' : '');
-    });
+    dots.update((i) => i < state.solved.length, shownIndex);
 
     rungs.replaceChildren();
     const chain = reading ? state.solved[shownIndex] : state.chain;
@@ -381,8 +356,7 @@ export function render(container, puzzle, onDone) {
       // The word to change: big tiles to tap.
       const row = make('div', 'wl-rung wl-rung-now');
       [...word].forEach((ch, k) => {
-        const tile = make('button', 'wl-tile wl-tile-big' + (k === selected ? ' wl-tile-picked' : ''), ch);
-        tile.type = 'button';
+        const tile = button('wl-tile wl-tile-big' + (k === selected ? ' wl-tile-picked' : ''), ch);
         tile.setAttribute('aria-label', `${ORDINALS[k]} letter, ${ch}`);
         tile.setAttribute('aria-pressed', String(k === selected));
         tile.addEventListener('click', () => {

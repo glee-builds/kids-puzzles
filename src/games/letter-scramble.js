@@ -8,6 +8,7 @@
 // (TEN for NET), that counts too.
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage, wiggle, dragOrTap } from '../ui.js';
 
 export const PLAN = [3, 3, 4, 4]; // word lengths, in order
 const SORTED = (word) => [...word].sort().join('');
@@ -132,21 +133,12 @@ export function verify(puzzle) {
 
 const CHEERS = ['You spelled it!', 'Yes!', 'Great reading!', 'You got it!'];
 const PAUSE = 900; // ms to show a spelled word before the next one
-const DRAG_START = 8; // px a finger moves before a tap becomes a drag
-
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
 
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let boxes = [];   // tray index in each box, or null
   let busy = false; // true while a spelling is being judged
-  let drag = null;
   let cheerCount = 0;
 
   container.replaceChildren();
@@ -161,20 +153,15 @@ export function render(container, puzzle, onDone) {
 
   const boxRow = make('div', 'ls-boxes');
   const tray = make('div', 'ls-tray');
-  const message = make('p', 'ls-message', 'Drag the letters into the boxes to spell a word.');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('ls-message', 'Drag the letters into the boxes to spell a word.');
 
   const buttons = make('div', 'ls-buttons');
-  const clearButton = make('button', 'lw-button', 'Clear');
-  clearButton.type = 'button';
-  clearButton.addEventListener('click', () => {
+  const clearButton = button('lw-button', 'Clear', () => {
     if (busy || state.status !== 'playing') return;
     boxes = boxes.map((b, k) => (state.locked[k] ? b : null));
     draw();
   });
-  const hintButton = make('button', 'lw-button', 'Hint');
-  hintButton.type = 'button';
-  hintButton.addEventListener('click', giveHint);
+  const hintButton = button('lw-button', 'Hint', giveHint);
   buttons.append(clearButton, hintButton);
 
   container.append(found, boxRow, tray, message, buttons);
@@ -190,20 +177,19 @@ export function render(container, puzzle, onDone) {
     boxRow.replaceChildren();
     tray.replaceChildren();
     boxNodes = [...mixed].map((_, k) => {
-      const box = make('button', 'ls-box');
-      box.type = 'button';
-      box.addEventListener('click', () => sendBack(k));
+      const box = button('ls-box', '', () => sendBack(k));
       boxRow.append(box);
       return box;
     });
     tiles = [...mixed].map((letter, i) => {
-      const tile = make('button', 'ls-tile', letter);
-      tile.type = 'button';
-      tile.addEventListener('pointerdown', (event) => startDrag(event, i));
-      tile.addEventListener('pointermove', moveDrag);
-      tile.addEventListener('pointerup', endDrag);
-      tile.addEventListener('pointercancel', cancelDrag);
-      tile.addEventListener('click', (event) => { if (event.detail === 0) placeFirstEmpty(i); });
+      const tile = button('ls-tile', letter);
+      dragOrTap(tile, {
+        canStart: () => canPlay() && !boxes.includes(i),
+        targets: () => boxNodes,
+        onDrop: (k) => place(i, k),
+        onTap: () => placeFirstEmpty(i),
+        classes: { ghost: 'ls-ghost', lifted: 'ls-tile-lifted', over: 'ls-box-over' },
+      });
       tray.append(tile);
       return tile;
     });
@@ -240,54 +226,6 @@ export function render(container, puzzle, onDone) {
     if (!canPlay() || boxes[k] === null || state.locked[k]) return;
     boxes[k] = null;
     draw();
-  }
-
-  function boxAt(x, y) {
-    const hit = document.elementFromPoint(x, y);
-    const box = hit && hit.closest('.ls-box');
-    return box && boxNodes.includes(box) ? box : null;
-  }
-
-  function startDrag(event, i) {
-    if (!canPlay() || boxes.includes(i)) return;
-    event.preventDefault();
-    drag = { i, x: event.clientX, y: event.clientY, id: event.pointerId, moved: false, ghost: null };
-    try { tiles[i].setPointerCapture(event.pointerId); } catch { /* fine without it */ }
-  }
-
-  function moveDrag(event) {
-    if (!drag || event.pointerId !== drag.id) return;
-    if (!drag.moved) {
-      if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < DRAG_START) return;
-      drag.moved = true;
-      drag.ghost = make('div', 'ls-ghost', tiles[drag.i].textContent);
-      document.body.append(drag.ghost);
-      tiles[drag.i].classList.add('ls-tile-lifted');
-    }
-    drag.ghost.style.left = `${event.clientX}px`;
-    drag.ghost.style.top = `${event.clientY}px`;
-    const over = boxAt(event.clientX, event.clientY);
-    boxNodes.forEach((box) => box.classList.toggle('ls-box-over', box === over));
-  }
-
-  function endDrag(event) {
-    if (!drag || event.pointerId !== drag.id) return;
-    const { i, moved } = drag;
-    cancelDrag();
-    if (!moved) {
-      placeFirstEmpty(i);
-      return;
-    }
-    const box = boxAt(event.clientX, event.clientY);
-    if (box) place(i, boxNodes.indexOf(box));
-  }
-
-  function cancelDrag() {
-    if (!drag) return;
-    if (drag.ghost) drag.ghost.remove();
-    tiles[drag.i].classList.remove('ls-tile-lifted');
-    boxNodes.forEach((box) => box.classList.remove('ls-box-over'));
-    drag = null;
   }
 
   // ---------- Hints and judging ----------
@@ -349,9 +287,7 @@ export function render(container, puzzle, onDone) {
       ? 'Not yet! The green letters are in the right place.'
       : 'Not yet! Try a different order.';
     boxes = boxes.map((b, k) => (state.locked[k] ? b : null));
-    boxRow.classList.remove('np-wiggle');
-    void boxRow.offsetWidth; // restart the wiggle
-    boxRow.classList.add('np-wiggle');
+    wiggle(boxRow);
     busy = false;
     draw();
   }

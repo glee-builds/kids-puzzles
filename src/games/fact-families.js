@@ -9,6 +9,7 @@
 // facts together. Three houses make a street.
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage, wiggle, dragOrTap } from '../ui.js';
 
 export const HOUSES = 3;
 export const WINDOWS = ['+', '+', '-', '-'];
@@ -172,14 +173,6 @@ export function verify(puzzle) {
 
 const CHEERS = ['Lights on!', 'True fact!', 'Yes!', 'Bright idea!'];
 const PAUSE = 700; // ms to show a right or wrong fact before clearing it
-const DRAG_START = 8; // px a finger moves before a tap becomes a drag
-
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
 
 /** "15-7=8" -> "15 − 7 = 8" */
 const pretty = (fact) => fact.replace(/([+\-=])/g, ' $1 ').replace('-', '−');
@@ -190,7 +183,6 @@ export function render(container, puzzle, onDone) {
   let viewHouse = 0;          // the house on screen (stays on a lit house until "Next")
   let boxes = [null, null, null]; // roof index (0 whole, 1 and 2 parts) in each box
   let busy = false;           // true while a fact is being judged
-  let drag = null;
   let cheerCount = 0;
 
   container.replaceChildren();
@@ -206,14 +198,14 @@ export function render(container, puzzle, onDone) {
   const house = make('div', 'ff-house');
   const roof = make('div', 'ff-roof');
   const tiles = [0, 1, 2].map((i) => {
-    const tile = make('button', i === 0 ? 'ff-num ff-num-whole' : 'ff-num');
-    tile.type = 'button';
-    tile.addEventListener('pointerdown', (event) => startDrag(event, i));
-    tile.addEventListener('pointermove', moveDrag);
-    tile.addEventListener('pointerup', endDrag);
-    tile.addEventListener('pointercancel', cancelDrag);
-    // A keyboard press (no pointer) places the number too.
-    tile.addEventListener('click', (event) => { if (event.detail === 0) placeFirstEmpty(i); });
+    const tile = button(i === 0 ? 'ff-num ff-num-whole' : 'ff-num');
+    dragOrTap(tile, {
+      canStart: () => canPlay() && !boxes.includes(i),
+      targets: () => boxNodes,
+      onDrop: (k) => place(i, k),
+      onTap: () => placeFirstEmpty(i),
+      classes: { ghost: 'ff-ghost', lifted: 'ff-num-lifted', over: 'ff-box-over' },
+    });
     roof.append(tile);
     return tile;
   });
@@ -229,9 +221,7 @@ export function render(container, puzzle, onDone) {
   const fact = make('div', 'ff-fact');
   const op = make('span', 'ff-op');
   const boxNodes = [0, 1, 2].map((k) => {
-    const box = make('button', 'ff-box');
-    box.type = 'button';
-    box.addEventListener('click', () => sendBack(k));
+    const box = button('ff-box', '', () => sendBack(k));
     return box;
   });
   fact.append(boxNodes[0], op, boxNodes[1], make('span', 'ff-op', '='), boxNodes[2]);
@@ -246,19 +236,14 @@ export function render(container, puzzle, onDone) {
   house.append(roof, body);
 
   const promptLine = make('p', 'ff-prompt');
-  const message = make('p', 'ff-message');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('ff-message');
 
-  const clearButton = make('button', 'lw-button ff-action', 'Clear');
-  clearButton.type = 'button';
-  clearButton.addEventListener('click', () => {
+  const clearButton = button('lw-button ff-action', 'Clear', () => {
     if (busy) return;
     boxes = [null, null, null];
     draw();
   });
-  const nextButton = make('button', 'lw-button lw-enter ff-action', 'Next house →');
-  nextButton.type = 'button';
-  nextButton.addEventListener('click', () => {
+  const nextButton = button('lw-button lw-enter ff-action', 'Next house →', () => {
     viewHouse = state.house;
     message.textContent = '';
     draw();
@@ -298,54 +283,6 @@ export function render(container, puzzle, onDone) {
     draw();
   }
 
-  function boxAt(x, y) {
-    const hit = document.elementFromPoint(x, y);
-    const box = hit && hit.closest('.ff-box');
-    return box && boxNodes.includes(box) ? box : null;
-  }
-
-  function startDrag(event, i) {
-    if (!canPlay() || boxes.includes(i)) return;
-    event.preventDefault();
-    drag = { i, x: event.clientX, y: event.clientY, id: event.pointerId, moved: false, ghost: null };
-    try { tiles[i].setPointerCapture(event.pointerId); } catch { /* fine without it */ }
-  }
-
-  function moveDrag(event) {
-    if (!drag || event.pointerId !== drag.id) return;
-    if (!drag.moved) {
-      if (Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < DRAG_START) return;
-      drag.moved = true;
-      drag.ghost = make('div', 'ff-ghost', tiles[drag.i].textContent);
-      document.body.append(drag.ghost);
-      tiles[drag.i].classList.add('ff-num-lifted');
-    }
-    drag.ghost.style.left = `${event.clientX}px`;
-    drag.ghost.style.top = `${event.clientY}px`;
-    const over = boxAt(event.clientX, event.clientY);
-    boxNodes.forEach((box) => box.classList.toggle('ff-box-over', box === over));
-  }
-
-  function endDrag(event) {
-    if (!drag || event.pointerId !== drag.id) return;
-    const { i, moved } = drag;
-    cancelDrag();
-    if (!moved) {
-      placeFirstEmpty(i);
-      return;
-    }
-    const box = boxAt(event.clientX, event.clientY);
-    if (box) place(i, boxNodes.indexOf(box));
-  }
-
-  function cancelDrag() {
-    if (!drag) return;
-    if (drag.ghost) drag.ghost.remove();
-    tiles[drag.i].classList.remove('ff-num-lifted');
-    boxNodes.forEach((box) => box.classList.remove('ff-box-over'));
-    drag = null;
-  }
-
   // ---------- Judging a fact ----------
 
   function submit() {
@@ -369,9 +306,7 @@ export function render(container, puzzle, onDone) {
       message.textContent = result === 'repeat'
         ? 'You made that one! Switch the order.'
         : `Not quite. ${hint(state)}`;
-      fact.classList.remove('np-wiggle');
-      void fact.offsetWidth; // restart the wiggle
-      fact.classList.add('np-wiggle');
+      wiggle(fact);
     }
 
     setTimeout(() => {

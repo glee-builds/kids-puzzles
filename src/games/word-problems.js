@@ -10,6 +10,7 @@
 // answer, so an answer is never wrong.
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage } from '../ui.js';
 
 export const PER_DAY = 3;
 export const MAX_TRIES = 3; // after this many misses the answer fills itself in
@@ -222,13 +223,6 @@ export function hint(state) {
 
 const CHEERS = ['You thought it through!', 'Great thinking!', 'You got it!', 'Nice work!'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -242,13 +236,11 @@ export function render(container, puzzle, onDone) {
   const story = make('p', 'wp-story');
   const ask = make('p', 'wp-ask');
   const entry = make('p', 'wp-entry');
-  const message = make('p', 'wp-message');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('wp-message');
 
   const pad = make('div', 'np-pad wp-pad');
   for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
-    const key = make('button', 'np-key', label);
-    key.type = 'button';
+    const key = button('np-key', label);
     if (label === 'Check') {
       key.classList.add('np-key-check');
       key.addEventListener('click', submit);
@@ -261,9 +253,7 @@ export function render(container, puzzle, onDone) {
     pad.append(key);
   }
 
-  const nextButton = make('button', 'button wp-next');
-  nextButton.type = 'button';
-  nextButton.addEventListener('click', goNext);
+  const nextButton = button('button wp-next', '', goNext);
 
   container.append(count, story, ask, entry, message, pad, nextButton);
 

@@ -11,6 +11,7 @@
 // doesn't spell anything from SKIP by accident.
 
 import { createRandom, hashString } from '../seed.js';
+import { make, button, liveMessage, trace } from '../ui.js';
 
 export const SIZE = 15;
 export const WORDS_PER_DAY = 10;
@@ -199,13 +200,6 @@ export function hint(state) {
 // Trace across or down with a finger; the trace snaps to a straight line.
 // ---------------------------------------------------------------------------
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -217,8 +211,7 @@ export function render(container, puzzle, onDone) {
   container.classList.add('ws');
 
   const title = make('h2', 'ws-theme', puzzle.theme);
-  const message = make('p', 'ws-message', 'Trace a word across or down.');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('ws-message', 'Trace a word across or down.');
 
   const grid = make('div', 'ws-grid');
   const cells = puzzle.grid.map((row, r) => row.map((ch, c) => {
@@ -236,9 +229,7 @@ export function render(container, puzzle, onDone) {
     return [word, li];
   }));
 
-  const hintButton = make('button', 'lw-button ws-hint', 'Hint');
-  hintButton.type = 'button';
-  hintButton.addEventListener('click', () => {
+  const hintButton = button('lw-button ws-hint', 'Hint', () => {
     const result = hint(state);
     if (!result.word) return;
     state = result.state;
@@ -251,29 +242,17 @@ export function render(container, puzzle, onDone) {
 
   container.append(title, message, grid, list, hintButton);
 
-  function squareAt(x, y) {
-    const hit = document.elementFromPoint(x, y);
-    const cell = hit && hit.closest('.ws-cell');
-    return cell && grid.contains(cell) ? [Number(cell.dataset.r), Number(cell.dataset.c)] : null;
-  }
-
-  grid.addEventListener('pointerdown', (event) => {
-    if (state.status !== 'playing') return;
-    event.preventDefault();
-    anchor = squareAt(event.clientX, event.clientY);
-    if (!anchor) return;
-    try { grid.setPointerCapture(event.pointerId); } catch { /* fine without it */ }
-    picked = [anchor];
-    draw();
-  });
-
-  grid.addEventListener('pointermove', (event) => {
-    if (!anchor) return;
-    const square = squareAt(event.clientX, event.clientY);
-    if (square) {
+  trace(grid, {
+    onStart(square) {
+      if (state.status !== 'playing') return false;
+      anchor = square;
+      return true;
+    },
+    onMove(square) {
       picked = lineBetween(anchor, square);
       draw();
-    }
+    },
+    onEnd: finishTrace,
   });
 
   function finishTrace() {
@@ -301,8 +280,6 @@ export function render(container, puzzle, onDone) {
       onDone({ status: state.status });
     }
   }
-  grid.addEventListener('pointerup', finishTrace);
-  grid.addEventListener('pointercancel', finishTrace);
 
   function draw() {
     const foundCells = new Set();

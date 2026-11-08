@@ -10,6 +10,7 @@
 // repeats until the whole list has been used.
 
 import { createRandom, hashString } from '../seed.js';
+import { make, button, liveMessage } from '../ui.js';
 
 export const WORDS_PER_DAY = 2;
 export const SENTENCES = 3;
@@ -136,13 +137,6 @@ export function hint(state) {
 
 const CHEERS = ['You used the clues!', 'Word detective!', 'You got it!', 'Great reading!'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Text with one word marked, as nodes. */
 function markWord(text, word) {
   const out = [];
@@ -167,11 +161,8 @@ export function render(container, puzzle, onDone) {
   const card = make('div', 'wc-card');
   const ask = make('p', 'wc-ask');
   const choices = make('div', 'wc-choices');
-  const message = make('p', 'wc-message');
-  message.setAttribute('aria-live', 'polite');
-  const nextButton = make('button', 'button wc-next');
-  nextButton.type = 'button';
-  nextButton.addEventListener('click', goNext);
+  const message = liveMessage('wc-message');
+  const nextButton = button('button wc-next', '', goNext);
 
   container.append(count, card, ask, choices, message, nextButton);
 
@@ -219,19 +210,18 @@ export function render(container, puzzle, onDone) {
 
     choices.replaceChildren();
     for (const option of step.options) {
-      const button = make('button', 'wc-choice', option);
-      button.type = 'button';
+      const choice = button('wc-choice', option);
       const right = state.done && option === answerFor(puzzle, step);
       if (right) {
-        button.classList.add('wc-right');
-        button.prepend('✓ ');
+        choice.classList.add('wc-right');
+        choice.prepend('✓ ');
       } else if (state.tried.includes(option)) {
-        button.classList.add('wc-tried');
-        button.prepend('↺ ');
+        choice.classList.add('wc-tried');
+        choice.prepend('↺ ');
       }
-      button.disabled = state.done || state.tried.includes(option);
-      button.addEventListener('click', () => choose(option));
-      choices.append(button);
+      choice.disabled = state.done || state.tried.includes(option);
+      choice.addEventListener('click', () => choose(option));
+      choices.append(choice);
     }
 
     nextButton.hidden = !state.done;

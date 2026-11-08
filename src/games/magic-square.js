@@ -9,6 +9,7 @@
 // "0-0" is the top-left square, "2-2" is the bottom-right.
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage, wiggle } from '../ui.js';
 
 export const SIZE = 3;
 export const BLANKS = 4;
@@ -205,13 +206,6 @@ export function verify(puzzle) {
 
 const CHEERS = ['Yes!', 'Great adding!', 'You got it!', 'Nice work!', 'Correct!'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -229,20 +223,16 @@ export function render(container, puzzle, onDone) {
   const grid = make('div', 'ms-grid');
   const squares = {};
   for (const id of allCells()) {
-    const square = make('button', 'ms-cell');
-    square.type = 'button';
-    square.addEventListener('click', () => select(id));
+    const square = button('ms-cell', '', () => select(id));
     grid.append(square);
     squares[id] = square;
   }
 
-  const message = make('p', 'ms-message', 'Tap a ? square and type its number.');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('ms-message', 'Tap a ? square and type its number.');
 
   const pad = make('div', 'np-pad');
   for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
-    const key = make('button', 'np-key', label);
-    key.type = 'button';
+    const key = button('np-key', label);
     if (label === 'Check') {
       key.classList.add('np-key-check');
       key.addEventListener('click', submit);
@@ -312,9 +302,7 @@ export function render(container, puzzle, onDone) {
     } else {
       message.textContent = `Not quite. ${hint(state, cell)}`;
       highlight = hintLine(state, cell) || [];
-      squares[cell].classList.remove('np-wiggle');
-      void squares[cell].offsetWidth; // restart the wiggle animation
-      squares[cell].classList.add('np-wiggle');
+      wiggle(squares[cell]);
     }
     draw();
 

@@ -10,6 +10,7 @@
 // repeats until the whole list has been used.
 
 import { createRandom, hashString } from '../seed.js';
+import { make, button, liveMessage } from '../ui.js';
 
 export const PER_DAY = 4;
 export const FIND_TRIES = 2; // after this many wrong taps the wrong word is shown
@@ -130,13 +131,6 @@ export function hint(state) {
 
 const CHEERS = ['You fixed it!', 'Sharp eyes!', 'Great editing!', 'You got it!'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -156,11 +150,8 @@ export function render(container, puzzle, onDone) {
   const line = make('div', 'fs-words');
   const ask = make('p', 'fs-ask');
   const choices = make('div', 'fs-choices');
-  const message = make('p', 'fs-message');
-  message.setAttribute('aria-live', 'polite');
-  const nextButton = make('button', 'button fs-next');
-  nextButton.type = 'button';
-  nextButton.addEventListener('click', goNext);
+  const message = liveMessage('fs-message');
+  const nextButton = button('button fs-next', '', goNext);
 
   container.append(talk, count, line, ask, choices, message, nextButton);
 
@@ -238,18 +229,17 @@ export function render(container, puzzle, onDone) {
     choices.replaceChildren();
     if (state.phase !== 'find') {
       for (const option of item.options) {
-        const button = make('button', 'wc-choice', option);
-        button.type = 'button';
+        const choice = button('wc-choice', option);
         if (state.phase === 'fixed' && option === item.fix) {
-          button.classList.add('wc-right');
-          button.prepend('✓ ');
+          choice.classList.add('wc-right');
+          choice.prepend('✓ ');
         } else if (state.tried.includes(option)) {
-          button.classList.add('wc-tried');
-          button.prepend('↺ ');
+          choice.classList.add('wc-tried');
+          choice.prepend('↺ ');
         }
-        button.disabled = state.phase === 'fixed' || state.tried.includes(option);
-        button.addEventListener('click', () => pick(option));
-        choices.append(button);
+        choice.disabled = state.phase === 'fixed' || state.tried.includes(option);
+        choice.addEventListener('click', () => pick(option));
+        choices.append(choice);
       }
     }
 

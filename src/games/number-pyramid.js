@@ -10,6 +10,7 @@
 // "3-0" is the top brick.
 
 import { createRandom } from '../seed.js';
+import { make, button, liveMessage, wiggle } from '../ui.js';
 
 export const LEVEL_SIZES = [4, 3, 2, 1];
 export const MIN_TOP = 40;
@@ -220,13 +221,6 @@ export function verify(puzzle) {
 
 const CHEERS = ['Yes!', 'Great adding!', 'You got it!', 'Nice work!', 'Correct!'];
 
-function make(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
 /** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -244,23 +238,19 @@ export function render(container, puzzle, onDone) {
     const row = make('div', 'np-row');
     for (let index = 0; index < LEVEL_SIZES[level]; index++) {
       const id = cellId(level, index);
-      const brick = make('button', 'np-brick');
-      brick.type = 'button';
-      brick.addEventListener('click', () => select(id));
+      const brick = button('np-brick', '', () => select(id));
       row.append(brick);
       bricks[id] = brick;
     }
     pyramid.append(row);
   }
 
-  const message = make('p', 'np-message', 'Tap a ? brick and type its number.');
-  message.setAttribute('aria-live', 'polite');
+  const message = liveMessage('np-message', 'Tap a ? brick and type its number.');
 
   // Number pad.
   const pad = make('div', 'np-pad');
   for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
-    const key = make('button', 'np-key', label);
-    key.type = 'button';
+    const key = button('np-key', label);
     if (label === 'Check') {
       key.classList.add('np-key-check');
       key.addEventListener('click', submit);
@@ -328,9 +318,7 @@ export function render(container, puzzle, onDone) {
       selectNext();
     } else {
       message.textContent = `Not quite. ${hint(state, cell)}`;
-      bricks[cell].classList.remove('np-wiggle');
-      void bricks[cell].offsetWidth; // restart the wiggle animation
-      bricks[cell].classList.add('np-wiggle');
+      wiggle(bricks[cell]);
     }
     draw();
 
