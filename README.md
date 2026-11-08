@@ -13,3 +13,13 @@ python3 -m http.server 8000
 ```
 
 Then open http://localhost:8000 in a browser. Press `Ctrl+C` in the terminal to stop the server.
+
+## Run the tests
+
+From this folder, run:
+
+```bash
+node --test
+```
+
+This uses Node's built-in test runner. It finds every `*.test.js` file in `tests/` and reports which checks pass.
