@@ -42,6 +42,26 @@
   box-sizing: border-box;
 }
 
+/* Andika: a font made for children learning to read, with the "a" and "g"
+   kids learn to write. The files live in this repo (assets/fonts, with its
+   license), so there are still no outside network requests. Weights above
+   700 use the bold file. */
+@font-face {
+  font-family: "Andika";
+  src: url("assets/fonts/andika-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Andika";
+  src: url("assets/fonts/andika-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 html,
 body {
   margin: 0;
@@ -50,9 +70,13 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  /* System fonts only: no outside network requests. */
-  font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: "Andika", ui-rounded, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-text-size-adjust: 100%;
+}
+
+/* Buttons don't pick up the page font on their own. */
+button {
+  font-family: inherit;
 }
 
 /* ---------- Splash ---------- */
