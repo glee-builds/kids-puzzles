@@ -7,15 +7,20 @@
 
 import { dateKey, seedFor } from './seed.js';
 import * as wordGuess from './games/word-guess.js';
+import * as numberPyramid from './games/number-pyramid.js';
 import * as progressStore from './progress.js';
 
 const today = dateKey();
 let progress = progressStore.load();
 
+// Playable games, by the name used in the address and in saved progress.
+const GAMES = ['mystery-word', 'number-pyramid'];
+
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
   '': document.getElementById('home'),
   'mystery-word': document.getElementById('view-mystery-word'),
+  'number-pyramid': document.getElementById('view-number-pyramid'),
 };
 
 // Games are started the first time they are opened, then kept, so
@@ -36,9 +41,10 @@ function updateHome() {
   streak.textContent = streakText(days);
   streak.classList.toggle('streak-on', days > 0);
 
-  if (progressStore.isFinished(progress, today, 'mystery-word')) {
-    const status = document.getElementById('status-mystery-word');
-    status.textContent = 'Done ✓';
+  for (const game of GAMES) {
+    if (progressStore.isFinished(progress, today, game)) {
+      document.getElementById(`status-${game}`).textContent = 'Done ✓';
+    }
   }
 }
 
@@ -97,8 +103,15 @@ async function startMysteryWord() {
   }
 }
 
+function startNumberPyramid() {
+  const game = document.getElementById('game-number-pyramid');
+  const puzzle = numberPyramid.generate(seedFor(today, 'number-pyramid'));
+  numberPyramid.render(game, puzzle, () => finishGame('number-pyramid'));
+}
+
 const STARTERS = {
   'mystery-word': startMysteryWord,
+  'number-pyramid': startNumberPyramid,
 };
 
 // ---------- Moving between screens ----------
@@ -110,6 +123,8 @@ function show() {
   for (const [viewName, view] of Object.entries(VIEWS)) {
     view.hidden = viewName !== current;
   }
+  // The celebration card belongs to the game that just finished.
+  document.getElementById('done').hidden = true;
   window.scrollTo(0, 0);
 
   if (STARTERS[current] && !started.has(current)) {
