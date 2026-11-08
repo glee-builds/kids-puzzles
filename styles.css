@@ -208,12 +208,12 @@ body {
   text-align: center;
 }
 
-.card-word {
+.card-play {
   border-color: var(--here);
   box-shadow: 0 4px 0 var(--here);
 }
 
-.card-word:active {
+.card-play:active {
   transform: translateY(3px);
   box-shadow: 0 1px 0 var(--here);
 }
@@ -233,7 +233,7 @@ body {
   color: var(--muted);
 }
 
-.card-word .card-status {
+.card-play .card-status {
   color: var(--here);
 }
 
@@ -271,32 +271,170 @@ body {
   font-weight: 800;
 }
 
-.pairs {
-  display: grid;
-  grid-template-columns: 26px 26px;
-  gap: 6px;
+.bricks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
-.pairs span {
+.brick-row {
+  display: flex;
+  gap: 4px;
+}
+
+.brick-row span {
+  width: 30px;
   height: 26px;
   border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: var(--go);
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.brick-row:first-child span {
+  background: var(--here);
+}
+
+.square-art {
+  display: grid;
+  grid-template-columns: repeat(3, 17px);
+  gap: 3px;
+}
+
+.square-art span {
+  height: 17px;
+  border-radius: 4px;
   background: var(--elsewhere);
 }
 
-.pairs span:nth-child(2),
-.pairs span:nth-child(3) {
-  background: var(--go);
+.square-art span:nth-child(odd) {
+  background: var(--star);
 }
 
-.maze {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
-  background:
-    linear-gradient(var(--text), var(--text)) 14px 0 / 5px 38px no-repeat,
-    linear-gradient(var(--text), var(--text)) 32px 18px / 5px 38px no-repeat,
-    var(--surface);
-  border: 5px solid var(--text);
+/* ---------- Number Pyramid ---------- */
+
+.np-pyramid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: auto 0;
+}
+
+.np-row {
+  display: flex;
+  gap: 8px;
+}
+
+.np-brick {
+  width: clamp(64px, 19vw, 80px);
+  height: clamp(48px, 7.5dvh, 60px);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+
+.np-given {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.np-blank {
+  border-style: dashed;
+  border-color: var(--muted);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.np-selected {
+  border-style: solid;
+  border-width: 3px;
+  border-color: var(--go);
+  color: var(--text);
+  background: var(--surface);
+}
+
+/* Found: teal with a check mark. Shown after 3 tries: purple, no check. */
+.np-found {
+  position: relative;
+  background: var(--here);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.np-found::after {
+  content: "✓";
+  position: absolute;
+  top: 3px;
+  right: 6px;
+  font-size: 0.7rem;
+}
+
+.np-shown {
+  background: var(--elsewhere);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.np-wiggle {
+  animation: wiggle 300ms ease-in-out;
+}
+
+.np-message {
+  min-height: 1.5em;
+  margin: 10px 0;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.np-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.np-key {
+  height: clamp(48px, 7dvh, 58px);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.np-key:active {
+  transform: translateY(2px);
+}
+
+.np-key-check {
+  background: var(--go);
+  border-color: transparent;
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.np-finished .np-pad {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
 }
 
 /* ---------- Mystery Word board ---------- */
@@ -569,6 +707,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .wg-tile-typed,
+  .np-wiggle,
   .done-card,
   .done-star {
     animation: none;
