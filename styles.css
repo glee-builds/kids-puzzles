@@ -81,6 +81,8 @@ button {
 
 /* ---------- Splash ---------- */
 
+/* The splash fades out by itself (CSS only), so it can never get stuck
+   over the app, even if the app's code fails to load. */
 .splash {
   position: fixed;
   inset: 0;
@@ -91,12 +93,15 @@ button {
   justify-content: center;
   gap: 8px;
   background: var(--water);
-  transition: opacity 400ms ease;
+  pointer-events: none;
+  animation: splash-out 400ms ease 700ms forwards;
 }
 
-.splash-out {
-  opacity: 0;
-  pointer-events: none;
+@keyframes splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 .splash-frog {
@@ -108,6 +113,26 @@ button {
   font-size: 2.4rem;
   font-weight: 800;
   color: var(--text);
+}
+
+/* Shown only if the app's code didn't start (see the script in index.html). */
+.load-problem {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 110;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 2px solid var(--go);
+  text-align: center;
+  font-weight: 700;
+}
+
+.load-problem[hidden] {
+  display: none;
 }
 
 /* ---------- Page layout ---------- */
@@ -1911,6 +1936,10 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .splash {
+    animation: splash-out 1ms linear 300ms forwards;
+  }
+
   .wg-tile-typed,
   .np-wiggle,
   .nl-frog,

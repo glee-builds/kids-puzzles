@@ -242,6 +242,16 @@
   <div id="confetti" class="confetti" aria-hidden="true"></div>
 
   <noscript>This puzzle needs JavaScript turned on.</noscript>
+  <p id="load-problem" class="load-problem" role="alert" hidden>
+    Lily Pad didn't finish loading. Pull down to refresh, or close it and open it again.
+  </p>
   <script type="module" src="src/app.js"></script>
+  <script>
+    // If the app's code hasn't started after 5 seconds (for example, the
+    // phone kept an old copy of a file after an update), say so kindly.
+    setTimeout(function () {
+      if (!window.lilyPadStarted) document.getElementById('load-problem').hidden = false;
+    }, 5000);
+  </script>
 </body>
 </html>

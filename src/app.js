@@ -273,19 +273,9 @@ window.addEventListener('hashchange', show);
 updateHome();
 show();
 
-// ---------- Splash ----------
+// ---------- Started ----------
 
-// The splash covers the screen while the app starts. Keep it up long
-// enough to see (about 0.7 seconds), then fade it out.
-const SPLASH_MS = 700;
-function hideSplash() {
-  const splash = document.getElementById('splash');
-  if (!splash) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    splash.remove();
-    return;
-  }
-  splash.classList.add('splash-out');
-  setTimeout(() => splash.remove(), 400);
-}
-setTimeout(hideSplash, SPLASH_MS);
+// Tells the check in index.html that the app's code loaded and ran. The
+// splash fades out on its own (styles.css); this just tidies it away.
+window.lilyPadStarted = true;
+setTimeout(() => document.getElementById('splash')?.remove(), 1500);
