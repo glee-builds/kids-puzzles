@@ -99,6 +99,187 @@ body {
   color: var(--muted);
 }
 
+/* ---------- Screens ---------- */
+
+.view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.view[hidden] {
+  display: none;
+}
+
+.game-top {
+  position: relative;
+}
+
+/* The title row is as tall as the back button, so the legend sits below it. */
+.game-top h1 {
+  margin: 0 0 4px;
+  line-height: 48px;
+}
+
+/* Back button: a 48px circle in the top-left corner. */
+.back {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 12px 20px;
+  min-height: 48px;
+  border-radius: 12px;
+  background: var(--go);
+  color: #ffffff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+/* ---------- Home: pick a puzzle ---------- */
+
+.home-top {
+  padding: 16px 0 8px;
+}
+
+.home-top h1 {
+  font-size: 2.2rem;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--muted);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: auto 0;
+  padding: 8px 0 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px 8px 14px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  text-align: center;
+}
+
+.card-word {
+  border-color: var(--here);
+  box-shadow: 0 4px 0 var(--here);
+}
+
+.card-word:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--here);
+}
+
+.card-soon {
+  opacity: 0.55;
+}
+
+.card-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.card-status {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.card-word .card-status {
+  color: var(--here);
+}
+
+/* Small drawings on each card, made from shapes (no image files). */
+.card-art {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.mini {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.mini-a { background: var(--here); transform: rotate(-6deg); }
+.mini-q { background: var(--elsewhere); transform: rotate(6deg); }
+
+.wheel {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 6px dotted var(--go);
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.pairs {
+  display: grid;
+  grid-template-columns: 26px 26px;
+  gap: 6px;
+}
+
+.pairs span {
+  height: 26px;
+  border-radius: 6px;
+  background: var(--elsewhere);
+}
+
+.pairs span:nth-child(2),
+.pairs span:nth-child(3) {
+  background: var(--go);
+}
+
+.maze {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background:
+    linear-gradient(var(--text), var(--text)) 14px 0 / 5px 38px no-repeat,
+    linear-gradient(var(--text), var(--text)) 32px 18px / 5px 38px no-repeat,
+    var(--surface);
+  border: 5px solid var(--text);
+}
+
 /* ---------- Mystery Word board ---------- */
 
 .wg {

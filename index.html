@@ -9,24 +9,73 @@
 </head>
 <body>
   <div class="app">
-    <header class="top">
-      <h1>Mystery Word</h1>
-      <p class="legend">
-        <span class="legend-item"><span class="swatch mark-here" aria-hidden="true"></span>right spot</span>
-        <span class="legend-item"><span class="swatch mark-elsewhere" aria-hidden="true"></span>other spot</span>
-        <span class="legend-item"><span class="swatch mark-none" aria-hidden="true"></span>not in word</span>
-      </p>
-    </header>
 
-    <main id="game" class="game">
-      <p class="loading">Getting today's puzzle…</p>
-    </main>
+    <!-- Home: pick a puzzle -->
+    <section id="home" class="view">
+      <header class="top home-top">
+        <h1>Puzzle Time</h1>
+        <p class="subtitle">Pick a puzzle!</p>
+      </header>
 
-    <section id="done" class="done" hidden>
-      <div class="done-star" aria-hidden="true">★</div>
-      <p class="done-title">All done for today!</p>
-      <p class="done-note">Come back tomorrow for a new mystery word.</p>
+      <nav class="cards" aria-label="Puzzles">
+        <a class="card card-word" href="#mystery-word">
+          <span class="card-art" aria-hidden="true">
+            <span class="mini mini-a">A</span><span class="mini mini-q">?</span>
+          </span>
+          <span class="card-name">Mystery Word</span>
+          <span class="card-status" id="status-mystery-word">Play</span>
+        </a>
+
+        <div class="card card-soon" aria-disabled="true">
+          <span class="card-art" aria-hidden="true">
+            <span class="wheel"><span>e</span></span>
+          </span>
+          <span class="card-name">Letter Wheel</span>
+          <span class="card-status">Coming soon</span>
+        </div>
+
+        <div class="card card-soon" aria-disabled="true">
+          <span class="card-art" aria-hidden="true">
+            <span class="pairs"><span></span><span></span><span></span><span></span></span>
+          </span>
+          <span class="card-name">Tile Match</span>
+          <span class="card-status">Coming soon</span>
+        </div>
+
+        <div class="card card-soon" aria-disabled="true">
+          <span class="card-art" aria-hidden="true">
+            <span class="maze"></span>
+          </span>
+          <span class="card-name">Maze</span>
+          <span class="card-status">Coming soon</span>
+        </div>
+      </nav>
     </section>
+
+    <!-- Mystery Word -->
+    <section id="view-mystery-word" class="view" hidden>
+      <header class="top game-top">
+        <a class="back" href="#" aria-label="Back to puzzles">←</a>
+        <h1>Mystery Word</h1>
+        <p class="legend">
+          <span class="legend-item"><span class="swatch mark-here" aria-hidden="true"></span>right spot</span>
+          <span class="legend-item"><span class="swatch mark-elsewhere" aria-hidden="true"></span>other spot</span>
+          <span class="legend-item"><span class="swatch mark-none" aria-hidden="true"></span>not in word</span>
+        </p>
+      </header>
+
+      <main id="game" class="game">
+        <p class="loading">Getting today's puzzle…</p>
+      </main>
+
+      <section id="done" class="done" hidden>
+        <div class="done-star" aria-hidden="true">★</div>
+        <p class="done-title">You did it!</p>
+        <p class="done-note">Come back tomorrow for a new mystery word.</p>
+        <a class="button" href="#">Pick another puzzle</a>
+      </section>
+    </section>
+
   </div>
 
   <noscript>This puzzle needs JavaScript turned on.</noscript>
