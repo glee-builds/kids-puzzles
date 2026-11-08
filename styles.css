@@ -426,6 +426,111 @@ body {
   font-size: 1.6rem;
 }
 
+/* ---------- Skip Count Maze ---------- */
+
+.skip-art {
+  display: flex;
+  gap: 3px;
+}
+
+.skip-art span {
+  width: 20px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  background: var(--here);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.sk-message {
+  min-height: 2.6em;
+  margin: 4px 0 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.sk-grid {
+  --cell: min(calc((100vw - 40px) / 5), calc(56dvh / 5), 68px);
+  display: grid;
+  grid-template-columns: repeat(5, var(--cell));
+  grid-auto-rows: var(--cell);
+  gap: 4px;
+  justify-content: center;
+  margin: auto 0;
+  touch-action: none; /* tracing must not scroll the page */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.sk-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: calc(var(--cell) * 0.38);
+  font-weight: 800;
+}
+
+.sk-path {
+  border-color: var(--here);
+  background: var(--here);
+  color: #ffffff;
+}
+
+/* The head of the trail: where to go on from. */
+.sk-head {
+  box-shadow: 0 0 0 3px var(--text);
+}
+
+/* The goal wears a star in its corner. */
+.sk-goal::after {
+  content: "★";
+  position: absolute;
+  top: 1px;
+  right: 4px;
+  font-size: calc(var(--cell) * 0.26);
+  color: var(--star);
+}
+
+.sk-path.sk-goal::after {
+  color: #ffffff;
+}
+
+.sk-glow {
+  border-color: var(--star);
+  background: color-mix(in srgb, var(--star) 45%, var(--surface));
+}
+
+/* A wrong square: purple with a cross, never color alone. */
+.sk-wrong {
+  border-color: var(--elsewhere);
+  background: color-mix(in srgb, var(--elsewhere) 25%, var(--surface));
+}
+
+.sk-wrong::before {
+  content: "✗";
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  font-size: calc(var(--cell) * 0.24);
+  color: var(--elsewhere);
+}
+
+.sk-hint {
+  margin: 14px auto 0;
+  min-width: 140px;
+}
+
+.sk-finished .sk-hint {
+  opacity: 0.5;
+}
+
 /* ---------- Number Line Hop ---------- */
 
 .nl-dots {
