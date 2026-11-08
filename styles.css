@@ -547,6 +547,161 @@ body {
   pointer-events: none;
 }
 
+.house-art {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.house-art-roof {
+  width: 52px;
+  height: 22px;
+  background: var(--go);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.house-art-body {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  width: 40px;
+  padding: 5px 0;
+  background: var(--elsewhere);
+}
+
+.house-art-body span {
+  width: 11px;
+  height: 11px;
+  background: var(--star);
+}
+
+/* ---------- Fact Families ---------- */
+
+.ff-street {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 0 0 4px;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.ff-street-house { color: var(--border); }
+.ff-street-now { color: var(--muted); }
+.ff-street-lit { color: var(--star); }
+
+.ff-house {
+  width: min(320px, 100%);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* The roof is a triangle: the whole number on top, the two parts below. */
+.ff-roof {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  background: var(--go);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  justify-items: center;
+  align-items: center;
+  padding: 26px 50px 8px;
+}
+
+.ff-num {
+  width: 62px;
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.ff-num-whole {
+  grid-column: 1 / 3;
+}
+
+.ff-num:disabled {
+  opacity: 0.45;
+}
+
+.ff-windows {
+  width: 94%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px;
+  background: var(--elsewhere);
+  border-radius: 0 0 12px 12px;
+}
+
+.ff-window {
+  min-height: 52px;
+  display: flex; /* one line: the fact and its check mark side by side */
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 8px;
+  background: #3b3355;
+  color: #b7aecb;
+  font-size: 0.98rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.ff-window-now {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 0 0 3px var(--go);
+}
+
+/* Lit: warm light and a check mark. Filled in after 3 misses: light, no check. */
+.ff-window-lit,
+.ff-window-shown {
+  background: var(--star);
+  color: #2b2440;
+}
+
+.ff-window-lit::after {
+  content: "✓";
+}
+
+.ff-window-shown {
+  opacity: 0.75;
+}
+
+.ff-house-lit .ff-windows {
+  box-shadow: 0 0 24px var(--star);
+}
+
+.ff-message {
+  min-height: 2.6em;
+  margin: 8px 0;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.ff-erase {
+  margin: 0 auto;
+  min-width: 140px;
+}
+
+.ff-finished .ff-erase {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 /* ---------- Letter Wheel ---------- */
 
 .lw-slots {
