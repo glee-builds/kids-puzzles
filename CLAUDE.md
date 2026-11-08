@@ -55,7 +55,8 @@ src/seed.js         date -> repeatable random numbers
 src/games/          one file per game
 src/ui.js           screen helpers the games share (buttons, tracing, drag-or-tap)
 data/words/         curated word lists by level (JSON)
-tests/              one test file per game, plus seed tests
+tests/              one test file per game, plus seed tests; helpers.js has
+                    everyDay, which checks every day for two years
 docs/decisions.md   decisions log
 ```
 

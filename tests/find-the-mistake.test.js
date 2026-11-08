@@ -2,14 +2,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay, dayKey } from './helpers.js';
 import {
   generate, verify, start, check, next, hint, lines, questionAnswer, current,
   PROBLEMS, MAX_TRIES, ORDER,
 } from '../src/games/find-the-mistake.js';
 
 const seedForDay = (key) => seedFor(key, 'find-the-mistake');
-const dayKey = (day) => dateKey(new Date(2026, 10, 1 + day));
 
 // 34 + 28 with the ones step wrong: 4 + 8 = 11, so the answer shows 61.
 const fixed = {
@@ -47,13 +47,13 @@ test('generate gives the same problems for the same day', () => {
 });
 
 test('every day for two years has exactly one mistake per problem, numbers 0 to 100', () => {
-  for (let day = 0; day < 730; day++) {
+  everyDay((key, day) => {
     const puzzle = generate(seedForDay(dayKey(day)));
     const result = verify(puzzle);
     assert.ok(result.ok, `${dayKey(day)}: ${result.problems.join('; ')}`);
     assert.equal(puzzle.problems.length, PROBLEMS);
     assert.deepEqual(puzzle.problems.map((p) => p.kind), ORDER);
-  }
+  });
 });
 
 test('mistakes land on every step, not always the last one', () => {

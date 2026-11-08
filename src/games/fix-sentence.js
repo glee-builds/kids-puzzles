@@ -9,7 +9,7 @@
 // The sentences are dealt in a fixed shuffled order, four a day, so none
 // repeats until the whole list has been used.
 
-import { createRandom, hashString } from '../seed.js';
+import { createRandom, dealForDay } from '../seed.js';
 import { make, button, liveMessage } from '../ui.js';
 
 export const PER_DAY = 4;
@@ -18,12 +18,7 @@ export const MAX_SENTENCE = 55; // characters
 export const MAX_WHY = 60;
 
 /** The sentences for a day number (days since a fixed start date). */
-export function sentencesForDay(items, dayNumber) {
-  const order = createRandom(hashString('fix-sentence-deck')).shuffle(items.map((_, i) => i));
-  const n = order.length;
-  const start = ((dayNumber * PER_DAY) % n + n) % n;
-  return Array.from({ length: PER_DAY }, (_, k) => items[order[(start + k) % n]]);
-}
+export const sentencesForDay = (items, dayNumber) => dealForDay(items, PER_DAY, dayNumber, 'fix-sentence');
 
 export const words = (item) => item.sentence.split(' ');
 

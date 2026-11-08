@@ -3,7 +3,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay } from './helpers.js';
 import {
   generate, verify, start, check, hint, current, storiesForDay, storyProblems, STORIES_PER_DAY,
 } from '../src/games/story-order.js';
@@ -46,11 +47,10 @@ test('no story repeats until the whole bank has been used', () => {
 });
 
 test('every day for two years makes 2 valid, mixed-up stories', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key, day) => {
     const result = verify(generate(seedForDay(key), STORIES, day));
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
-  }
+  });
 });
 
 test('verify catches a story already in order', () => {

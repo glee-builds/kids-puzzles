@@ -9,7 +9,7 @@
 // The stories are dealt in a fixed shuffled order, two a day, so none
 // repeats until the whole bank has been used.
 
-import { createRandom, hashString } from '../seed.js';
+import { createRandom, dealForDay } from '../seed.js';
 import { make, button, liveMessage, wiggle, progressDots } from '../ui.js';
 
 export const STORIES_PER_DAY = 2;
@@ -17,12 +17,7 @@ export const SENTENCES = 4;
 export const MAX_SENTENCE = 52; // characters: keeps each card to one or two lines
 
 /** The two stories for a day number (days since a fixed start date). */
-export function storiesForDay(stories, dayNumber) {
-  const order = createRandom(hashString('story-order-deck')).shuffle(stories.map((_, i) => i));
-  const n = order.length;
-  const start = ((dayNumber * STORIES_PER_DAY) % n + n) % n;
-  return Array.from({ length: STORIES_PER_DAY }, (_, k) => stories[order[(start + k) % n]]);
-}
+export const storiesForDay = (stories, dayNumber) => dealForDay(stories, STORIES_PER_DAY, dayNumber, 'story-order');
 
 /** Mix up a story's sentences: never already in order. Returns positions, e.g. [2, 0, 3, 1]. */
 function mixUp(random) {

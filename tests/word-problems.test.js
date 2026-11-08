@@ -4,7 +4,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay, dayKey } from './helpers.js';
 import {
   generate, verify, start, check, next, hint, current, pieces, worked, answerFor, textProblems,
   KINDS, PER_DAY, MAX_TRIES, PICK_TRIES,
@@ -12,7 +13,6 @@ import {
 
 const ITEMS = JSON.parse(readFileSync(new URL('../data/word-problems.json', import.meta.url), 'utf8')).problems;
 const seedForDay = (key) => seedFor(key, 'word-problems');
-const dayKey = (day) => dateKey(new Date(2026, 10, 1 + day));
 
 const fixed = {
   problems: [
@@ -46,7 +46,7 @@ test('generate gives the same problems for the same day', () => {
 });
 
 test('every day for two years: 3 valid problems, extra first, two-step second', () => {
-  for (let day = 0; day < 730; day++) {
+  everyDay((key, day) => {
     const puzzle = generate(seedForDay(dayKey(day)), ITEMS);
     const result = verify(puzzle);
     assert.ok(result.ok, `${dayKey(day)}: ${result.problems.join('; ')}`);
@@ -54,7 +54,7 @@ test('every day for two years: 3 valid problems, extra first, two-step second', 
     assert.ok(puzzle.problems[0].kind.startsWith('extra'));
     assert.ok(puzzle.problems[1].kind.startsWith('two'));
     assert.equal(new Set(puzzle.problems.map((p) => p.text)).size, PER_DAY, 'a story repeated in one day');
-  }
+  });
 });
 
 test('verify catches an answer below 1', () => {

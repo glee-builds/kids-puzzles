@@ -10,7 +10,7 @@
 // is only used if every word appears exactly once, and if the filler
 // doesn't spell anything from SKIP by accident.
 
-import { createRandom, hashString } from '../seed.js';
+import { createRandom, dealForDay } from '../seed.js';
 import { make, button, liveMessage, trace } from '../ui.js';
 
 export const SIZE = 15;
@@ -29,11 +29,7 @@ const key = (r, c) => `${r}-${c}`;
 const reverse = (text) => [...text].reverse().join('');
 
 /** The theme for a day number (days since a fixed start date). */
-export function themeForDay(themes, dayNumber) {
-  const order = createRandom(hashString('word-search-deck')).shuffle(themes.map((_, i) => i));
-  const n = order.length;
-  return themes[order[((dayNumber % n) + n) % n]];
-}
+export const themeForDay = (themes, dayNumber) => dealForDay(themes, 1, dayNumber, 'word-search')[0];
 
 /** Every place `word` can be read along a straight line, as lists of cells. */
 function findAll(grid, word, directions) {

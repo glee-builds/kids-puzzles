@@ -2,7 +2,8 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay, dayKey } from './helpers.js';
 import {
   generate, verify, start, check, hint, hintLine, workable, isSolvable, answerFor,
   LINES, BLANKS, MIN_TARGET, MAX_TARGET, MAX_TRIES,
@@ -27,19 +28,18 @@ test('generate gives the same square for the same day', () => {
 });
 
 test('every day for two years makes a valid, solvable magic square', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key) => {
     const puzzle = generate(seedForDay(key));
     const result = verify(puzzle);
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
     assert.equal(puzzle.hidden.length, BLANKS);
-  }
+  });
 });
 
 test('targets stay in range and vary from day to day', () => {
   const targets = new Set();
   for (let day = 0; day < 60; day++) {
-    const { target } = generate(seedForDay(dateKey(new Date(2026, 10, 1 + day))));
+    const { target } = generate(seedForDay(dayKey(day)));
     assert.ok(target >= MIN_TARGET && target <= MAX_TARGET, `target ${target}`);
     targets.add(target);
   }

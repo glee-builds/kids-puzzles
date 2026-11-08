@@ -4,7 +4,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { dateKey, seedFor } from '../src/seed.js';
+import { seedFor } from '../src/seed.js';
+import { everyDay } from './helpers.js';
 import {
   generate, verify, start, check, next, hint, current, itemProblems, sentencesForDay, fixedSentence,
   PER_DAY, FIND_TRIES,
@@ -48,11 +49,10 @@ test('no sentence repeats until the whole list has been used', () => {
 });
 
 test('every day for two years is valid', () => {
-  for (let day = 0; day < 730; day++) {
-    const key = dateKey(new Date(2026, 10, 1 + day));
+  everyDay((key, day) => {
     const result = verify(generate(seedForDay(key), ITEMS, day));
     assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
-  }
+  });
 });
 
 // --- playing ---
