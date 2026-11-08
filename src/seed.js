@@ -81,3 +81,13 @@ export function createRandom(seed) {
     },
   };
 }
+
+/**
+ * Every way to choose `k` items from a list, in order, e.g.
+ * combinations([a, b, c], 2) -> [[a, b], [a, c], [b, c]]. Games use it to
+ * list every set of blank squares once, then keep the ones that work.
+ */
+export function combinations(list, k) {
+  if (k === 0) return [[]];
+  return list.flatMap((item, i) => combinations(list.slice(i + 1), k - 1).map((rest) => [item, ...rest]));
+}

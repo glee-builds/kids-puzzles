@@ -8,7 +8,7 @@
 // classic 3x3 magic square pattern. Cells are named by row and column:
 // "0-0" is the top-left square, "2-2" is the bottom-right.
 
-import { createRandom } from '../seed.js';
+import { createRandom, combinations } from '../seed.js';
 import { make, button, liveMessage, wiggle } from '../ui.js';
 
 export const SIZE = 3;
@@ -71,23 +71,20 @@ export function isSolvable(hidden) {
   return hidden.every((id) => known.has(id));
 }
 
+// Every set of blank squares that can be worked out, listed once.
+const BLANK_SETS = combinations(allCells(), BLANKS).filter(isSolvable);
+
 /** Make today's magic square from a seed. */
 export function generate(seed) {
   const random = createRandom(seed);
-  for (let attempt = 0; attempt < 5000; attempt++) {
-    const step = random.pick([1, 2, 3, 4, 5]);
-    const first = random.int(1, 30);
-    const target = 3 * (first + 4 * step); // three times the middle number
-    if (target < MIN_TARGET || target > MAX_TARGET) continue;
-
-    const shape = arrange(BASE_SQUARE, random.int(0, 3), random.int(0, 1) === 1);
-    const grid = shape.map((row) => row.map((n) => first + (n - 1) * step));
-    const hidden = random.shuffle(allCells()).slice(0, BLANKS);
-    if (!isSolvable(hidden)) continue;
-
-    return { grid, target, hidden: hidden.sort() };
-  }
-  throw new Error('Could not make a magic square for this seed.');
+  // The target is 3 times the middle number (first + 4 steps), so pick the
+  // step, then a first number that keeps the target in range.
+  const step = random.pick([1, 2, 3, 4, 5]);
+  const middle = random.int(Math.max(MIN_TARGET / 3, 1 + 4 * step), Math.floor(MAX_TARGET / 3));
+  const first = middle - 4 * step;
+  const shape = arrange(BASE_SQUARE, random.int(0, 3), random.int(0, 1) === 1);
+  const grid = shape.map((row) => row.map((n) => first + (n - 1) * step));
+  return { grid, target: 3 * middle, hidden: [...random.pick(BLANK_SETS)].sort() };
 }
 
 export function answerFor(puzzle, id) {

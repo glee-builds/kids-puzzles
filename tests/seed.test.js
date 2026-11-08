@@ -2,7 +2,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dateKey, hashString, seedFor, createRandom } from '../src/seed.js';
+import { dateKey, hashString, seedFor, createRandom, combinations } from '../src/seed.js';
 
 test('dateKey formats a date as YYYY-MM-DD with leading zeros', () => {
   assert.equal(dateKey(new Date(2026, 0, 5)), '2026-01-05');
@@ -83,4 +83,10 @@ test('shuffle() keeps every item and leaves the original list alone', () => {
   const shuffled = random.shuffle(list);
   assert.deepEqual(list, [1, 2, 3, 4, 5, 6, 7, 8]);
   assert.deepEqual([...shuffled].sort(), list);
+});
+
+test('combinations lists every way to choose k items, once each', () => {
+  assert.deepEqual(combinations(['a', 'b', 'c'], 2), [['a', 'b'], ['a', 'c'], ['b', 'c']]);
+  assert.equal(combinations([1, 2, 3, 4, 5, 6, 7, 8, 9], 4).length, 126);
+  assert.deepEqual(combinations([1, 2], 0), [[]]);
 });

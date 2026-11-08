@@ -19,20 +19,18 @@ const ONES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 /** Make today's hops from a seed. */
 export function generate(seed) {
   const random = createRandom(seed);
-  for (let attempt = 0; attempt < 5000; attempt++) {
-    const start = random.int(5, 60);
-    const hops = [];
-    let at = start;
-    for (let i = 0; i < HOPS; i++) {
-      const amount = random.int(0, 1) === 0 ? random.pick(TENS) : random.pick(ONES);
-      const op = random.int(0, 2) === 0 ? '-' : '+';
-      at = op === '+' ? at + amount : at - amount;
-      hops.push({ op, amount });
-    }
-    const puzzle = { start, hops };
-    if (verify(puzzle).ok) return puzzle;
-  }
-  throw new Error('Could not make hops for this seed.');
+  // At least 2 tens hops and 2 ones hops; at least one back and one forward.
+  const sizes = random.shuffle([TENS, TENS, ONES, ONES, random.pick([TENS, ONES])]);
+  const [back, forward] = random.shuffle([0, 1, 2, 3, 4]);
+  const hops = sizes.map((choices, i) => ({
+    op: i === back ? '-' : i === forward ? '+' : random.int(0, 2) === 0 ? '-' : '+',
+    amount: random.pick(choices),
+  }));
+  // Then start where every landing spot stays between 0 and 100 (and not
+  // right at either end). There's always room: the hops spread at most 80.
+  const offsets = positions({ start: 0, hops });
+  const start = random.int(Math.max(5, MIN - Math.min(...offsets)), Math.min(95, MAX - Math.max(...offsets)));
+  return { start, hops };
 }
 
 /** Where the frog is before hop 0, after hop 0, after hop 1, and so on. */
