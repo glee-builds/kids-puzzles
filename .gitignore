@@ -1,0 +1,5 @@
+# macOS folder metadata
+.DS_Store
+
+# Node packages (we don't use any, but keep them out just in case)
+node_modules/
