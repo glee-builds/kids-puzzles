@@ -1,0 +1,29 @@
+{
+  "about": "Themes for Word Search, at about a 2nd to 3rd grade reading level. Each theme has 16 words of 3 to 8 letters. Each day uses one theme and 10 of its words.",
+  "themes": [
+    { "name": "On the Farm", "words": ["cow", "pig", "horse", "sheep", "goat", "duck", "hen", "chick", "barn", "mule", "lamb", "goose", "pony", "rooster", "turkey", "calf"] },
+    { "name": "In the Ocean", "words": ["fish", "shark", "whale", "crab", "seal", "wave", "shell", "squid", "eel", "coral", "starfish", "octopus", "dolphin", "boat", "tide", "clam"] },
+    { "name": "Weather", "words": ["rain", "snow", "wind", "cloud", "storm", "sunny", "fog", "hail", "frost", "thunder", "rainbow", "cold", "warm", "breeze", "puddle", "sleet"] },
+    { "name": "Fruit", "words": ["apple", "pear", "plum", "grape", "lemon", "lime", "peach", "mango", "kiwi", "melon", "cherry", "banana", "orange", "berry", "fig", "papaya"] },
+    { "name": "Vegetables", "words": ["corn", "peas", "bean", "carrot", "potato", "onion", "kale", "beet", "squash", "pepper", "lettuce", "celery", "garlic", "radish", "yam", "tomato"] },
+    { "name": "At School", "words": ["book", "desk", "pencil", "paper", "ruler", "glue", "chalk", "teacher", "recess", "lunch", "class", "crayon", "eraser", "math", "read", "spell"] },
+    { "name": "Outer Space", "words": ["sun", "moon", "star", "planet", "comet", "rocket", "orbit", "earth", "mars", "space", "galaxy", "crater", "saturn", "venus", "launch", "meteor"] },
+    { "name": "In the Kitchen", "words": ["pot", "pan", "spoon", "fork", "cup", "plate", "bowl", "oven", "sink", "stove", "mixer", "apron", "toast", "kettle", "napkin", "whisk"] },
+    { "name": "Bugs", "words": ["ant", "bee", "moth", "wasp", "flea", "beetle", "spider", "cricket", "ladybug", "firefly", "worm", "snail", "gnat", "hornet", "termite", "cicada"] },
+    { "name": "My Body", "words": ["arm", "leg", "hand", "foot", "head", "nose", "ear", "eye", "knee", "elbow", "chin", "neck", "toe", "thumb", "finger", "ankle"] },
+    { "name": "Sports", "words": ["ball", "bat", "goal", "kick", "swim", "run", "race", "skate", "ski", "team", "score", "soccer", "tennis", "hockey", "net", "jump"] },
+    { "name": "Colors", "words": ["red", "blue", "green", "yellow", "pink", "purple", "orange", "black", "white", "brown", "gray", "gold", "silver", "tan", "teal", "violet"] },
+    { "name": "Clothes", "words": ["hat", "cap", "coat", "sock", "shoe", "boot", "shirt", "pants", "dress", "scarf", "glove", "mitten", "jacket", "belt", "vest", "skirt"] },
+    { "name": "Music", "words": ["drum", "horn", "flute", "harp", "piano", "violin", "tuba", "song", "sing", "band", "note", "beat", "bell", "banjo", "guitar", "choir"] },
+    { "name": "Camping", "words": ["tent", "fire", "log", "map", "hike", "trail", "lake", "canoe", "lantern", "forest", "trees", "stars", "compass", "cabin", "owl", "marsh"] },
+    { "name": "Birds", "words": ["owl", "crow", "robin", "eagle", "hawk", "duck", "swan", "dove", "wren", "jay", "parrot", "pigeon", "finch", "goose", "heron", "penguin"] },
+    { "name": "Jobs", "words": ["chef", "nurse", "pilot", "farmer", "baker", "vet", "judge", "coach", "doctor", "artist", "dentist", "author", "singer", "painter", "teacher", "mayor"] },
+    { "name": "Going Places", "words": ["car", "bus", "train", "plane", "boat", "ship", "bike", "truck", "van", "taxi", "jet", "tractor", "wagon", "subway", "scooter", "rocket"] },
+    { "name": "In the Garden", "words": ["seed", "soil", "root", "stem", "leaf", "rose", "tulip", "daisy", "weed", "hose", "rake", "shovel", "sprout", "bloom", "petal", "worm"] },
+    { "name": "Pets", "words": ["dog", "cat", "fish", "bird", "frog", "hamster", "rabbit", "turtle", "mouse", "puppy", "kitten", "lizard", "parrot", "snake", "pony", "guppy"] },
+    { "name": "At the Zoo", "words": ["lion", "tiger", "bear", "zebra", "camel", "monkey", "panda", "hippo", "rhino", "giraffe", "koala", "otter", "seal", "llama", "moose", "gorilla"] },
+    { "name": "At the Beach", "words": ["sand", "sun", "wave", "towel", "shell", "bucket", "shovel", "kite", "crab", "gull", "swim", "dune", "tide", "umbrella", "surf", "sandal"] },
+    { "name": "Winter", "words": ["snow", "sled", "skate", "ice", "scarf", "mitten", "cocoa", "cold", "frost", "igloo", "boots", "coat", "flake", "chilly", "shovel", "hat"] },
+    { "name": "Breakfast", "words": ["egg", "toast", "milk", "juice", "cereal", "bacon", "waffle", "muffin", "yogurt", "oats", "jam", "butter", "bagel", "honey", "syrup", "pancake"] }
+  ]
+}

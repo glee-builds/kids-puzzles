@@ -11,6 +11,7 @@ import * as numberPyramid from './games/number-pyramid.js';
 import * as magicSquare from './games/magic-square.js';
 import * as letterScramble from './games/letter-scramble.js';
 import * as storyOrder from './games/story-order.js';
+import * as wordSearch from './games/word-search.js';
 import * as maze from './games/maze.js';
 import * as numberLine from './games/number-line.js';
 import * as factFamilies from './games/fact-families.js';
@@ -21,7 +22,7 @@ const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'maze', 'number-line', 'fact-families'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'maze', 'number-line', 'fact-families'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -31,6 +32,7 @@ const VIEWS = {
   'magic-square': document.getElementById('view-magic-square'),
   'story-order': document.getElementById('view-story-order'),
   'letter-scramble': document.getElementById('view-letter-scramble'),
+  'word-search': document.getElementById('view-word-search'),
   maze: document.getElementById('view-maze'),
   'number-line': document.getElementById('view-number-line'),
   'fact-families': document.getElementById('view-fact-families'),
@@ -205,6 +207,22 @@ async function startLetterScramble() {
   }
 }
 
+// Word Search themes are dealt one a day from the same start date.
+async function startWordSearch() {
+  const game = document.getElementById('game-word-search');
+  try {
+    const response = await fetch('data/search-themes.json');
+    if (!response.ok) throw new Error('Could not load data/search-themes.json');
+    const { themes } = await response.json();
+    const day = progressStore.daysBetween(STORY_START, today);
+    const puzzle = wordSearch.generate(seedFor(today, 'word-search'), themes, day);
+    wordSearch.render(game, puzzle, () => finishGame('word-search'));
+  } catch (error) {
+    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
 function startMaze() {
   const game = document.getElementById('game-maze');
   const puzzle = maze.generate(seedFor(today, 'maze'));
@@ -229,6 +247,7 @@ const STARTERS = {
   'magic-square': startMagicSquare,
   'story-order': startStoryOrder,
   'letter-scramble': startLetterScramble,
+  'word-search': startWordSearch,
   maze: startMaze,
   'number-line': startNumberLine,
   'fact-families': startFactFamilies,
