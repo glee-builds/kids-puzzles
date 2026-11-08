@@ -12,6 +12,7 @@ import * as magicSquare from './games/magic-square.js';
 import * as letterScramble from './games/letter-scramble.js';
 import * as storyOrder from './games/story-order.js';
 import * as wordSearch from './games/word-search.js';
+import * as wordLadder from './games/word-ladder.js';
 import * as maze from './games/maze.js';
 import * as numberLine from './games/number-line.js';
 import * as factFamilies from './games/fact-families.js';
@@ -22,7 +23,7 @@ const today = dateKey();
 let progress = progressStore.load();
 
 // Playable games, by the name used in the address and in saved progress.
-const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'maze', 'number-line', 'fact-families'];
+const GAMES = ['mystery-word', 'number-pyramid', 'magic-square', 'story-order', 'letter-scramble', 'word-search', 'word-ladder', 'maze', 'number-line', 'fact-families'];
 
 // Screens that exist. Anything else in the address shows the home screen.
 const VIEWS = {
@@ -33,6 +34,7 @@ const VIEWS = {
   'story-order': document.getElementById('view-story-order'),
   'letter-scramble': document.getElementById('view-letter-scramble'),
   'word-search': document.getElementById('view-word-search'),
+  'word-ladder': document.getElementById('view-word-ladder'),
   maze: document.getElementById('view-maze'),
   'number-line': document.getElementById('view-number-line'),
   'fact-families': document.getElementById('view-fact-families'),
@@ -223,6 +225,22 @@ async function startWordSearch() {
   }
 }
 
+async function startWordLadder() {
+  const game = document.getElementById('game-word-ladder');
+  try {
+    const [ladder, ...phonics] = await Promise.all([
+      loadWords('data/words/ladder.json'),
+      loadWords('data/words/level-1.json'),
+      loadWords('data/words/level-2.json'),
+    ]);
+    const puzzle = wordLadder.generate(seedFor(today, 'word-ladder'), ladder, phonics.flat());
+    wordLadder.render(game, puzzle, () => finishGame('word-ladder'));
+  } catch (error) {
+    game.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
+    console.error(error);
+  }
+}
+
 function startMaze() {
   const game = document.getElementById('game-maze');
   const puzzle = maze.generate(seedFor(today, 'maze'));
@@ -248,6 +266,7 @@ const STARTERS = {
   'story-order': startStoryOrder,
   'letter-scramble': startLetterScramble,
   'word-search': startWordSearch,
+  'word-ladder': startWordLadder,
   maze: startMaze,
   'number-line': startNumberLine,
   'fact-families': startFactFamilies,
