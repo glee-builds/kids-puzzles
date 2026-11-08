@@ -38,6 +38,14 @@
           <span class="card-status" id="status-number-pyramid">Play</span>
         </a>
 
+        <a class="card card-play" href="#magic-square">
+          <span class="card-art" aria-hidden="true">
+            <span class="square-art"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
+          </span>
+          <span class="card-name">Magic Square</span>
+          <span class="card-status" id="status-magic-square">Play</span>
+        </a>
+
         <div class="card card-soon" aria-disabled="true">
           <span class="card-art" aria-hidden="true">
             <span class="wheel"><span>e</span></span>
@@ -46,13 +54,6 @@
           <span class="card-status">Coming soon</span>
         </div>
 
-        <div class="card card-soon" aria-disabled="true">
-          <span class="card-art" aria-hidden="true">
-            <span class="square-art"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>
-          </span>
-          <span class="card-name">Magic Square</span>
-          <span class="card-status">Coming soon</span>
-        </div>
       </nav>
     </section>
 
@@ -82,6 +83,17 @@
       </header>
 
       <main id="game-number-pyramid" class="game"></main>
+    </section>
+
+    <!-- Magic Square -->
+    <section id="view-magic-square" class="view" hidden>
+      <header class="top game-top">
+        <a class="back" href="#" aria-label="Back to puzzles">←</a>
+        <h1>Magic Square</h1>
+        <p class="legend">Rows, columns, and diagonals all add up the same</p>
+      </header>
+
+      <main id="game-magic-square" class="game"></main>
     </section>
 
   </div>

@@ -298,6 +298,7 @@ export function render(container, puzzle, onDone) {
   // A computer keyboard works too, which helps when testing on a laptop.
   function onKeydown(event) {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (container.closest('[hidden]')) return; // only while this game is on screen
     if (/^[a-z]$/i.test(event.key)) typeLetter(event.key.toLowerCase());
     else if (event.key === 'Backspace') eraseLetter();
     else if (event.key === 'Enter') submitGuess();
