@@ -1,0 +1,28 @@
+{
+  "level": 3,
+  "name": "Second and third grade spelling patterns",
+  "about": "Five-letter words a second or third grader can read, grouped by the spelling pattern they practice: vowel teams (ai, ay, ee, ea, oa, ow, oo, ou), bossy r (ar, or, ir, er, ur), silent e (a_e means a, one consonant, then e), and letter pairs (sh, ch, th, wh).",
+  "words": {
+    "ai": ["train", "paint", "snail", "chain", "brain", "plain", "trail", "grain"],
+    "ay": ["spray", "stray", "today", "delay"],
+    "ee": ["sheep", "sleep", "green", "teeth", "cheek", "sweet", "three", "wheel", "queen", "speed"],
+    "ea": ["beach", "dream", "cream", "clean", "peach", "teach", "reach", "steam", "treat", "wheat"],
+    "oa": ["float", "coast", "toast", "roast", "coach"],
+    "ow": ["throw", "grown", "below", "clown", "crown", "brown", "frown", "towel"],
+    "oo": ["spoon", "broom", "goose", "stool", "tooth", "bloom", "scoop"],
+    "ou": ["cloud", "house", "mouse", "mouth", "south", "round", "sound", "count", "scout", "proud"],
+    "ar": ["shark", "start", "smart", "party", "scarf", "march", "sharp"],
+    "or": ["storm", "horse", "short", "sport", "north", "porch", "torch", "story"],
+    "ir": ["shirt", "third", "first", "dirty", "skirt"],
+    "er": ["water", "tiger", "paper", "after", "river", "under"],
+    "ur": ["nurse", "purse", "curly", "burnt"],
+    "a_e": ["plate", "skate", "grape", "snake", "shake", "flame", "brave", "plane", "shape"],
+    "i_e": ["smile", "slide", "prize", "white", "shine", "drive", "price"],
+    "o_e": ["stone", "smoke", "phone", "globe", "those", "froze", "stove"],
+    "u_e": ["flute", "prune"],
+    "sh": ["brush", "flash", "fresh", "crash", "shelf"],
+    "ch": ["check", "lunch", "bench", "chest", "pinch"],
+    "th": ["think", "thing", "cloth", "thumb"],
+    "wh": ["which", "whale"]
+  }
+}

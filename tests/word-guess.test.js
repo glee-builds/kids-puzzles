@@ -174,8 +174,19 @@ test('verify: every word in the level 2 list makes a valid puzzle', () => {
   }
 });
 
+test('verify: every word in the level 3 list makes a valid puzzle', () => {
+  const level3 = JSON.parse(
+    readFileSync(new URL('../data/words/level-3.json', import.meta.url), 'utf8'),
+  );
+  for (const answer of Object.values(level3.words).flat()) {
+    const result = verify({ answer, length: answer.length, maxGuesses: MAX_GUESSES });
+    assert.ok(result.ok, `${answer}: ${result.problems.join('; ')}`);
+  }
+});
+
 test('verify: catches broken puzzles', () => {
   assert.equal(verify({ answer: 'ca', length: 2, maxGuesses: 6 }).ok, false);
+  assert.equal(verify({ answer: 'turtle', length: 6, maxGuesses: 6 }).ok, false);
   assert.equal(verify({ answer: 'Cat', length: 3, maxGuesses: 6 }).ok, false);
   assert.equal(verify({ answer: 'cat', length: 4, maxGuesses: 6 }).ok, false);
   assert.equal(verify({ answer: 'cat', length: 3, maxGuesses: 99 }).ok, false);

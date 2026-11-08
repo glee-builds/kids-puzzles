@@ -152,7 +152,7 @@ async function loadWords(path) {
 async function startMysteryWord() {
   const game = document.getElementById('game');
   try {
-    const words = await loadWords('data/words/level-2.json');
+    const words = await loadWords('data/words/level-3.json');
     const puzzle = wordGuess.generate(seedFor(today, 'word-guess'), words);
     wordGuess.render(game, puzzle, () => finishGame('mystery-word'));
   } catch (error) {

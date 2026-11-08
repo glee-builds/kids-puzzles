@@ -90,8 +90,8 @@ export function verify(puzzle) {
   const problems = [];
   const { answer, length, maxGuesses } = puzzle;
 
-  if (typeof answer !== 'string' || !/^[a-z]{3,4}$/.test(answer)) {
-    problems.push(`answer "${answer}" must be 3 or 4 lowercase letters`);
+  if (typeof answer !== 'string' || !/^[a-z]{3,5}$/.test(answer)) {
+    problems.push(`answer "${answer}" must be 3 to 5 lowercase letters`);
   } else if (length !== answer.length) {
     problems.push(`length ${length} does not match answer "${answer}"`);
   }
