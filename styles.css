@@ -13,8 +13,9 @@
   --mark-text: #ffffff;
 
   --go: #ff8a5c;
+  --on-go: #2b2440;      /* text on orange: dark in both modes (white is too faint) */
   --star: #ffb627;
-  --words: #7b68e0;      /* home sections: purple for words */
+  --words: #7461de;      /* home sections: purple for words (white text on it: 4.7:1) */
   --words-ink: #5644c4;  /* darker, for text on white */
   --numbers: #ff8a5c;    /* orange for numbers */
   --numbers-ink: #b8481a;
@@ -301,7 +302,7 @@ button {
   min-height: 48px;
   border-radius: 12px;
   background: var(--go);
-  color: #ffffff;
+  color: var(--on-go);
   font-weight: 800;
   text-decoration: none;
 }
@@ -1222,9 +1223,10 @@ button {
   line-height: 1;
 }
 
-.ff-street-house { color: var(--border); }
-.ff-street-now { color: var(--muted); }
-.ff-street-lit { color: var(--star); }
+/* Houses still to do, the one being built (underlined, not just a color), and lit ones. */
+.ff-street-house { color: var(--muted); }
+.ff-street-now { color: var(--words-ink); text-decoration: underline; text-underline-offset: 4px; }
+.ff-street-lit { color: var(--numbers-ink); }
 
 .ff-house {
   width: min(320px, 100%);
@@ -1454,7 +1456,7 @@ button {
 .lw-enter {
   background: var(--go);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--on-go);
 }
 
 /* ---------- Story Order ---------- */
@@ -1492,7 +1494,7 @@ button {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .so-slot-row {
@@ -1531,7 +1533,7 @@ button {
   border: 2px dashed var(--muted);
   background: transparent;
   color: var(--text);
-  min-height: 36px;
+  min-height: 44px; /* big enough to tap */
 }
 
 .so-slot-filled {
@@ -1563,7 +1565,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .so-card {
@@ -1591,7 +1593,7 @@ button {
 }
 
 .so-message {
-  margin: 12px 0 auto;
+  margin: 10px 0 auto;
 }
 
 /* ---------- Magic Square ----------
@@ -1740,7 +1742,7 @@ button {
 .np-key-check {
   background: var(--go);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--on-go);
   font-size: 1.2rem;
 }
 
@@ -1861,7 +1863,7 @@ button {
 .wg-key-go {
   background: var(--go);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--on-go);
   text-transform: none;
 }
 
@@ -2503,7 +2505,7 @@ button.fs-word {
 
 .fs-wrong::after {
   content: "✗";
-  color: var(--go);
+  color: var(--numbers-ink);
   margin-left: 5px;
 }
 
