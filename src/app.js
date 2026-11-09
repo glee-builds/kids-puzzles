@@ -132,6 +132,13 @@ async function words(...names) {
 /** One part of a data file, e.g. part('stories', 'stories'). */
 const part = async (name, key) => (await loadJson(`data/${name}.json`))[key];
 
+// Number Pyramid, Magic Square, and the Maze get harder as the pond grows:
+// level 2 after 30 puzzle days, level 3 after 60. Today doesn't count yet,
+// so the level can't change partway through a day.
+const DAYS_PER_LEVEL = 30;
+const daysBeforeToday = (progress.totalDays || 0) - (progress.lastDay === today ? 1 : 0);
+const LEVEL = Math.min(3, 1 + Math.floor(daysBeforeToday / DAYS_PER_LEVEL));
+
 // Stories, themes, words, and sentences are dealt from a deck counted from
 // this date, so none repeats until the whole deck has been used.
 const DAY = progressStore.daysBetween('2026-01-01', today);
@@ -152,13 +159,13 @@ const GAMES = {
   'word-ladder': { title: 'Word Ladder', legend: 'Change one letter at a time', data: () => [words('ladder'), words('level-1', 'level-2')] },
   'word-clues': { title: 'Word Clues', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY] },
   'fix-sentence': { title: 'Fix the Sentence', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY] },
-  'number-pyramid': { title: 'Number Pyramid', legend: 'Each brick = the two bricks under it, added' },
-  'magic-square': { title: 'Magic Square', legend: 'Rows, columns, and diagonals all add up the same' },
+  'number-pyramid': { title: 'Number Pyramid', legend: 'Each brick = the two bricks under it, added', data: () => [LEVEL] },
+  'magic-square': { title: 'Magic Square', legend: 'Rows, columns, and diagonals all add up the same', data: () => [LEVEL] },
   'number-line': { title: 'Number Line Hop', legend: 'Where will the frog land?' },
   'fact-families': { title: 'Fact Families', legend: 'Three numbers make four facts. Drag them in!' },
   'find-the-mistake': { title: 'Find the Mistake', legend: 'The frog got one step wrong. Find it and fix it!' },
   'word-problems': { title: 'Think It Through', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')] },
-  maze: { title: 'Maze', legend: 'Trace from the green dot to the star' },
+  maze: { title: 'Maze', legend: 'Trace from the green dot to the star', data: () => [LEVEL] },
 };
 
 /** A game's screen: a back button, its title and legend, and room for the game. */
@@ -213,6 +220,9 @@ function drawGrownUps() {
   const days = progressStore.currentStreak(progress, today);
   area.append(make('p', 'gu-summary',
     `${progress.totalDays || 0} puzzle days in all · ${days} day${days === 1 ? '' : 's'} in a row now`));
+  const next = LEVEL < 3 ? ` Level ${LEVEL + 1} starts after ${LEVEL * DAYS_PER_LEVEL} puzzle days.` : '';
+  area.append(make('p', 'gu-level',
+    `Number Pyramid, Magic Square, and the Maze are on level ${LEVEL} of 3.${next}`));
 
   // The last 4 weeks, oldest first, with today in the last square.
   area.append(make('h2', 'gu-heading', 'Last 4 weeks'));
