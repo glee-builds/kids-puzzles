@@ -9,6 +9,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - Keep changes small. One pull request does one thing.
 - Ask before adding any dependency, tool, or service.
 - **Never commit directly to `main`.** Phase 0 (the first commit) was the only exception. All work goes on a branch and reaches `main` through a pull request that the owner merges.
+- `main` is protected on GitHub (set 2026-11-08): changes only arrive through a pull request, the `test` check must pass before merging, and `main` can't be force-pushed or deleted. The rules apply to admins too.
 
 ## Locked decisions
 
