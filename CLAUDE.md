@@ -26,7 +26,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
   - `render(container, puzzle, onDone)`: draw it and call `onDone` when finished
 
   Adding a game means adding its file, its card on the home screen in `index.html`, and one line in the `GAMES` list in `src/app.js` (title, legend, and the data it needs). The game's screen is built from that line.
-- **Testing:** Node's built-in test runner (`node --test`), no test libraries. One test file per game in `tests/`, plus seed tests. GitHub Actions runs tests on every pull request (Phase 2).
+- **Testing:** Node's built-in test runner (`node --test`), no test libraries. One test file per game in `tests/`, plus seed tests. GitHub Actions runs the tests on every pull request and after each merge (`.github/workflows/tests.yml`); check that the pull request shows a green check before merging.
 
 ## Phone-first design rules
 
@@ -58,6 +58,7 @@ data/words/         curated word lists by level (JSON)
 tests/              one test file per game, plus seed tests; helpers.js has
                     everyDay, which checks every day for two years
 docs/decisions.md   decisions log
+.github/workflows/  GitHub Actions: runs the tests on every pull request
 ```
 
 ## Preview locally

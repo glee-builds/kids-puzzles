@@ -1,0 +1,32 @@
+# Runs all the tests on GitHub for every pull request, and again after a
+# merge into main. The result shows on the pull request as a green check or
+# a red X, so a broken change is caught before "Merge".
+#
+# Nothing to install: GitHub starts a fresh computer, gets this repo, sets
+# up Node, and runs the same command as on the Mac: node --test
+
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# This only reads the code; it can't change anything in the repo.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Run the tests
+        run: node --test
