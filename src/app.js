@@ -8,7 +8,7 @@
 import { dateKey, seedFor } from './seed.js';
 import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
-import { make } from './ui.js';
+import { make, button } from './ui.js';
 
 const today = dateKey();
 let progress = progressStore.load();
@@ -200,6 +200,68 @@ for (const [name, game] of Object.entries(GAMES)) {
   VIEWS[name] = document.querySelector('.app').appendChild(makeScreen(name, game));
 }
 
+// ---------- For grown-ups ----------
+
+// A page with the last 4 weeks, which puzzles get played, and a way to
+// start over. Everything shown here is read from this phone only.
+VIEWS['grown-ups'] = document.querySelector('.app').appendChild(
+  makeScreen('grown-ups', { title: 'For Grown-Ups', legend: 'Everything here stays on this phone.' }));
+
+function drawGrownUps() {
+  const area = document.getElementById('game-grown-ups');
+  area.replaceChildren();
+  const days = progressStore.currentStreak(progress, today);
+  area.append(make('p', 'gu-summary',
+    `${progress.totalDays || 0} puzzle days in all · ${days} day${days === 1 ? '' : 's'} in a row now`));
+
+  // The last 4 weeks, oldest first, with today in the last square.
+  area.append(make('h2', 'gu-heading', 'Last 4 weeks'));
+  const now = new Date();
+  const dates = Array.from({ length: progressStore.KEEP_DAYS }, (_, i) =>
+    new Date(now.getFullYear(), now.getMonth(), now.getDate() - (progressStore.KEEP_DAYS - 1 - i)));
+  const weeks = make('div', 'gu-weeks');
+  for (const date of dates.slice(0, 7)) {
+    weeks.append(make('span', 'gu-weekday', date.toLocaleDateString('en-US', { weekday: 'narrow' })));
+  }
+  for (const date of dates) {
+    const key = dateKey(date);
+    const count = (progress.finished[key] || []).length;
+    const square = make('div', 'gu-day' + (count ? ' gu-day-played' : '') + (key === today ? ' gu-today' : ''));
+    square.append(make('span', 'gu-date', String(date.getDate())), make('span', 'gu-count', count ? `${count}✓` : '·'));
+    square.setAttribute('aria-label', `${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}: ${count ? `${count} puzzle${count === 1 ? '' : 's'}` : 'no puzzles'}`);
+    weeks.append(square);
+  }
+  area.append(weeks);
+
+  // Which puzzles get played: days each was finished, most first.
+  area.append(make('h2', 'gu-heading', 'Puzzles played'));
+  const list = make('ul', 'gu-games');
+  const rows = Object.entries(GAMES)
+    .map(([name, { title }]) => [title, progress.plays?.[name] || 0])
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  for (const [title, times] of rows) {
+    const row = make('li', 'gu-game');
+    row.append(make('span', '', title), make('span', 'gu-times', times ? `${times} day${times === 1 ? '' : 's'}` : 'not yet'));
+    list.append(row);
+  }
+  area.append(list);
+
+  // Start over: asks first, since it can't be undone.
+  const ask = make('div', 'gu-confirm');
+  ask.hidden = true;
+  ask.append(
+    make('p', '', 'This clears the lily pads, the streak, and this page on this phone. It can\'t be undone.'),
+    button('lw-button', 'Cancel', () => { ask.hidden = true; startOver.hidden = false; }),
+    button('lw-button gu-reset', 'Yes, start over', () => {
+      progressStore.save(progressStore.emptyProgress());
+      location.hash = '';
+      location.reload();
+    }),
+  );
+  const startOver = button('lw-button gu-start-over', 'Start over…', () => { ask.hidden = false; startOver.hidden = true; });
+  area.append(startOver, ask);
+}
+
 // ---------- Moving between screens ----------
 
 function show() {
@@ -214,6 +276,7 @@ function show() {
   window.scrollTo(0, 0);
 
   if (current === '') drawPond();
+  if (current === 'grown-ups') drawGrownUps();
 
   if (current in GAMES && !started.has(current)) {
     started.add(current);

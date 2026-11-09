@@ -10,12 +10,14 @@
 //   - Finishing counts whether the word was found or shown: no penalties.
 //   - totalDays counts every day with a finished puzzle, ever. It never goes
 //     down, so the frog on the lily pads never hops backward.
+//   - plays counts how many days each game has been finished, ever (for
+//     the grown-up page). The day-by-day history keeps the last 4 weeks.
 
 export const STORAGE_KEY = 'kids-puzzles.progress';
-const KEEP_DAYS = 14; // how many days of "finished" history to keep
+export const KEEP_DAYS = 28; // how many days of "finished" history to keep (4 weeks)
 
 export function emptyProgress() {
-  return { streak: 0, totalDays: 0, lastDay: null, finished: {} };
+  return { streak: 0, totalDays: 0, lastDay: null, finished: {}, plays: {} };
 }
 
 /** Whole days from one "YYYY-MM-DD" to another (b minus a). */
@@ -40,9 +42,12 @@ export function recordFinish(progress, day, game) {
     if (daysBetween(d, day) < KEEP_DAYS) finished[d] = games;
   }
   const today = finished[day] || [];
-  finished[day] = today.includes(game) ? today : [...today, game];
+  const isNew = !today.includes(game);
+  finished[day] = isNew ? [...today, game] : today;
+  const plays = { ...progress.plays };
+  if (isNew) plays[game] = (plays[game] || 0) + 1;
 
-  return { streak, totalDays, lastDay: day, finished };
+  return { streak, totalDays, lastDay: day, finished, plays };
 }
 
 /**
@@ -59,6 +64,13 @@ export function isFinished(progress, day, game) {
   return (progress.finished[day] || []).includes(game);
 }
 
+/** How many days each game appears in a day-by-day history. */
+function countPlays(finished) {
+  const plays = {};
+  for (const games of Object.values(finished)) for (const game of games) plays[game] = (plays[game] || 0) + 1;
+  return plays;
+}
+
 /** Read saved progress. Anything missing or damaged starts fresh. */
 export function load(storage = globalThis.localStorage) {
   try {
@@ -66,7 +78,9 @@ export function load(storage = globalThis.localStorage) {
     if (saved && typeof saved.streak === 'number' && typeof saved.finished === 'object') {
       // Saved before totalDays existed: start from the days in the history.
       const totalDays = typeof saved.totalDays === 'number' ? saved.totalDays : Object.keys(saved.finished).length;
-      return { ...emptyProgress(), ...saved, totalDays };
+      // Saved before plays existed: count them from the days in the history.
+      const plays = saved.plays && typeof saved.plays === 'object' ? saved.plays : countPlays(saved.finished);
+      return { ...emptyProgress(), ...saved, totalDays, plays };
     }
   } catch {
     // Private browsing or damaged data: start fresh.
