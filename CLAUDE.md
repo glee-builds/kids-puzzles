@@ -12,7 +12,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 
 ## Locked decisions
 
-- **Platform:** web app, installable to the phone home screen as a PWA (Phase 3). No App Store.
+- **Platform:** web app, installable to the phone home screen as a PWA. It works offline: `sw.js` (the service worker) saves every file and uses the newest copy whenever the phone is online. No App Store.
 - **Code:** plain HTML, CSS, and JavaScript ES modules. No framework, no build step, no npm packages. Every file must stay readable for a beginner.
 - **Hosting:** GitHub Pages, deployed from the root of `main`.
 - **Repo:** public, named `kids-puzzles`. Nothing sensitive goes in it.
@@ -25,7 +25,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
   - `verify(puzzle)`: confirm a puzzle is valid and solvable
   - `render(container, puzzle, onDone)`: draw it and call `onDone` when finished
 
-  Adding a game means adding its file, its card on the home screen in `index.html`, and one line in the `GAMES` list in `src/app.js` (title, legend, and the data it needs). The game's screen is built from that line.
+  Adding a game means adding its file, its card on the home screen in `index.html`, and one line in the `GAMES` list in `src/app.js` (title, legend, and the data it needs). The game's screen is built from that line. Add any new file (game, data, image) to `FILES` in `sw.js` too, so it works offline; `tests/offline.test.js` fails if one is missing.
 - **Testing:** Node's built-in test runner (`node --test`), no test libraries. One test file per game in `tests/`, plus seed tests. GitHub Actions runs the tests on every pull request and after each merge (`.github/workflows/tests.yml`); check that the pull request shows a green check before merging.
 
 ## Phone-first design rules
@@ -54,6 +54,7 @@ src/app.js          the GAMES list, game screens, streak, navigation
 src/seed.js         date -> repeatable random numbers
 src/games/          one file per game
 src/ui.js           screen helpers the games share (buttons, tracing, drag-or-tap)
+sw.js               service worker: offline play, newest files when online
 data/words/         curated word lists by level (JSON)
 tests/              one test file per game, plus seed tests; helpers.js has
                     everyDay, which checks every day for two years
