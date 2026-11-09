@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, load, save, STORAGE_KEY,
+  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, load, save, STORAGE_KEY, KEEP_DAYS,
 } from '../src/progress.js';
 
 // A stand-in for the browser's localStorage, so tests run in Node.
@@ -108,4 +108,28 @@ test('totalDays counts every puzzle day and never goes down', () => {
 test('progress saved before totalDays starts from the days in its history', () => {
   const old = { streak: 2, lastDay: '2026-11-08', finished: { '2026-11-07': ['maze'], '2026-11-08': ['maze'] } };
   assert.equal(load(fakeStorage({ [STORAGE_KEY]: JSON.stringify(old) })).totalDays, 2);
+});
+
+// --- for the grown-up page ---
+
+test('plays counts each game once per day, ever', () => {
+  let p = recordFinish(emptyProgress(), '2026-11-08', 'maze');
+  p = recordFinish(p, '2026-11-08', 'maze');         // same day again: no change
+  p = recordFinish(p, '2026-11-08', 'word-search');
+  p = recordFinish(p, '2026-11-09', 'maze');
+  assert.deepEqual(p.plays, { maze: 2, 'word-search': 1 });
+});
+
+test('the history keeps the last 4 weeks', () => {
+  assert.equal(KEEP_DAYS, 28);
+  let p = recordFinish(emptyProgress(), '2026-10-12', 'maze'); // 27 days before Nov 8
+  p = recordFinish(p, '2026-11-08', 'maze');
+  assert.deepEqual(Object.keys(p.finished), ['2026-10-12', '2026-11-08']);
+  assert.equal(p.plays.maze, 2);
+});
+
+test('progress saved before plays existed counts them from its history', () => {
+  const old = { streak: 2, totalDays: 2, lastDay: '2026-11-08', finished: { '2026-11-07': ['maze'], '2026-11-08': ['maze', 'word-search'] } };
+  const p = load(fakeStorage({ [STORAGE_KEY]: JSON.stringify(old) }));
+  assert.deepEqual(p.plays, { maze: 2, 'word-search': 1 });
 });

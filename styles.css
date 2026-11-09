@@ -1072,6 +1072,120 @@ button {
   height: 48px;
 }
 
+/* ---------- For grown-ups ---------- */
+
+.grown-up-link {
+  margin: 20px 0 8px;
+  text-align: center;
+}
+
+.grown-up-link a {
+  display: inline-block;
+  padding: 12px 16px; /* a 48px tap target */
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.gu-summary {
+  margin: 4px 0 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+.gu-heading {
+  margin: 18px 0 8px;
+  font-size: 1.1rem;
+}
+
+/* 4 rows of 7 days, with weekday letters on top. */
+.gu-weeks {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.gu-weekday {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.gu-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  line-height: 1.2;
+}
+
+/* Played days: teal, and a count with a check, so it's not color alone. */
+.gu-day-played {
+  border-color: var(--here);
+  background: color-mix(in srgb, var(--here) 18%, var(--surface));
+}
+
+.gu-today {
+  box-shadow: 0 0 0 2px var(--text);
+}
+
+.gu-date {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.gu-count {
+  font-weight: 800;
+}
+
+.gu-games {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gu-game {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.gu-times {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.gu-start-over {
+  margin: 24px auto 0;
+  min-width: 160px;
+}
+
+.gu-confirm {
+  margin-top: 20px;
+  padding: 12px;
+  border: 2px solid var(--numbers-ink);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.gu-confirm p {
+  margin: 0 0 12px;
+}
+
+.gu-confirm .lw-button {
+  margin: 0 4px;
+  padding: 0 14px;
+}
+
+.gu-reset {
+  border-color: var(--numbers-ink);
+  color: var(--numbers-ink);
+}
+
 /* ---------- Number Line Hop ---------- */
 
 .nl-dots {
