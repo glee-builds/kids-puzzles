@@ -1092,6 +1092,12 @@ button {
   font-weight: 700;
 }
 
+.gu-level {
+  margin: 6px 0 0;
+  text-align: center;
+  color: var(--muted);
+}
+
 .gu-heading {
   margin: 18px 0 8px;
   font-size: 1.1rem;

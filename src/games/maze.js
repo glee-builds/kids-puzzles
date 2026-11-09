@@ -12,6 +12,8 @@ import { createRandom } from '../seed.js';
 import { make, button, liveMessage, trace } from '../ui.js';
 
 export const SIZE = 8;
+// Bigger as the player goes on (the app picks the level; see src/app.js).
+export const LEVEL_SIZES = [8, 9, 10];
 export const N = 1;
 export const E = 2;
 export const S = 4;
@@ -34,7 +36,8 @@ const same = (a, b) => a[0] === b[0] && a[1] === b[1];
  * start, knocking down walls into squares it hasn't visited yet, and backs
  * up when stuck. This always makes a perfect maze.
  */
-export function generate(seed, size = SIZE) {
+export function generate(seed, level = 1) {
+  const size = LEVEL_SIZES[Math.min(Math.max(level, 1), LEVEL_SIZES.length) - 1];
   const random = createRandom(seed);
   const walls = Array.from({ length: size }, () => Array(size).fill(ALL_WALLS));
   const visited = new Set([key([0, 0])]);

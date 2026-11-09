@@ -6,8 +6,7 @@ import { seedFor } from '../src/seed.js';
 import { everyDay, dayKey } from './helpers.js';
 import {
   generate, verify, start, check, hint, workable, buildValues, isSolvable, answerFor,
-  BLANKS, MAX_TOP, MIN_TOP, MAX_TRIES,
-} from '../src/games/number-pyramid.js';
+  BLANKS, MAX_TOP, MIN_TOP, MAX_TRIES, LEVELS} from '../src/games/number-pyramid.js';
 
 const seedForDay = (key) => seedFor(key, 'number-pyramid');
 
@@ -150,4 +149,20 @@ test('verify: catches broken pyramids', () => {
   assert.equal(verify(unsolvable).ok, false);
   const wrongShape = { ...fixed, values: [[1, 2], [3]] };
   assert.equal(verify(wrongShape).ok, false);
+});
+
+// --- levels ---
+
+test('levels 2 and 3 make a valid pyramid every day for two years', () => {
+  for (const level of [2, 3]) {
+    everyDay((key) => {
+      const puzzle = generate(seedForDay(key), level);
+      assert.ok(verify(puzzle).ok, `level ${level}, ${key}: ${verify(puzzle).problems.join('; ')}`);
+      assert.ok(puzzle.values[3][0] <= LEVELS[level - 1].maxTop);
+    });
+  }
+});
+
+test('level 1 is the same as no level', () => {
+  assert.deepEqual(generate(seedForDay('2026-11-08'), 1), generate(seedForDay('2026-11-08')));
 });

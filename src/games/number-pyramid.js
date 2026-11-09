@@ -13,8 +13,16 @@ import { createRandom, combinations } from '../seed.js';
 import { make, button, liveMessage, wiggle } from '../ui.js';
 
 export const LEVEL_SIZES = [4, 3, 2, 1];
-export const MIN_TOP = 40;
-export const MAX_TOP = 100;
+// Harder as the player goes on (the app picks the level; see src/app.js).
+// Level 1 is the original pyramid.
+export const LEVELS = [
+  { minTop: 40, maxTop: 100, low: 2, high: 25 },
+  { minTop: 80, maxTop: 150, low: 3, high: 35 },
+  { minTop: 120, maxTop: 200, low: 5, high: 45 },
+];
+const levelOf = (level) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
+export const MIN_TOP = LEVELS[0].minTop;
+export const MAX_TOP = LEVELS[0].maxTop;
 export const BLANKS = 5;
 export const MAX_TRIES = 3; // after this many misses the brick fills itself in
 
@@ -87,15 +95,13 @@ export function isSolvable(hidden) {
 const BLANK_SETS = combinations(allCells(), BLANKS).filter((hidden) =>
   hidden.some((id) => id.startsWith('0-')) && hidden.some((id) => !id.startsWith('0-')) && isSolvable(hidden));
 
-const LOW = 2;   // smallest bottom brick
-const HIGH = 25; // biggest bottom brick
-
-/** Make today's pyramid from a seed. */
-export function generate(seed) {
+/** Make today's pyramid from a seed, at a level from 1 to 3. */
+export function generate(seed, level = 1) {
+  const { minTop, maxTop, low: LOW, high: HIGH } = levelOf(level);
   const random = createRandom(seed);
   // With a bottom row of a, b, c, d the top is a + 3b + 3c + d. Pick the
   // top, then the middle pair (b + c), then a; d is what's left.
-  const top = random.int(MIN_TOP, MAX_TOP);
+  const top = random.int(minTop, maxTop);
   // b + c must leave room for a + d, and b and c each must fit too.
   const middleSum = random.int(
     Math.max(2 * LOW, Math.ceil((top - 2 * HIGH) / 3)),
@@ -106,7 +112,7 @@ export function generate(seed) {
   const rest = top - 3 * middleSum; // a + d
   const a = random.int(Math.max(LOW, rest - HIGH), Math.min(HIGH, rest - LOW));
   const values = buildValues([a, b, c, rest - a]);
-  return { values, hidden: [...random.pick(BLANK_SETS)].sort() };
+  return { values, hidden: [...random.pick(BLANK_SETS)].sort(), level };
 }
 
 export function answerFor(puzzle, id) {
@@ -211,7 +217,8 @@ export function verify(puzzle) {
     });
   }
   const top = values[values.length - 1][0];
-  if (top > MAX_TOP) problems.push(`top brick ${top} is over ${MAX_TOP}`);
+  const { maxTop } = levelOf(puzzle.level ?? 1);
+  if (top > maxTop) problems.push(`top brick ${top} is over ${maxTop}`);
 
   const cells = allCells();
   if (!Array.isArray(hidden) || hidden.length !== BLANKS || hidden.some((id) => !cells.includes(id))) {

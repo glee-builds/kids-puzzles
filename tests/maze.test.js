@@ -5,8 +5,7 @@ import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
 import { everyDay, dayKey } from './helpers.js';
 import {
-  generate, verify, solution, canMove, start, step, hintSquares, offRoute, SIZE, N, E, S, W,
-} from '../src/games/maze.js';
+  generate, verify, solution, canMove, start, step, hintSquares, offRoute, SIZE, N, E, S, W, LEVEL_SIZES} from '../src/games/maze.js';
 
 const seedForDay = (key) => seedFor(key, 'maze');
 
@@ -107,4 +106,20 @@ test('after a wrong turn, the hint starts where the path left the route', () => 
   assert.equal(offRoute(lost), true);
   assert.deepEqual(hintSquares(lost), [[0, 1], [1, 1]]);
   assert.equal(offRoute(start(tiny)), false);
+});
+
+// --- levels ---
+
+test('levels 2 and 3 make a valid maze every day for two years', () => {
+  for (const level of [2, 3]) {
+    everyDay((key) => {
+      const puzzle = generate(seedForDay(key), level);
+      assert.ok(verify(puzzle).ok, `level ${level}, ${key}: ${verify(puzzle).problems.join('; ')}`);
+      assert.equal(puzzle.size, LEVEL_SIZES[level - 1]);
+    });
+  }
+});
+
+test('level 1 is the same as no level', () => {
+  assert.deepEqual(generate(seedForDay('2026-11-08'), 1), generate(seedForDay('2026-11-08')));
 });

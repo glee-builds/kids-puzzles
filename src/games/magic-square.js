@@ -13,8 +13,16 @@ import { make, button, liveMessage, wiggle } from '../ui.js';
 
 export const SIZE = 3;
 export const BLANKS = 4;
-export const MIN_TARGET = 30;
-export const MAX_TARGET = 99;
+// Harder as the player goes on (the app picks the level; see src/app.js).
+// Level 1 is the original square. Numbers stay at 100 or less.
+export const LEVELS = [
+  { minTarget: 30, maxTarget: 99, steps: [1, 2, 3, 4, 5] },
+  { minTarget: 60, maxTarget: 150, steps: [2, 3, 4, 5, 6, 7, 8] },
+  { minTarget: 120, maxTarget: 180, steps: [5, 6, 7, 8, 9, 10] },
+];
+const levelOf = (level) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
+export const MIN_TARGET = LEVELS[0].minTarget;
+export const MAX_TARGET = LEVELS[0].maxTarget;
 export const MAX_TRIES = 3; // after this many misses the square fills itself in
 
 // The classic magic square of 1-9: every line adds to 15.
@@ -74,17 +82,18 @@ export function isSolvable(hidden) {
 // Every set of blank squares that can be worked out, listed once.
 const BLANK_SETS = combinations(allCells(), BLANKS).filter(isSolvable);
 
-/** Make today's magic square from a seed. */
-export function generate(seed) {
+/** Make today's magic square from a seed, at a level from 1 to 3. */
+export function generate(seed, level = 1) {
+  const { minTarget, maxTarget, steps } = levelOf(level);
   const random = createRandom(seed);
   // The target is 3 times the middle number (first + 4 steps), so pick the
   // step, then a first number that keeps the target in range.
-  const step = random.pick([1, 2, 3, 4, 5]);
-  const middle = random.int(Math.max(MIN_TARGET / 3, 1 + 4 * step), Math.floor(MAX_TARGET / 3));
+  const step = random.pick(steps);
+  const middle = random.int(Math.max(minTarget / 3, 1 + 4 * step), Math.floor(maxTarget / 3));
   const first = middle - 4 * step;
   const shape = arrange(BASE_SQUARE, random.int(0, 3), random.int(0, 1) === 1);
   const grid = shape.map((row) => row.map((n) => first + (n - 1) * step));
-  return { grid, target: 3 * middle, hidden: [...random.pick(BLANK_SETS)].sort() };
+  return { grid, target: 3 * middle, hidden: [...random.pick(BLANK_SETS)].sort(), level };
 }
 
 export function answerFor(puzzle, id) {
@@ -179,8 +188,9 @@ export function verify(puzzle) {
     problems.push('every square must be a whole number from 1 to 100');
   }
   if (new Set(numbers).size !== numbers.length) problems.push('no number may appear twice');
-  if (!Number.isInteger(target) || target < MIN_TARGET || target > MAX_TARGET) {
-    problems.push(`target ${target} must be from ${MIN_TARGET} to ${MAX_TARGET}`);
+  const { minTarget, maxTarget } = levelOf(puzzle.level ?? 1);
+  if (!Number.isInteger(target) || target < minTarget || target > maxTarget) {
+    problems.push(`target ${target} must be from ${minTarget} to ${maxTarget}`);
   }
   for (const line of LINES) {
     const sum = line.reduce((total, id) => total + answerFor(puzzle, id), 0);

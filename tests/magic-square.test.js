@@ -6,8 +6,7 @@ import { seedFor } from '../src/seed.js';
 import { everyDay, dayKey } from './helpers.js';
 import {
   generate, verify, start, check, hint, hintLine, workable, isSolvable, answerFor,
-  LINES, BLANKS, MIN_TARGET, MAX_TARGET, MAX_TRIES,
-} from '../src/games/magic-square.js';
+  LINES, BLANKS, MIN_TARGET, MAX_TARGET, MAX_TRIES, LEVELS} from '../src/games/magic-square.js';
 
 const seedForDay = (key) => seedFor(key, 'magic-square');
 
@@ -128,4 +127,20 @@ test('verify: catches broken squares', () => {
   assert.equal(verify(unsolvable).ok, false);
   const wrongShape = { ...fixed, grid: [[1, 2], [3, 4]] };
   assert.equal(verify(wrongShape).ok, false);
+});
+
+// --- levels ---
+
+test('levels 2 and 3 make a valid magic square every day for two years', () => {
+  for (const level of [2, 3]) {
+    everyDay((key) => {
+      const puzzle = generate(seedForDay(key), level);
+      assert.ok(verify(puzzle).ok, `level ${level}, ${key}: ${verify(puzzle).problems.join('; ')}`);
+      assert.ok(puzzle.grid.flat().every((n) => n <= 100));
+    });
+  }
+});
+
+test('level 1 is the same as no level', () => {
+  assert.deepEqual(generate(seedForDay('2026-11-08'), 1), generate(seedForDay('2026-11-08')));
 });
