@@ -236,3 +236,11 @@ show();
 // splash fades out on its own (styles.css); this just tidies it away.
 window.lilyPadStarted = true;
 setTimeout(() => document.getElementById('splash')?.remove(), 1500);
+
+// ---------- Offline ----------
+
+// The service worker (sw.js) saves the app's files so it opens without
+// internet. If the phone can't run one, the app works as before, online.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch((error) => console.warn('Offline mode is off:', error));
+}
