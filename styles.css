@@ -419,6 +419,25 @@ button {
   font-weight: 700;
 }
 
+.catch-up {
+  display: inline-block;
+  margin: 0 0 4px;
+  padding: 12px 16px; /* a 48px tap target */
+  color: var(--words-ink);
+  font-weight: 700;
+}
+
+.catch-up[hidden] {
+  display: none;
+}
+
+.yesterday-tag {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--words-ink);
+}
+
 .pond-streak {
   display: block;
   font-size: 0.9rem;

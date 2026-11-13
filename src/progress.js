@@ -7,6 +7,8 @@
 //   - A day counts toward the streak when at least one puzzle is finished.
 //   - Finishing again on the same day does not count twice.
 //   - Playing on the very next day adds one. Missing a day starts over at 1.
+//   - Catching up: yesterday's puzzles can be played the next day. Finishing
+//     one fills in the missed day, so the days in a row join back up.
 //   - Finishing counts whether the word was found or shown: no penalties.
 //   - totalDays counts every day with a finished puzzle, ever. It never goes
 //     down, so the frog on the lily pads never hops backward.
@@ -17,7 +19,9 @@ export const STORAGE_KEY = 'kids-puzzles.progress';
 export const KEEP_DAYS = 28; // how many days of "finished" history to keep (4 weeks)
 
 export function emptyProgress() {
-  return { streak: 0, totalDays: 0, lastDay: null, finished: {}, plays: {} };
+  // previous: the last day and streak before lastDay, so a caught-up day
+  // can join the two runs back together.
+  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {} };
 }
 
 /** Whole days from one "YYYY-MM-DD" to another (b minus a). */
@@ -29,25 +33,35 @@ export function daysBetween(a, b) {
 
 /** Record that `game` was finished on `day`. Returns new progress. */
 export function recordFinish(progress, day, game) {
-  let streak = progress.streak;
-  let totalDays = progress.totalDays;
-  if (progress.lastDay !== day) {
-    const gap = progress.lastDay ? daysBetween(progress.lastDay, day) : null;
-    streak = gap === 1 ? progress.streak + 1 : 1;
+  let { streak, totalDays, lastDay, previous = null } = progress;
+  if (day !== lastDay && !(progress.finished[day] || []).length) {
+    // A new puzzle day: the frog hops.
     totalDays += 1;
+    if (!lastDay || day > lastDay) {
+      // The usual case: a day after the last one.
+      previous = lastDay ? { day: lastDay, streak } : null;
+      streak = lastDay && daysBetween(lastDay, day) === 1 ? streak + 1 : 1;
+      lastDay = day;
+    } else if (daysBetween(day, lastDay) === 1) {
+      // Catching up on the day just before the last one. It joins the last
+      // day (2 days in a row), plus the run before it if that ended the day
+      // before.
+      const joins = previous && daysBetween(previous.day, day) === 1;
+      streak = joins ? previous.streak + 2 : 2;
+    }
   }
 
   const finished = {};
   for (const [d, games] of Object.entries(progress.finished)) {
-    if (daysBetween(d, day) < KEEP_DAYS) finished[d] = games;
+    if (daysBetween(d, lastDay) < KEEP_DAYS) finished[d] = games;
   }
-  const today = finished[day] || [];
-  const isNew = !today.includes(game);
-  finished[day] = isNew ? [...today, game] : today;
+  const dayGames = finished[day] || [];
+  const isNew = !dayGames.includes(game);
+  finished[day] = isNew ? [...dayGames, game] : dayGames;
   const plays = { ...progress.plays };
   if (isNew) plays[game] = (plays[game] || 0) + 1;
 
-  return { streak, totalDays, lastDay: day, finished, plays };
+  return { streak, totalDays, lastDay, previous, finished, plays };
 }
 
 /**
@@ -60,8 +74,10 @@ export function currentStreak(progress, today) {
   return gap === 0 || gap === 1 ? progress.streak : 0;
 }
 
+/** Whether `game` was finished on `day`. Without a game: whether any was. */
 export function isFinished(progress, day, game) {
-  return (progress.finished[day] || []).includes(game);
+  const games = progress.finished[day] || [];
+  return game ? games.includes(game) : games.length > 0;
 }
 
 /** How many days each game appears in a day-by-day history. */
