@@ -13,6 +13,15 @@ import { make, button } from './ui.js';
 const today = dateKey();
 let progress = progressStore.load();
 
+// Yesterday's puzzles: after a missed day, the home screen links to
+// ?day=yesterday, which plays yesterday's puzzles instead of today's.
+// Finishing one fills in the missed day (see progress.js). Only yesterday,
+// not older days.
+const now = new Date();
+const yesterday = dateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+const playingYesterday = new URLSearchParams(location.search).get('day') === 'yesterday';
+const playDay = playingYesterday ? yesterday : today; // the day whose puzzles are shown
+
 // Games are started the first time they are opened, then kept, so
 // leaving a game halfway and coming back keeps the guesses.
 const started = new Set();
@@ -58,6 +67,9 @@ function drawPond() {
   if (at === 0) caption = 'Finish a puzzle and the frog hops onto a lily pad!';
   else if (!doneToday) caption = 'Finish a puzzle to hop to the next lily pad!';
   else caption = `The frog is on lily pad ${at}!`;
+  if (playingYesterday && !progressStore.isFinished(progress, yesterday)) {
+    caption = 'Finish one of yesterday\'s puzzles to fill in the missed day!';
+  }
   const captionNode = document.getElementById('pond-caption');
   captionNode.textContent = caption;
   if (days >= 2) {
@@ -66,12 +78,28 @@ function drawPond() {
     inARow.textContent = `★ ${days} days in a row`;
     captionNode.append(inARow);
   }
+  drawCatchUp();
+}
+
+/** The link between today's and yesterday's puzzles, when it's needed. */
+function drawCatchUp() {
+  const link = document.getElementById('catch-up');
+  const missedYesterday = (progress.totalDays || 0) > 0 && !progressStore.isFinished(progress, yesterday);
+  link.hidden = !playingYesterday && !missedYesterday;
+  if (playingYesterday) {
+    link.textContent = '← Back to today\'s puzzles';
+    link.href = './';
+    document.getElementById('subtitle').textContent = 'Yesterday\'s puzzles';
+  } else {
+    link.textContent = 'Missed yesterday? Play it now →';
+    link.href = '?day=yesterday';
+  }
 }
 
 function updateHome() {
   drawPond();
   for (const game of Object.keys(GAMES)) {
-    if (progressStore.isFinished(progress, today, game)) {
+    if (progressStore.isFinished(progress, playDay, game)) {
       document.getElementById(`status-${game}`).textContent = 'Done ✓';
     }
   }
@@ -79,7 +107,7 @@ function updateHome() {
 
 function finishGame(game) {
   const before = progress.totalDays || 0;
-  progress = progressStore.recordFinish(progress, today, game);
+  progress = progressStore.recordFinish(progress, playDay, game);
   progressStore.save(progress);
   const hopped = (progress.totalDays || 0) > before;
   updateHome();
@@ -141,7 +169,7 @@ const LEVEL = Math.min(3, 1 + Math.floor(daysBeforeToday / DAYS_PER_LEVEL));
 
 // Stories, themes, words, and sentences are dealt from a deck counted from
 // this date, so none repeats until the whole deck has been used.
-const DAY = progressStore.daysBetween('2026-01-01', today);
+const DAY = progressStore.daysBetween('2026-01-01', playDay);
 
 // Every game, by the name used in its address (#maze) and in saved
 // progress. Each has:
@@ -179,6 +207,7 @@ function makeScreen(name, { title, legend }) {
   back.setAttribute('aria-label', 'Back to puzzles');
   top.append(back, make('h1', '', title));
   if (legend) top.append(make('p', 'legend', legend));
+  if (playingYesterday && name !== 'grown-ups') top.append(make('p', 'yesterday-tag', 'Yesterday\'s puzzle'));
   const area = make('main', 'game');
   area.id = `game-${name}`;
   area.append(make('p', 'loading', 'Getting today\'s puzzle…'));
@@ -192,7 +221,7 @@ async function startGame(name) {
   const area = document.getElementById(`game-${name}`);
   try {
     const [game, extras] = await Promise.all([import(`./games/${file}.js`), Promise.all(data())]);
-    const puzzle = game.generate(seedFor(today, file), ...extras);
+    const puzzle = game.generate(seedFor(playDay, file), ...extras);
     game.render(area, puzzle, () => finishGame(name));
   } catch (error) {
     area.textContent = 'Oops, the puzzle could not load. Try again in a moment.';

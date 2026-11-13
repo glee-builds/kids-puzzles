@@ -133,3 +133,57 @@ test('progress saved before plays existed counts them from its history', () => {
   const p = load(fakeStorage({ [STORAGE_KEY]: JSON.stringify(old) }));
   assert.deepEqual(p.plays, { maze: 2, 'word-search': 1 });
 });
+
+// --- catching up on yesterday's puzzles ---
+
+test('catching up after today joins the days back into one run', () => {
+  let p = recordFinish(emptyProgress(), '2026-11-06', 'maze');
+  p = recordFinish(p, '2026-11-07', 'maze');
+  // 2026-11-08 is missed.
+  p = recordFinish(p, '2026-11-09', 'maze');
+  assert.equal(p.streak, 1);
+  p = recordFinish(p, '2026-11-08', 'maze'); // yesterday's puzzle, played on the 9th
+  assert.equal(p.streak, 4);
+  assert.equal(p.totalDays, 4);
+  assert.equal(p.lastDay, '2026-11-09');
+  assert.equal(currentStreak(p, '2026-11-09'), 4);
+});
+
+test('catching up before today, then playing today', () => {
+  let p = recordFinish(emptyProgress(), '2026-11-06', 'maze');
+  p = recordFinish(p, '2026-11-07', 'maze');
+  p = recordFinish(p, '2026-11-08', 'maze'); // missed on the 8th, played on the 9th
+  assert.equal(p.streak, 3);
+  p = recordFinish(p, '2026-11-09', 'maze');
+  assert.equal(p.streak, 4);
+  assert.equal(p.totalDays, 4);
+});
+
+test('catching up with no run before it makes 2 days in a row', () => {
+  let p = recordFinish(emptyProgress(), '2026-11-01', 'maze');
+  p = recordFinish(p, '2026-11-09', 'maze');
+  p = recordFinish(p, '2026-11-08', 'maze');
+  assert.equal(p.streak, 2);
+  assert.equal(p.totalDays, 3);
+});
+
+test('more of yesterday\'s puzzles do not count the day twice', () => {
+  let p = recordFinish(emptyProgress(), '2026-11-09', 'maze');
+  p = recordFinish(p, '2026-11-08', 'maze');
+  p = recordFinish(p, '2026-11-08', 'word-search');
+  p = recordFinish(p, '2026-11-08', 'maze');
+  assert.equal(p.totalDays, 2);
+  assert.equal(p.streak, 2);
+  assert.deepEqual(p.finished['2026-11-08'], ['maze', 'word-search']);
+  assert.equal(p.lastDay, '2026-11-09');
+});
+
+test('progress saved before catching up existed still loads', () => {
+  const old = { streak: 3, totalDays: 5, lastDay: '2026-11-07', finished: { '2026-11-07': ['maze'] }, plays: { maze: 5 } };
+  const storage = { getItem: () => JSON.stringify(old) };
+  let p = load(storage);
+  assert.equal(p.previous, null);
+  p = recordFinish(p, '2026-11-09', 'maze');
+  p = recordFinish(p, '2026-11-08', 'maze');
+  assert.equal(p.streak, 5); // 3 days up to the 7th, then the 8th and 9th
+});
