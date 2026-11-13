@@ -1,0 +1,65 @@
+// Tests for src/games/garden-rows.js. Run all tests with: node --test
+
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { seedFor } from '../src/seed.js';
+import { everyDay } from './helpers.js';
+import { stageFor } from '../src/times.js';
+import {
+  generate, verify, start, check, hint, total, ROUNDS, SPLIT_AT, BIG_ROWS,
+} from '../src/games/garden-rows.js';
+
+const seedForDay = (key) => seedFor(key, 'garden-rows');
+const sample = generate(seedForDay('2026-11-13'), 0);
+
+test('every day for two years, at every stage, makes valid rounds', () => {
+  for (const plays of [0, 7, 14]) {
+    everyDay((key) => {
+      const puzzle = generate(seedForDay(key), plays);
+      const result = verify(puzzle);
+      assert.ok(result.ok, `${key}, ${plays} plays: ${result.problems.join('; ')}`);
+      assert.equal(puzzle.stage, stageFor(plays));
+    });
+  }
+});
+
+test('the split round always has more than 5 rows to split', () => {
+  everyDay((key) => {
+    const split = generate(seedForDay(key), 14).rounds[2];
+    assert.ok(split.rows > SPLIT_AT && split.rows <= BIG_ROWS[1]);
+  });
+});
+
+test('the harder facts show up once the 6s to 9s start', () => {
+  const sizes = new Set();
+  everyDay((key) => { for (const r of generate(seedForDay(key), 14).rounds) sizes.add(r.size); }, 60);
+  for (const n of [6, 7, 8, 9]) assert.ok(sizes.has(n), `${n}s`);
+});
+
+test('the same day and stage always make the same rounds', () => {
+  assert.deepEqual(generate(seedForDay('2026-11-13'), 0), sample);
+});
+
+test('verify catches a missing right answer', () => {
+  const broken = structuredClone(sample);
+  broken.rounds[0].choices = [1, 2, 3];
+  assert.equal(verify(broken).ok, false);
+});
+
+test('the right totals win all 3 rounds; a miss stays put', () => {
+  let state = start(sample);
+  state = check(state, total(sample.rounds[0]) + 1);
+  assert.equal(state.round, 0);
+  assert.equal(state.last.correct, false);
+  for (const round of sample.rounds) state = check(state, total(round));
+  assert.equal(state.status, 'won');
+  assert.equal(state.round, ROUNDS.length);
+});
+
+test('hints point at the rows, the turn, or the two parts', () => {
+  const [add, turn, split] = sample.rounds;
+  assert.match(hint(add, total(add) - add.size), /Count the rows/);
+  assert.match(hint(add, total(add) + add.size), /too many/);
+  assert.match(hint(turn, 0), /Turning/);
+  assert.match(hint(split, 0), new RegExp(`${SPLIT_AT * split.size} \\+ ${(split.rows - SPLIT_AT) * split.size}`));
+});

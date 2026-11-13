@@ -2682,7 +2682,7 @@ button.fs-word {
 }
 
 
-/* ---------- Bug Groups ---------- */
+/* ---------- Bug Groups (Garden Rows uses these too) ---------- */
 /* Orange (--numbers-ink) is always how many groups; teal (--size-ink) is
    always how many in each group, in the pictures and in the facts. */
 
@@ -2874,6 +2874,98 @@ button.grp-pad { cursor: pointer; }
 .bugs-art i {
   width: 8px;
   height: 8px;
+  border-radius: 50%;
+  background: var(--here);
+  border: 1px solid #1d3b34;
+}
+
+/* ---------- Garden Rows ---------- */
+/* Each row is a group: a counted row gets an orange outline. */
+
+.gr-garden {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--bank);
+}
+
+.gr-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  font: inherit;
+}
+
+button.gr-row {
+  min-height: 44px; /* with the gaps between rows, about a 48px tap */
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.gr-row-lit { border-color: var(--numbers); }
+
+/* Tall gardens: smaller seeds and tighter rows so 10 rows fit a phone. */
+.gr-garden-tall { gap: 1px; padding: 6px; }
+.gr-garden-tall .gr-row { padding: 1px 6px; gap: 4px; }
+.gr-garden-tall .gr-seed { width: 13px; height: 13px; }
+.gr-garden-tall .gr-row-split { margin-top: 8px; }
+
+/* Rows to tap are wide, so they're easy to hit. */
+.gr-garden-tap { min-width: 180px; }
+
+/* The split round: the rows after the first 5 sit a little apart. */
+.gr-row-split { margin-top: 10px; }
+.gr-row-part { background: rgb(255 138 92 / 0.25); }
+
+.gr-seed {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--here);
+  border: 2px solid #1d3b34;
+}
+
+.gr-box { transition: transform 600ms ease-in-out; }
+.gr-turning { transform: rotate(90deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gr-box { transition: none; }
+}
+
+.gr-turn { min-width: 160px; }
+
+.gr-parts {
+  display: flex;
+  gap: 18px;
+}
+
+.gr-part {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* Home card art: a little garden of seeds. */
+.garden-art {
+  display: grid;
+  grid-template-columns: repeat(3, 10px);
+  gap: 4px;
+  padding: 6px;
+  border-radius: 8px;
+  background: var(--bank);
+}
+
+.garden-art i {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--here);
   border: 1px solid #1d3b34;

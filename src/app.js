@@ -198,6 +198,7 @@ const GAMES = {
   'number-line': { title: 'Number Line Hop', legend: 'Where will the frog land?' },
   'fact-families': { title: 'Fact Families', legend: 'Three numbers make four facts. Drag them in!' },
   'bug-groups': { title: 'Bug Groups', legend: 'Equal groups make times facts', data: () => [playsBefore('bug-groups')] },
+  'garden-rows': { title: 'Garden Rows', legend: 'Rows of seeds make times facts', data: () => [playsBefore('garden-rows')] },
   'find-the-mistake': { title: 'Find the Mistake', legend: 'The frog got one step wrong. Find it and fix it!' },
   'word-problems': { title: 'Think It Through', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')] },
   maze: { title: 'Maze', legend: 'Trace from the green dot to the star', data: () => [LEVEL] },
