@@ -2970,3 +2970,126 @@ button.gr-row {
   background: var(--here);
   border: 1px solid #1d3b34;
 }
+
+/* ---------- Spell It ---------- */
+/* Right answers use .grp-right (a teal ring and a check mark). The letter
+   keyboard uses Mystery Word's .wg-key styles. */
+
+.sp-ask {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.sp-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.sp-sentence {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.sp-blank {
+  display: inline-block;
+  min-width: 70px;
+  border-bottom: 3px solid var(--words-ink);
+}
+
+.sp-filled {
+  color: var(--words-ink);
+  font-weight: 800;
+}
+
+.sp-hear {
+  padding: 0 18px;
+  color: var(--words-ink);
+}
+
+.sp-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.sp-choice {
+  min-width: 84px;
+  padding: 0 12px;
+  font-size: 1.3rem;
+}
+
+/* The word with blanks, like "tr _ _ n". */
+.sp-shape {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.sp-shape-done { color: var(--words-ink); }
+
+.sp-boxes {
+  display: flex;
+  gap: 6px;
+}
+
+.sp-box {
+  width: 46px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+/* A right letter: teal with a small check, not color alone. */
+.sp-box-right {
+  position: relative;
+  border-color: var(--here);
+  background: var(--here);
+  color: #ffffff;
+}
+
+.sp-box-right::after {
+  content: "✓";
+  position: absolute;
+  top: -2px;
+  right: 3px;
+  font-size: 0.7rem;
+}
+
+.sp-keyboard { width: 100%; margin-top: 6px; }
+
+/* Home card art: a word with one letter missing. */
+.spell-art {
+  display: flex;
+  gap: 2px;
+}
+
+.spell-art span {
+  width: 18px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--words);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.spell-art .spell-art-blank {
+  background: var(--surface);
+  color: var(--words-ink);
+  border: 2px solid var(--words);
+}
