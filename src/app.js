@@ -194,6 +194,7 @@ const GAMES = {
   'word-clues': { title: 'Word Clues', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY] },
   'spell-it': { title: 'Spell It', legend: 'Listen, look, and spell', data: () => [part('spelling', 'words'), DAY] },
   'fix-sentence': { title: 'Fix the Sentence', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY] },
+  'end-marks': { title: 'End Marks', legend: 'Telling, asking, or a strong feeling?', data: () => [loadJson('data/end-marks.json'), DAY] },
   'number-pyramid': { title: 'Number Pyramid', legend: 'Each brick = the two bricks under it, added', data: () => [LEVEL] },
   'magic-square': { title: 'Magic Square', legend: 'Rows, columns, and diagonals all add up the same', data: () => [LEVEL] },
   'number-line': { title: 'Number Line Hop', legend: 'Where will the frog land?' },
