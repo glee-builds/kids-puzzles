@@ -3,10 +3,10 @@
   "name": "Short vowels with blends",
   "about": "Four-letter words with one short vowel, built with blends and letter pairs (fr, st, sh, ch, th, ck). Grouped by vowel to make review easier.",
   "words": {
-    "a": ["back", "band", "bath", "camp", "clap", "crab", "flag", "glad", "grab", "hand", "lamp", "land", "mask", "math", "path", "plan", "sand", "snap", "swam", "that"],
-    "e": ["bell", "belt", "bend", "best", "desk", "help", "left", "melt", "nest", "next", "rest", "sled", "step", "tent", "test", "then", "vest", "well", "west", "when"],
-    "i": ["chip", "crib", "dish", "drip", "fish", "gift", "grin", "hill", "kick", "kiss", "lift", "milk", "mint", "pink", "ship", "sing", "sink", "skip", "slip", "swim", "this", "trip", "wind", "wish", "with"],
-    "o": ["chop", "crop", "doll", "drop", "flop", "frog", "golf", "lock", "long", "moth", "plot", "pond", "rock", "shop", "sock", "song", "spot", "stop"],
-    "u": ["bump", "club", "drum", "duck", "dust", "gulp", "hunt", "hush", "jump", "just", "much", "must", "plug", "plum", "puff", "rush", "snug", "such", "tuck"]
+    "a": ["back", "band", "bath", "camp", "cash", "clam", "clap", "crab", "damp", "fast", "flag", "flap", "gasp", "glad", "grab", "hand", "lamp", "land", "last", "mash", "mask", "math", "pant", "path", "plan", "raft", "sack", "sand", "slam", "snap", "swam", "tack", "that", "trap"],
+    "e": ["bell", "belt", "bend", "bent", "best", "deck", "desk", "fell", "held", "help", "kept", "left", "lend", "melt", "neck", "nest", "next", "rest", "sent", "shed", "sled", "stem", "step", "tell", "tent", "test", "then", "vest", "well", "west", "when", "yell"],
+    "i": ["chip", "clip", "crib", "dish", "drip", "film", "fish", "fist", "gift", "grin", "grip", "hill", "kick", "king", "kiss", "lift", "list", "milk", "mint", "mist", "pick", "pink", "ring", "ship", "silk", "sing", "sink", "skip", "slid", "slip", "spin", "swim", "this", "trip", "twin", "wind", "wing", "wish", "with"],
+    "o": ["blob", "bond", "chop", "cost", "crop", "dock", "doll", "drop", "flop", "frog", "golf", "lock", "long", "lost", "moth", "plop", "plot", "pond", "prop", "rock", "shop", "slot", "sock", "soft", "song", "spot", "stop", "trot"],
+    "u": ["bump", "bunk", "club", "drum", "duck", "dusk", "dust", "grub", "gulp", "gust", "hung", "hunt", "hush", "jump", "just", "lump", "much", "must", "plug", "plum", "puff", "pump", "rush", "rust", "shut", "slug", "snug", "stub", "such", "tuck", "tusk"]
   }
 }
