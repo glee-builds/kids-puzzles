@@ -171,6 +171,12 @@ const LEVEL = Math.min(3, 1 + Math.floor(daysBeforeToday / DAYS_PER_LEVEL));
 // this date, so none repeats until the whole deck has been used.
 const DAY = progressStore.daysBetween('2026-01-01', playDay);
 
+// The multiplication puzzles grow with how many days each has been played
+// (see src/times.js). Today doesn't count yet, so a puzzle never changes
+// partway through a day.
+const playsBefore = (game) =>
+  (progress.plays?.[game] || 0) - (progressStore.isFinished(progress, playDay, game) ? 1 : 0);
+
 // Every game, by the name used in its address (#maze) and in saved
 // progress. Each has:
 //   title, legend  shown at the top of its screen
@@ -191,6 +197,7 @@ const GAMES = {
   'magic-square': { title: 'Magic Square', legend: 'Rows, columns, and diagonals all add up the same', data: () => [LEVEL] },
   'number-line': { title: 'Number Line Hop', legend: 'Where will the frog land?' },
   'fact-families': { title: 'Fact Families', legend: 'Three numbers make four facts. Drag them in!' },
+  'bug-groups': { title: 'Bug Groups', legend: 'Equal groups make times facts', data: () => [playsBefore('bug-groups')] },
   'find-the-mistake': { title: 'Find the Mistake', legend: 'The frog got one step wrong. Find it and fix it!' },
   'word-problems': { title: 'Think It Through', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')] },
   maze: { title: 'Maze', legend: 'Trace from the green dot to the star', data: () => [LEVEL] },

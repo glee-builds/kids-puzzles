@@ -20,6 +20,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Daily puzzles:** generated in the browser using today's date as a seed (`src/seed.js`). Same date, same puzzles. No server, no database.
 - **Levels:** Number Pyramid, Magic Square, and the Maze get harder as the pond grows: level 2 after 30 puzzle days, level 3 after 60 (`LEVEL` in `src/app.js`; each game's `LEVELS`). Same date and same level, same puzzle. Level 1 is the original puzzle.
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
+- **Times puzzles:** Bug Groups (and Garden Rows) pick group sizes from `src/times.js`, growing with how many days that puzzle has been played (`playsBefore` in `src/app.js`). Orange text means how many groups; teal (`--size-ink`) means how many in each.
 - **Yesterday's puzzles:** after a missed day, the home screen links to `?day=yesterday`, which plays that day's puzzles; finishing one fills in the missed day (`playDay` in `src/app.js`, catching up in `src/progress.js`). Only yesterday.
 - **Difficulty:** lives in data, not code. Hand-curated word lists by level in `data/words/` (JSON).
 - **Game modules:** each game is one file in `src/games/` that exports:
@@ -57,6 +58,7 @@ src/app.js          the GAMES list, game screens, streak, navigation
 src/seed.js         date -> repeatable random numbers
 src/games/          one file per game
 src/ui.js           screen helpers the games share (buttons, tracing, drag-or-tap)
+src/times.js        which times facts the multiplication puzzles use, by stage
 sw.js               service worker: offline play, newest files when online
 data/words/         curated word lists by level (JSON)
 tests/              one test file per game, plus seed tests; helpers.js has
