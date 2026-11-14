@@ -425,6 +425,16 @@ const GAMES = {
     how: ["Seeds grow in rows. Each row is a group.", "Add the rows, turn the garden, and split the big ones."],
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
+  'math-mix-ups': {
+    title: 'Math Mix-Ups', kind: 'everyday', legend: 'Puzzles that take some thinking', levels: 2, data: () => [levelFor('math-mix-ups'), DAY],
+    how: ["These take some thinking! Each shape stands for a number.", "Use what you know to work out what you don't."],
+    art: '<span class="mix-art"><i></i><b></b><u></u></span>',
+  },
+  'graph-it': {
+    title: 'Graph It', kind: 'everyday', legend: 'Read the graph, or make it', levels: 3, data: () => [levelFor('graph-it')],
+    how: ["A graph is a picture of numbers.", "Read the graph to answer, or make the graph that shows the story."],
+    art: '<span class="graph-art"><i></i><i></i><i></i></span>',
+  },
   'clock-time': {
     title: 'Clock Time', kind: 'everyday', legend: 'Read the hands to tell the time', levels: 3, data: () => [levelFor('clock-time')],
     how: ["The short hand points to the hour. The long hand points to the minutes.", "Pick the time the clock shows."],
