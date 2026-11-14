@@ -353,7 +353,7 @@ const GAMES = {
     art: '<span class="spell-art"><span>s</span><span>p</span><span class="spell-art-blank">_</span><span>l</span><span>l</span></span>',
   },
   'end-marks': {
-    title: 'End Marks', kind: 'words', legend: 'Telling, asking, or a strong feeling?', data: () => [loadJson('data/end-marks.json'), DAY],
+    title: 'End Marks', kind: 'words', legend: 'Telling, asking, or a strong feeling?', levels: 3, data: () => [loadJson('data/end-marks.json'), DAY, levelFor('end-marks')],
     how: ["Every sentence needs an end mark.", "A period tells. A question mark asks. An exclamation mark shows a strong feeling."],
     art: '<span class="marks-art"><span>.</span><span>?</span><span>!</span></span>',
   },

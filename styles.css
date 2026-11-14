@@ -3534,3 +3534,24 @@ button.gr-row {
   color: var(--muted);
   font-weight: 700;
 }
+
+/* End Marks, capitals round: each word is a button; a capitalized word is underlined and bold. */
+.em-caps { line-height: 1.2; }
+
+.em-cap {
+  min-height: 44px;
+  padding: 6px 5px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.em-cap-on {
+  border-color: var(--words-ink);
+  color: var(--words-ink);
+  font-weight: 800;
+}
