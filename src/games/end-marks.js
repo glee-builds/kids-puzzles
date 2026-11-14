@@ -299,7 +299,10 @@ export function render(container, puzzle, onDone) {
       if (!result.correct && !result.shown) return;
       lines.forEach((line, k) => {
         line.querySelector('.em-end').textContent = round.marks[k];
-        for (const b of line.querySelectorAll('button')) b.disabled = true;
+        [...line.querySelectorAll('button')].forEach((b, i) => {
+          b.disabled = true;
+          b.classList.toggle('em-picked', MARKS[i] === round.marks[k]); // show the right mark as picked
+        });
       });
       checkButton.remove();
       finishRound(result.correct ? '✓ Every sentence ends with the right mark!' : 'Here are the right marks. Read them out loud!');
