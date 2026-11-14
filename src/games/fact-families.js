@@ -216,13 +216,23 @@ const pretty = (fact) => fact.replace(/([+\-×÷=])/g, ' $1 ').replace('-', '−
  * once when finished: misses is how many wrong answers were given, and
  * helped is how many windows filled themselves in.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let misses = 0;             // wrong facts in the whole puzzle
   let viewHouse = 0;          // the house on screen (stays on a lit house until "Next")
   let boxes = [null, null, null]; // roof index (0 whole, 1 and 2 parts) in each box
   let busy = false;           // true while a fact is being judged
   let cheerCount = 0;
+  // Picking up a half-done puzzle: put back the lit windows, the misses, and the house on screen.
+  if (session.saved) {
+    const { misses: savedMisses, viewHouse: savedView, ...fields } = session.saved;
+    state = { ...state, ...fields };
+    misses = savedMisses;
+    viewHouse = savedView;
+  }
+  const keep = () => session.save?.({
+    house: state.house, lit: state.lit, tries: state.tries, revealed: state.revealed, misses, viewHouse,
+  });
 
   container.replaceChildren();
   container.classList.add('ff');
@@ -284,6 +294,7 @@ export function render(container, puzzle, onDone) {
   });
   const nextButton = button('lw-button lw-enter ff-action', 'Next house →', () => {
     viewHouse = state.house;
+    keep();
     message.textContent = '';
     draw();
   });
@@ -331,11 +342,12 @@ export function render(container, puzzle, onDone) {
     const { result } = state.last;
     // The 3rd miss on a window is 'shown': still a wrong fact.
     if (result === 'wrong' || result === 'shown') misses += 1;
+    if (state.status === 'playing') keep();
 
     if (result === 'lit' || result === 'shown') {
       if (result === 'shown') {
         // Put the fact that was filled in into the boxes so it can be read.
-        const made = state.lit[houseBefore].at(-1).split(/[+\-=]/).map(Number);
+        const made = state.lit[houseBefore].at(-1).split(/[+\-×÷=]/).map(Number);
         boxes = made.map((n) => numbers.indexOf(n));
         message.textContent = "Here's one. Let's keep going!";
       } else {

@@ -130,11 +130,22 @@ const CHEERS = ['You fixed it!', 'Sharp eyes!', 'Great editing!', 'You got it!']
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
  * once when finished: how many wrong answers, and how many answers were shown.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let cheerCount = 0;
   let misses = 0; // wrong answers in the whole puzzle
   let helped = 0; // wrong words the game showed after too many taps
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    const { index, phase, fine, findMisses, shown, tried } = session.saved;
+    state = { ...start(puzzle, index), phase, fine, findMisses, shown, tried };
+    misses = session.saved.misses;
+    helped = session.saved.helped;
+  }
+  const keep = () => {
+    const { index, phase, fine, findMisses, shown, tried } = state;
+    session.save?.({ index, phase, fine, findMisses, shown, tried, misses, helped });
+  };
 
   container.replaceChildren();
   container.classList.add('fs');
@@ -160,6 +171,7 @@ export function render(container, puzzle, onDone) {
     state = check(state, { tap: position });
     if (!state.last.correct) misses++;
     if (state.last.shown) helped++;
+    keep();
     if (state.last.correct) message.textContent = 'You found it! Now pick the right word.';
     else if (state.last.shown) message.textContent = 'That word is fine ✓. Here\'s the wrong one. Pick the right word.';
     else message.textContent = hint(state);
@@ -170,6 +182,7 @@ export function render(container, puzzle, onDone) {
     if (state.phase !== 'fix') return;
     state = check(state, { pick: word });
     if (!state.last.correct) misses++;
+    keep();
     message.textContent = state.last.correct
       ? `✓ ${CHEERS[cheerCount++ % CHEERS.length]} ${current(state).why}`
       : `↺ Not that one. ${hint(state)}`;
@@ -185,6 +198,7 @@ export function render(container, puzzle, onDone) {
       onDone({ status: state.status, misses, helped });
       return;
     }
+    keep();
     message.textContent = '';
     draw();
   }

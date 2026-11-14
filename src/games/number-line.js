@@ -152,12 +152,15 @@ const CHEERS = ['Hop! Yes!', 'Great counting!', 'You got it!', 'Nice jump!', 'Co
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
  * once when finished: how many wrong answers, and how many answers were shown.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
-  let typed = '';
-  let frogAt = puzzle.start;
-  let cheerCount = 0;
+  // Picking up a half-done puzzle: put back the hop it was on and the misses so far.
+  if (session.saved) state = { ...state, ...session.saved };
+  const keep = () => session.save?.({ hop: state.hop, tries: state.tries, revealed: state.revealed });
   const spots = positions(puzzle);
+  let typed = '';
+  let frogAt = spots[state.hop]; // the frog sits where the current hop starts
+  let cheerCount = 0;
 
   container.replaceChildren();
   container.classList.add('nl');
@@ -183,7 +186,7 @@ export function render(container, puzzle, onDone) {
 
   container.append(dots, line, card, message, pad);
 
-  let view = windowFor(spots[0], spots[1]);
+  let view = windowFor(spots[state.hop], spots[state.hop + 1]);
 
   function drawLine() {
     ticks.replaceChildren();
@@ -234,6 +237,7 @@ export function render(container, puzzle, onDone) {
     }
     state = check(state, Number(typed));
     typed = '';
+    if (state.status === 'playing') keep();
     const { hop, correct, revealed } = state.last;
 
     if (correct || revealed) {

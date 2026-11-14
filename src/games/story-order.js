@@ -126,7 +126,7 @@ const ORDINALS = ['first', 'second', 'third', 'last'];
  * once when finished: misses is how many wrong orders were tried and
  * helped is how many times Hint was pressed.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let slots = Array(SENTENCES).fill(null); // sentence position in each slot
   let busy = false;
@@ -134,6 +134,16 @@ export function render(container, puzzle, onDone) {
   let shownIndex = 0;  // the story on screen
   let cheerCount = 0;
   let misses = 0; // wrong orders, counted across both stories
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    const { index, locked, hints } = session.saved;
+    state = { ...state, index, locked, hints };
+    misses = session.saved.misses;
+    reading = session.saved.reading;
+    shownIndex = reading ? index - 1 : index; // while reading, the story just finished is on screen
+    slots = locked.map((isLocked, k) => (isLocked ? k : null)); // a locked spot holds its own sentence
+  }
+  const keep = () => session.save?.({ index: state.index, locked: state.locked, hints: state.hints, misses, reading });
 
   container.replaceChildren();
   container.classList.add('so');
@@ -159,6 +169,7 @@ export function render(container, puzzle, onDone) {
     reading = false;
     shownIndex = state.index;
     slots = Array(SENTENCES).fill(null);
+    keep();
     draw();
   });
   buttons.append(hintButton, nextButton);
@@ -208,6 +219,8 @@ export function render(container, puzzle, onDone) {
     if (slots.every((s) => s !== null)) {
       busy = true;
       setTimeout(submit, 350);
+    } else {
+      keep();
     }
   }
 
@@ -224,10 +237,12 @@ export function render(container, puzzle, onDone) {
         onDone({ status: state.status, misses, helped: state.hints });
         return;
       }
+      keep();
       draw();
       return;
     }
     misses += 1;
+    keep();
     const right = state.last.marks.filter(Boolean).length;
     slots = slots.map((s, k) => (state.locked[k] ? s : null));
     message.textContent = right > 0
@@ -271,6 +286,6 @@ export function render(container, puzzle, onDone) {
     nextButton.hidden = !(reading && state.status === 'playing');
   }
 
-  message.textContent = 'Tap what happens first.';
+  message.textContent = reading ? CHEERS[0] : promptText();
   draw();
 }
