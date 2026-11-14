@@ -258,7 +258,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['letter-scramble', 'word-search', 'spell-it', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows', 'maze'];
+const TOP_LEVELS = ['letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows', 'maze'];
 
 // How each played puzzle should be rated, given how PLAYS plays it.
 const EXPECTED = {
