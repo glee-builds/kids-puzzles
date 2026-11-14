@@ -3093,3 +3093,160 @@ button.gr-row {
   color: var(--words-ink);
   border: 2px solid var(--words);
 }
+
+/* ---------- End Marks ---------- */
+/* Right answers use .grp-right (a teal ring and a check mark). */
+
+.em-ask {
+  margin: 4px 0 8px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.em-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.em-sentence {
+  margin: 6px 0;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* The empty spot at the end of a sentence, then the mark that fills it. */
+.em-end {
+  display: inline-block;
+  min-width: 22px;
+  margin-left: 2px;
+  border-bottom: 3px solid var(--words-ink);
+  color: var(--words-ink);
+  font-weight: 800;
+  text-align: center;
+}
+
+.em-end-done { border-color: transparent; }
+
+.em-marks {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.em-mark {
+  width: 92px;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+.em-mark b { font-size: 2rem; }
+
+.em-mark small {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.em-mark-small {
+  width: 52px;
+  min-height: 48px;
+}
+
+.em-mark-small b { font-size: 1.6rem; }
+
+.em-picked {
+  border-color: var(--words-ink);
+  box-shadow: 0 0 0 2px var(--words-ink);
+}
+
+/* Stuck-together sentences: words with a tap spot between each pair. */
+.em-run {
+  margin: 0;
+  font-size: 1.3rem;
+  line-height: 2.4;
+  text-align: center;
+}
+
+.em-spot {
+  display: inline-block;
+  width: 30px; /* narrow, to keep the words together, but tall to tap */
+  height: 44px;
+  margin: 0 2px;
+  padding: 0;
+  vertical-align: middle;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--words-ink);
+  font: inherit;
+  font-weight: 800;
+  line-height: 38px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* A chosen spot: a solid line and a bar, not color alone. */
+.em-spot-on {
+  border-style: solid;
+  border-color: var(--words-ink);
+}
+
+.em-spot-last { cursor: default; }
+
+.em-check { width: 100%; }
+
+.em-line {
+  width: 100%;
+  padding: 6px 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+}
+
+.em-line-text {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+.em-marks-small { gap: 8px; }
+
+/* A sentence with the right mark: a teal ring and a check. */
+.em-line-right {
+  position: relative;
+  border-color: var(--here);
+}
+
+.em-line-right::after {
+  content: "✓";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  color: var(--here);
+  font-weight: 800;
+}
+
+/* Home card art: the three end marks. */
+.marks-art {
+  display: flex;
+  gap: 4px;
+}
+
+.marks-art span {
+  width: 22px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--words);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
