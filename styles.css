@@ -2976,7 +2976,7 @@ button.gr-row {
 /* Right answers use .grp-right (a teal ring and a check mark). The letter
    keyboard uses Mystery Word's .wg-key styles. */
 
-.sp-ask {
+.sp-question {
   margin: 4px 0 6px;
   text-align: center;
   font-size: 1.15rem;
@@ -3098,7 +3098,7 @@ button.gr-row {
 /* ---------- End Marks ---------- */
 /* Right answers use .grp-right (a teal ring and a check mark). */
 
-.em-ask {
+.em-question {
   margin: 4px 0 8px;
   text-align: center;
   font-size: 1.15rem;

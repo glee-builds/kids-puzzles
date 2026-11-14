@@ -2,7 +2,7 @@
 //
 // Each game draws its own screen; these are the pieces several games need
 // the same way: making elements, a message line, the "not quite" wiggle,
-// progress dots, the number pad, the letter keyboard, finger tracing on a
+// progress dots, the frame for rounds, the number pad, the letter keyboard, finger tracing on a
 // grid, and drag-or-tap.
 
 /** A new element, e.g. make('p', 'ws-message', 'Hello'). */
@@ -92,6 +92,52 @@ export function numberPad(container, { onDigit, onErase, onCheck }, extraClass =
     else if (event.key === 'Enter') onCheck();
   });
   return { node, stop };
+}
+
+/**
+ * The frame that puzzles with several rounds share: progress dots, a
+ * question, a play area, a message line, and a Next button.
+ *   count   how many rounds
+ *   prefix  for the class names: `${prefix}-question`, -stage, -message
+ *   draw    draw(round) fills in the question and play area for a round
+ * Returns { question, stage, message, begin, finish }:
+ *   begin(round)                    clear the frame and draw that round
+ *   finish(text, nextRound, onDone) show `text`; then the Next button goes
+ *                                   on to nextRound, or, after the last
+ *                                   round, onDone() is called
+ */
+export function roundFrame(container, { count, prefix, draw }) {
+  const dots = progressDots(count);
+  const question = make('div', `${prefix}-question`);
+  const stage = make('div', `${prefix}-stage`);
+  const message = liveMessage(`${prefix}-message`, '');
+  let upNext = 0;
+  const nextButton = button('button next-button', 'Next', () => begin(upNext));
+  nextButton.hidden = true;
+  container.append(dots.node, question, stage, message, nextButton);
+
+  function begin(round) {
+    nextButton.hidden = true;
+    message.textContent = '';
+    stage.replaceChildren();
+    question.replaceChildren();
+    dots.update((i) => i < round, round);
+    draw(round);
+  }
+
+  function finish(text, nextRound, onDone) {
+    message.textContent = text;
+    upNext = nextRound;
+    dots.update((i) => i < nextRound, nextRound);
+    if (nextRound >= count) {
+      container.classList.add('finished');
+      onDone();
+    } else {
+      nextButton.hidden = false;
+    }
+  }
+
+  return { question, stage, message, begin, finish };
 }
 
 // QWERTY rows, like a phone or computer keyboard.

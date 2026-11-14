@@ -13,7 +13,7 @@
 // its deck is used up (60 days).
 
 import { createRandom, dealForDay } from '../seed.js';
-import { make, button, liveMessage, wiggle, progressDots } from '../ui.js';
+import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const MARKS = ['.', '?', '!'];
 export const MARK_NAMES = { '.': 'telling', '?': 'asking', '!': 'strong feeling' };
@@ -152,26 +152,19 @@ export function render(container, puzzle, onDone) {
   container.replaceChildren();
   container.classList.add('em');
 
-  const dots = progressDots(puzzle.rounds.length);
-  const question = make('p', 'em-ask');
-  const stage = make('div', 'em-stage');
-  const message = liveMessage('em-message', '');
-  const nextButton = button('button next-button', 'Next', () => drawRound());
-  nextButton.hidden = true;
-  container.append(dots.node, question, stage, message, nextButton);
+  const frame = roundFrame(container, {
+    count: puzzle.rounds.length,
+    prefix: 'em',
+    draw(i) {
+      const round = puzzle.rounds[i];
+      ({ mark: drawMark, breaks: drawBreaks, marks: drawMarks })[round.kind](round);
+    },
+  });
+  const { question, stage, message } = frame;
 
   const roundNumber = (round) => puzzle.rounds.indexOf(round);
 
-  function finishRound(text) {
-    message.textContent = text;
-    dots.update((i) => i < state.round, state.round);
-    if (state.status === 'won') {
-      container.classList.add('finished');
-      onDone({ status: state.status });
-      return;
-    }
-    nextButton.hidden = false;
-  }
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status }));
 
   function answer(round, value, node) {
     if (state.round !== roundNumber(round)) return null;
@@ -190,15 +183,6 @@ export function render(container, puzzle, onDone) {
     if (!small) node.append(make('small', '', MARK_NAMES[mark]));
     node.setAttribute('aria-label', `${MARK_NAMES[mark]}: ${{ '.': 'period', '?': 'question mark', '!': 'exclamation mark' }[mark]}`);
     return node;
-  }
-
-  function drawRound() {
-    nextButton.hidden = true;
-    message.textContent = '';
-    stage.replaceChildren();
-    dots.update((i) => i < state.round, state.round);
-    const round = puzzle.rounds[state.round];
-    ({ mark: drawMark, breaks: drawBreaks, marks: drawMarks })[round.kind](round);
   }
 
   // 1–3. Pick the end mark for one sentence.
@@ -310,5 +294,5 @@ export function render(container, puzzle, onDone) {
     stage.append(...lines, checkButton);
   }
 
-  drawRound();
+  frame.begin(0);
 }

@@ -4,6 +4,7 @@
 // starts the app, opens the home screen and every puzzle at phone size
 // (today's and yesterday's), and fails if a screen doesn't draw, shows the
 // "Oops" message, logs an error, or (for a puzzle) doesn't fit the screen.
+// Some puzzles (see PLAYS below) are also played all the way to the end.
 //
 // The check always plays the same date (2026-11-13), so it gives the same
 // result every day. To look at other days too (only whether each puzzle
@@ -159,12 +160,83 @@ async function open(address, ready) {
   return false;
 }
 
+// ---------- Playing a puzzle to the end ----------
+
+// Each of these runs inside the page and plays one puzzle until it is
+// finished, the way a player would: tapping buttons and typing. `G` is the
+// puzzle's area on the screen. Puzzles not listed here are only opened.
+const HELPERS = `
+  const wait = (ms = 120) => new Promise((resolve) => setTimeout(resolve, ms));
+  const key = (k) => document.dispatchEvent(new KeyboardEvent('keydown', { key: k }));
+  const type = async (text) => { for (const ch of String(text)) key(ch); key('Enter'); await wait(); };
+  const message = () => G.querySelector('.message')?.textContent || '';
+  const next = async () => { G.querySelector('.next-button:not([hidden])')?.click(); await wait(); };
+  // Tap each of these buttons until one is right (the message starts with a check mark).
+  const tapUntilRight = async (selector) => {
+    for (const choice of G.querySelectorAll(selector)) {
+      if (choice.disabled) continue;
+      choice.click();
+      await wait();
+      if (message().startsWith('✓')) return;
+    }
+  };
+  const seed = await import('/src/seed.js');
+  const today = seed.dateKey();
+  const dayNumber = Math.round((new Date(today) - new Date('2026-01-01')) / 86400000);
+`;
+const PLAYS = {
+  'number-line': `
+    const game = await import('/src/games/number-line.js');
+    const spots = game.positions(game.generate(seed.seedFor(today, 'number-line')));
+    for (const spot of spots.slice(1)) await type(spot);`,
+  'mystery-word': `
+    for (let guess = 0; guess < 6; guess++) { await type('zzzzz'); await wait(350); }`,
+  'bug-groups': `
+    await tapUntilRight('.grp-picture'); await next();
+    for (const pad of G.querySelectorAll('button.grp-pad')) pad.click();
+    await wait();
+    await tapUntilRight('.grp-choice'); await next();
+    const [, pads, bugs] = G.querySelector('.grp-ask').textContent.match(/(\\d+) × (\\d+)/);
+    const more = G.querySelectorAll('[aria-label^="More"]');
+    for (let i = 1; i < Number(pads); i++) more[0].click();
+    for (let i = 1; i < Number(bugs); i++) more[1].click();
+    G.querySelector('.grp-check').click();`,
+  'garden-rows': `
+    for (const row of G.querySelectorAll('button.gr-row')) row.click();
+    await wait();
+    await tapUntilRight('.grp-choice'); await next();
+    G.querySelector('.gr-turn').click(); await wait(900);
+    await tapUntilRight('.grp-choice'); await next();
+    await tapUntilRight('.grp-choice');`,
+  'spell-it': `
+    const game = await import('/src/games/spell-it.js');
+    const { words } = await (await fetch('/data/spelling.json')).json();
+    const rounds = game.generate(seed.seedFor(today, 'spell-it'), words, dayNumber).rounds;
+    for (const round of rounds) {
+      if (round.kind === 'spell') { await type('zzzzz'); await type(round.word); } // one miss, then right
+      else await tapUntilRight('.sp-choice');
+      await next();
+    }`,
+  'end-marks': `
+    for (let round = 0; round < 3; round++) { await tapUntilRight('.em-mark'); await next(); }
+    for (let tries = 0; tries < 3; tries++) {            // three misses: the answer is shown
+      G.querySelector('.em-spot:not(:disabled)')?.click();
+      G.querySelector('.em-check')?.click(); await wait();
+      G.querySelector('.em-spot-on:not(:disabled)')?.click();
+    }
+    await next();
+    for (let tries = 0; tries < 3 && G.querySelector('.em-check'); tries++) {
+      for (const line of G.querySelectorAll('.em-line')) line.querySelector('button').click();
+      G.querySelector('.em-check').click(); await wait();
+    }`,
+};
+
 // ---------- The checks ----------
 
 const problems = [];
 let checked = 0;
 
-async function checkScreen(label, address, { ready, fits }) {
+async function checkScreen(label, address, { ready, fits, play }) {
   checked++;
   const ok = await open(address, ready);
   await sleep(150); // let anything late (fonts, a first draw) settle
@@ -177,9 +249,19 @@ async function checkScreen(label, address, { ready, fits }) {
     const height = await evaluate('document.documentElement.scrollHeight');
     if (height > PHONE.height) found.push(`is ${height}px tall, taller than a ${PHONE.height}px phone screen`);
   }
+  if (ok && play) {
+    try {
+      await evaluate(`(async () => { const G = document.getElementById('game-${play}'); ${HELPERS} ${PLAYS[play]} })()`);
+      await sleep(900); // the celebration card comes up a moment after the last answer
+      if (await evaluate('document.getElementById("done").hidden')) found.push('was played to the end, but the celebration card did not appear');
+      else if (await evaluate('document.getElementById("gift").hidden')) found.push('finished, but there was no gift');
+    } catch (error) {
+      found.push(`could not be played: ${String(error.message).split('\n')[0]}`);
+    }
+  }
   for (const error of errors) found.push(`logged an error: ${String(error).split('\n')[0]}`);
   if (found.length) problems.push(`${label}: ${found.join('; ')}`);
-  console.log(`${found.length ? '✗' : '✓'} ${label}`);
+  console.log(`${found.length ? '✗' : '✓'} ${label}${play ? ' (played to the end)' : ''}`);
 }
 
 try {
@@ -193,7 +275,7 @@ try {
       const label = `${game}${day ? ' (yesterday)' : ''}`;
       // Drawn means: the "Getting today's puzzle" line is gone and something replaced it.
       const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
-      await checkScreen(label, `${day}#${game}`, { ready, fits: true });
+      await checkScreen(label, `${day}#${game}`, { ready, fits: true, play: !day && PLAYS[game] ? game : null });
     }
   }
   await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-sticker").length > 100' });
