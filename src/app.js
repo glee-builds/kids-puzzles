@@ -192,6 +192,7 @@ const GAMES = {
   'word-search': { title: 'Word Search', legend: 'Find the hidden words', data: () => [part('search-themes', 'themes'), DAY] },
   'word-ladder': { title: 'Word Ladder', legend: 'Change one letter at a time', data: () => [words('ladder'), words('level-1', 'level-2')] },
   'word-clues': { title: 'Word Clues', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY] },
+  'spell-it': { title: 'Spell It', legend: 'Listen, look, and spell', data: () => [part('spelling', 'words'), DAY] },
   'fix-sentence': { title: 'Fix the Sentence', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY] },
   'number-pyramid': { title: 'Number Pyramid', legend: 'Each brick = the two bricks under it, added', data: () => [LEVEL] },
   'magic-square': { title: 'Magic Square', legend: 'Rows, columns, and diagonals all add up the same', data: () => [LEVEL] },
