@@ -111,7 +111,9 @@ export function levelOf(progress, game, day, startLevel = 1) {
  */
 export function recordResult(progress, day, game, result, { maxLevel = 1, startLevel = 1 } = {}) {
   const level = progress.levels?.[game]?.now ?? startLevel;
-  const history = [...(progress.results?.[game] || []), { day, score: rate(result), level }].slice(-RESULTS_KEPT);
+  // `items` is how many words or facts the puzzle practiced, if it says (for the weekly look back).
+  const entry = { day, score: rate(result), level, ...(result?.practiced && { items: result.practiced.length }) };
+  const history = [...(progress.results?.[game] || []), entry].slice(-RESULTS_KEPT);
   const results = { ...progress.results, [game]: history };
 
   // The days in a row at this level, newest last.
@@ -181,6 +183,18 @@ export function weekSummary(progress, today) {
     }
   }
   return { puzzles, days };
+}
+
+/** How many words or facts these puzzles practiced in the last 7 days, ending on `today`. */
+export function itemsThisWeek(progress, today, games) {
+  let items = 0;
+  for (const game of games) {
+    for (const entry of progress.results?.[game] || []) {
+      const ago = daysBetween(entry.day, today);
+      if (ago >= 0 && ago < 7) items += entry.items || 0;
+    }
+  }
+  return items;
 }
 
 /** Remember that a puzzle's "How to play" card was read. Returns new progress. */
