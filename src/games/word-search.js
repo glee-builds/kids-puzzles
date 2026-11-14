@@ -4,9 +4,11 @@
 // shuffled order, so none repeats until all have been used) and 10 of its
 // words, hidden in a 15x15 grid. At level 1, words run across (left to
 // right) or down (top to bottom). Level 2 adds words on a slant, and level
-// 3 adds words written backward or upward. The player traces a word with a
-// finger, from either end. Found words turn teal in the grid and get a
-// check in the list.
+// 3 adds words written backward or upward. At level 4 the word list is
+// replaced by clues from data/search-clues.json ("A baby sheep. (4
+// letters)"), one at a time, so the player has to work out each word
+// before hunting for it. The player traces a word with a finger, from
+// either end. Found words turn teal in the grid and get a check in the list.
 //
 // The other squares are filled with letters from the day's words. A grid
 // is only used if every word appears exactly once, and if the filler
@@ -104,8 +106,12 @@ function layOut(random, words, level) {
   return { grid, placed };
 }
 
-/** Make today's puzzle from a seed, the themes, the day number, and the level (1 to 3). */
-export function generate(seed, themes, dayNumber, level = 1) {
+/**
+ * Make today's puzzle from a seed, the themes, the day number, and the
+ * level (1 to 4). `clues` is the clues file's list by theme name; it's
+ * used at level 4.
+ */
+export function generate(seed, themes, dayNumber, level = 1, clues = {}) {
   const random = createRandom(seed);
   const theme = themeForDay(themes, dayNumber);
 
@@ -124,7 +130,9 @@ export function generate(seed, themes, dayNumber, level = 1) {
     const letters = words.join('');
     for (let fill = 0; fill < 20; fill++) {
       const grid = layout.grid.map((row) => row.map((ch) => ch ?? random.pick(letters)));
-      const puzzle = { theme: theme.name, words, grid, placed: layout.placed, level };
+      // Level 4 shows a clue for each word, if this theme has them.
+      const themeClues = level >= 4 && clues[theme.name] ? Object.fromEntries(words.map((w) => [w, clues[theme.name][w]])) : null;
+      const puzzle = { theme: theme.name, words, grid, placed: layout.placed, level, ...(themeClues && { clues: themeClues }) };
       if (verify(puzzle).ok) return puzzle;
     }
   }
@@ -134,7 +142,13 @@ export function generate(seed, themes, dayNumber, level = 1) {
 /** Confirm a puzzle is valid: every word hidden exactly once, nothing unkind. */
 export function verify(puzzle) {
   const problems = [];
-  const { words, grid, placed, level = 1 } = puzzle;
+  const { words, grid, placed, level = 1, clues } = puzzle;
+  if (clues) {
+    for (const word of words) {
+      if (!clues[word]) problems.push(`${word} has no clue`);
+      else if (clues[word].toLowerCase().includes(word)) problems.push(`the clue for ${word} gives it away`);
+    }
+  }
   if (words.length !== WORDS_PER_DAY) problems.push(`there must be ${WORDS_PER_DAY} words`);
   if (grid.length !== SIZE || grid.some((row) => row.length !== SIZE)) problems.push(`grid must be ${SIZE}x${SIZE}`);
   if (grid.flat().some((ch) => !/^[a-z]$/.test(ch ?? ''))) problems.push('every square needs a letter');
@@ -213,9 +227,10 @@ export function check(state, cells) {
  * for a word lights its first letter; the next lights the whole word.
  * Returns { state, word, cells }.
  */
-export function hint(state) {
+export function hint(state, wanted) {
   if (state.status !== 'playing') return { state, word: null, cells: [] };
-  const word = state.puzzle.words.find((w) => !state.found.includes(w));
+  // The word asked for (the one whose clue is showing), or else the next one not found.
+  const word = wanted && !state.found.includes(wanted) ? wanted : state.puzzle.words.find((w) => !state.found.includes(w));
   const { cells } = state.puzzle.placed.find((p) => p.word === word);
   const again = state.hinted === word;
   return {
@@ -252,7 +267,7 @@ export function render(container, puzzle, onDone, session = {}) {
 
   const title = make('h2', 'ws-theme', puzzle.theme);
   const HOW = ['Trace a word across or down.', 'Words go across, down, or on a slant.', 'Across, down, slanted, or backward!'];
-  const message = liveMessage('ws-message', HOW[(puzzle.level || 1) - 1]);
+  const message = liveMessage('ws-message', puzzle.clues ? 'Work out each clue, then find the word!' : HOW[Math.min(puzzle.level || 1, HOW.length) - 1]);
 
   const grid = make('div', 'ws-grid');
   const cells = puzzle.grid.map((row, r) => row.map((ch, c) => {
@@ -270,19 +285,33 @@ export function render(container, puzzle, onDone, session = {}) {
     return [word, li];
   }));
 
+  // Level 4: one clue at a time in place of the word list. Tapping it shows another clue.
+  let clueWord = puzzle.words.find((word) => !state.found.includes(word));
+  const clueButton = button('lw-button ws-clue', '', () => {
+    const left = puzzle.words.filter((word) => !state.found.includes(word));
+    clueWord = left[(left.indexOf(clueWord) + 1) % left.length];
+    glow = [];
+    draw();
+  });
+  clueButton.hidden = !puzzle.clues;
+  list.hidden = Boolean(puzzle.clues);
+
   const hintButton = button('lw-button hint-button', 'Hint', () => {
-    const result = hint(state);
+    const result = hint(state, puzzle.clues ? clueWord : undefined);
     if (!result.word) return;
     state = result.state;
     keep();
     glow = result.cells;
-    message.textContent = result.cells.length === 1
-      ? `Look for ${result.word.toUpperCase()}. It starts at the glowing letter.`
-      : `${result.word.toUpperCase()} is glowing. Trace it!`;
+    // With clues, the first hint doesn't give the word away: just where it starts.
+    if (result.cells.length === 1) {
+      message.textContent = puzzle.clues ? 'The word starts at the glowing letter.' : `Look for ${result.word.toUpperCase()}. It starts at the glowing letter.`;
+    } else {
+      message.textContent = `${result.word.toUpperCase()} is glowing. Trace it!`;
+    }
     draw();
   });
 
-  container.append(title, message, grid, list, hintButton);
+  container.append(title, message, grid, clueButton, list, hintButton);
 
   trace(grid, {
     onStart(square) {
@@ -342,6 +371,16 @@ export function render(container, puzzle, onDone, session = {}) {
       li.setAttribute('aria-label', done ? `${word}, found` : word);
     }
     hintButton.disabled = state.status !== 'playing';
+    if (puzzle.clues) {
+      // Move on from a clue whose word has been found.
+      if (state.found.includes(clueWord)) clueWord = puzzle.words.find((word) => !state.found.includes(word));
+      const left = puzzle.words.length - state.found.length;
+      clueButton.disabled = state.status !== 'playing';
+      clueButton.textContent = clueWord
+        ? `${puzzle.clues[clueWord]} (${clueWord.length} letters)${left > 1 ? '  ↻' : ''}`
+        : 'Every clue is solved!';
+      clueButton.setAttribute('aria-label', clueWord ? `Clue: ${puzzle.clues[clueWord]} ${clueWord.length} letters. ${left} words left. Tap for another clue.` : 'Every clue is solved');
+    }
   }
 
   draw();

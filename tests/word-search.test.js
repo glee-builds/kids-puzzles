@@ -156,3 +156,39 @@ test('a backward word at level 3 is found by tracing from either end', () => {
   assert.equal(check(start(puzzle), backward.cells).last.result, 'found');
   assert.equal(check(start(puzzle), [...backward.cells].reverse()).last.result, 'found');
 });
+
+// --- level 4: clues ---
+
+const CLUES = JSON.parse(readFileSync(new URL('../data/search-clues.json', import.meta.url), 'utf8')).clues;
+
+test('every word of every theme has a short clue that does not give it away', () => {
+  for (const theme of THEMES) {
+    for (const word of theme.words) {
+      const clue = CLUES[theme.name]?.[word];
+      assert.ok(clue, `${theme.name}: ${word} has no clue`);
+      assert.ok(clue.length <= 44, `${theme.name}: the clue for ${word} is ${clue.length} characters`);
+      assert.ok(!clue.toLowerCase().includes(word), `${theme.name}: the clue for ${word} gives it away`);
+    }
+    assert.equal(new Set(theme.words.map((w) => CLUES[theme.name][w])).size, theme.words.length, `${theme.name}: two words share a clue`);
+  }
+});
+
+test('level 4 has the level 3 directions and a clue for each of the 10 words, every day for a year', () => {
+  everyDay((key, day) => {
+    const puzzle = generate(seedForDay(key), THEMES, day, 4, CLUES);
+    const result = verify(puzzle);
+    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assert.deepEqual(Object.keys(puzzle.clues).sort(), [...puzzle.words].sort());
+    assert.deepEqual(puzzle.grid, generate(seedForDay(key), THEMES, day, 3).grid);
+  }, 365);
+  assert.equal(generate(seedForDay('2026-11-08'), THEMES, 0, 3, CLUES).clues, undefined); // only level 4
+});
+
+test('a hint can be asked for the word whose clue is showing', () => {
+  const puzzle = generate(seedForDay('2026-11-08'), THEMES, 0, 4, CLUES);
+  const wanted = puzzle.words[5];
+  assert.equal(hint(start(puzzle), wanted).word, wanted);
+  assert.equal(hint(start(puzzle)).word, puzzle.words[0]);
+  const found = check(start(puzzle), placedCells(puzzle, wanted));
+  assert.equal(hint(found, wanted).word, puzzle.words[0]); // already found: the next one instead
+});
