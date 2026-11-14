@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS,
+  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, recordReview, dueItems, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS,
 } from '../src/progress.js';
 
 // A stand-in for the browser's localStorage, so tests run in Node.
@@ -256,4 +256,31 @@ test('trend: going well, needs practice, or nothing to say yet', () => {
   assert.equal(trend(days(emptyProgress(), 'maze', ['hard', 'easy', 'hard']), 'maze'), 'practice');
   assert.equal(trend(days(emptyProgress(), 'maze', ['hard', 'easy', 'easy']), 'maze'), null);
   assert.equal(trend(emptyProgress(), 'maze'), null);
+});
+
+// --- missed things come back ---
+
+test('a missed item comes back 2 days later, then 7 days after that, then is done', () => {
+  let p = recordReview(emptyProgress(), 'spell-it', 100, { practiced: ['whale', 'train'], missed: ['whale'] });
+  assert.deepEqual(dueItems(p, 'spell-it', 101), []);
+  assert.deepEqual(dueItems(p, 'spell-it', 102), ['whale']);
+  // Day 103: whale comes back and goes well.
+  p = recordReview(p, 'spell-it', 103, { practiced: ['whale', 'shark'], missed: [] });
+  assert.deepEqual(dueItems(p, 'spell-it', 109), []);
+  assert.deepEqual(dueItems(p, 'spell-it', 110), ['whale']);
+  // Day 110: goes well again, so it's finished.
+  p = recordReview(p, 'spell-it', 110, { practiced: ['whale'], missed: [] });
+  assert.deepEqual(p.review['spell-it'], []);
+});
+
+test('missing it again starts the wait over', () => {
+  let p = recordReview(emptyProgress(), 'bug-groups', 100, { practiced: ['4x3'], missed: ['4x3'] });
+  p = recordReview(p, 'bug-groups', 102, { practiced: ['4x3'], missed: ['4x3'] });
+  assert.deepEqual(p.review['bug-groups'], [{ item: '4x3', step: 0, due: 104 }]);
+});
+
+test('an item seen by chance before it is due keeps its date', () => {
+  let p = recordReview(emptyProgress(), 'spell-it', 100, { practiced: ['whale'], missed: ['whale'] });
+  p = recordReview(p, 'spell-it', 101, { practiced: ['whale'], missed: [] });
+  assert.deepEqual(dueItems(p, 'spell-it', 102), ['whale']);
 });

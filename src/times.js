@@ -29,3 +29,12 @@ export function choicesFor(answer, misses) {
   }
   return picked.sort((a, b) => a - b);
 }
+
+/** A times fact as saved for review: "4x3" means 4 groups of 3. */
+export const factKey = (groups, size) => `${groups}x${size}`;
+
+/** Read a saved fact back: "4x3" gives { groups: 4, size: 3 }. */
+export function parseFact(text) {
+  const [groups, size] = String(text).split('x').map(Number);
+  return { groups, size };
+}

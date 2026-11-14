@@ -16,7 +16,7 @@
 // facts.
 
 import { createRandom } from '../seed.js';
-import { stageFor, STAGES, choicesFor } from '../times.js';
+import { stageFor, STAGES, choicesFor, factKey, parseFact } from '../times.js';
 import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const ROUNDS = ['match', 'add', 'build'];
@@ -25,8 +25,11 @@ export const MAX_GROUPS = 5;
 export const MAX_PADS = 5;  // the + button stops here when building
 export const MAX_BUGS = 10; // bugs on one pad
 
-/** Make today's 3 rounds. `level` (1 to 3) picks the group sizes. */
-export function generate(seed, level = 1) {
+/**
+ * Make today's 3 rounds. `level` (1 to 3) picks the group sizes. `review`
+ * is a list of facts to bring back (see recordReview in src/progress.js).
+ */
+export function generate(seed, level = 1, review = []) {
   const random = createRandom(seed);
   const stage = stageFor(level);
   const { sizes } = STAGES[stage];
@@ -39,6 +42,15 @@ export function generate(seed, level = 1) {
     if (groups === size || facts.some((f) => f.groups === groups && f.size === size)) continue;
     facts.push({ groups, size });
   }
+
+  // Facts missed a few days ago (`review`, like "4x3") come back in the
+  // add and build rounds, up to 2 of them.
+  review.map(parseFact)
+    .filter(({ groups, size }) => groups >= MIN_GROUPS && groups <= MAX_GROUPS && size >= 2 && size <= MAX_BUGS && groups !== size)
+    .slice(0, 2)
+    .forEach((fact, i) => {
+      if (!facts.some((f) => f.groups === fact.groups && f.size === fact.size)) facts[1 + i] = { ...fact, review: true };
+    });
 
   const [m, a, b] = facts;
   // Match: the right picture, the turned-around one, and one with uneven groups.
@@ -123,7 +135,9 @@ export function verify(puzzle) {
     const { kind, groups, size } = round;
     if (kind !== ROUNDS[i]) problems.push(`round ${i + 1} should be ${ROUNDS[i]}`);
     if (groups < MIN_GROUPS || groups > MAX_GROUPS) problems.push(`round ${i + 1}: ${groups} groups`);
-    if (!sizes.includes(size)) problems.push(`round ${i + 1}: size ${size} isn't in stage ${stage + 1}`);
+    // A fact that came back for review can be from any level.
+    const sizeOk = round.review ? size >= 2 && size <= MAX_BUGS : sizes.includes(size);
+    if (!sizeOk) problems.push(`round ${i + 1}: size ${size} isn't in stage ${stage + 1}`);
     if (groups === size) problems.push(`round ${i + 1}: groups and size are both ${size}`);
     seen.add(`${groups}x${size}`);
     if (kind === 'match') {
@@ -177,6 +191,7 @@ function pad(count, className = 'grp-pad') {
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let misses = 0; // wrong answers in the whole puzzle (state.misses starts over each round)
+  const missed = new Set(); // the facts that had a wrong answer, so they come back another day
   container.replaceChildren();
   container.classList.add('grp');
 
@@ -190,13 +205,17 @@ export function render(container, puzzle, onDone) {
   });
   const { question, stage, message } = frame;
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status, misses, helped: 0 }));
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({
+    status: state.status, misses, helped: 0,
+    practiced: puzzle.rounds.map((round) => factKey(round.groups, round.size)), missed: [...missed],
+  }));
 
   function answer(value, node) {
     const round = puzzle.rounds[state.round];
     state = check(state, value);
     if (!state.last.correct) {
       misses += 1;
+      missed.add(factKey(round.groups, round.size));
       message.textContent = `Not quite. ${hint(round, value)}`;
       if (node) wiggle(node);
     }

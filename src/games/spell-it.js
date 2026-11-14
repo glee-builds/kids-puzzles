@@ -49,10 +49,17 @@ export function entryProblems(entry) {
 /**
  * Make today's 3 rounds. A word with a sound step goes in the middle round;
  * if none of today's words has one, that round is a second "spell it".
+ * `review` is a list of words to bring back (see recordReview in
+ * src/progress.js).
  */
-export function generate(seed, words, dayNumber) {
+export function generate(seed, words, dayNumber, review = []) {
   const random = createRandom(seed);
-  const today = wordsForDay(words, dayNumber);
+  let today = wordsForDay(words, dayNumber);
+  // Words missed a few days ago (`review`) come back in place of today's
+  // last words, up to 2 of them.
+  const back = review.map((word) => words.find((entry) => entry.word === word))
+    .filter((entry) => entry && !today.includes(entry)).slice(0, 2);
+  today = [...today.slice(0, today.length - back.length), ...back];
   const soundWord = today.find(hasSound);
   const others = today.filter((w) => w !== soundWord);
   const plan = soundWord
@@ -148,6 +155,7 @@ function sentenceLine(sentence, word) {
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let misses = 0; // wrong answers in the whole puzzle (state.tries starts over each round)
+  const missed = new Set(); // the words that had a wrong answer, so they come back another day
   container.replaceChildren();
   container.classList.add('sp');
 
@@ -169,7 +177,10 @@ export function render(container, puzzle, onDone) {
     return button('lw-button sp-hear', '🔊 Hear it', () => say(`${round.word}. ${full} ${round.word}.`));
   }
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status, misses, helped: state.shown.length }));
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({
+    status: state.status, misses, helped: state.shown.length,
+    practiced: puzzle.rounds.map((round) => round.word), missed: [...missed],
+  }));
 
   /** Choice buttons; `label` turns a choice into its text. */
   function choiceRow(round, values, label, onRight, wrongHint) {
@@ -180,6 +191,7 @@ export function render(container, puzzle, onDone) {
         state = check(state, value);
         if (!state.last.correct) {
           misses += 1;
+          missed.add(round.word);
           message.textContent = `Not quite. ${wrongHint(value)}`;
           wiggle(choice);
           return;
@@ -244,7 +256,10 @@ export function render(container, puzzle, onDone) {
       }
       state = check(state, typed);
       const { correct, shown, marks } = state.last;
-      if (!correct) misses += 1;
+      if (!correct) {
+        misses += 1;
+        missed.add(round.word);
+      }
       if (correct || shown) {
         typed = round.word;
         drawBoxes(round.word.split('').map(() => correct));

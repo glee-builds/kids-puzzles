@@ -12,7 +12,7 @@
 // reaches the harder facts like 7 × 8.
 
 import { createRandom } from '../seed.js';
-import { stageFor, STAGES, choicesFor } from '../times.js';
+import { stageFor, STAGES, choicesFor, factKey, parseFact } from '../times.js';
 import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const ROUNDS = ['add', 'turn', 'split'];
@@ -20,25 +20,38 @@ export const SMALL_ROWS = [2, 5];  // rows in the first two rounds (from, to)
 export const BIG_ROWS = [6, 9];    // rows in the split round
 export const SPLIT_AT = 5;         // the split round always splits off 5 rows
 
-/** Make today's 3 rounds. `level` (1 to 3) picks the row sizes. */
-export function generate(seed, level = 1) {
+/**
+ * Make today's 3 rounds. `level` (1 to 3) picks the row sizes. `review` is
+ * a list of facts to bring back (see recordReview in src/progress.js).
+ */
+export function generate(seed, level = 1, review = []) {
   const random = createRandom(seed);
   const stage = stageFor(level);
   const { sizes } = STAGES[stage];
+
+  // Facts missed a few days ago (like "7x6": 7 rows of 6) come back: one
+  // with up to 5 rows in the first round, a bigger one in the split round.
+  const back = {};
+  for (const { groups: rows, size } of review.map(parseFact)) {
+    const kind = rows > SMALL_ROWS[1] ? 'split' : 'add';
+    const fits = rows >= SMALL_ROWS[0] && rows <= BIG_ROWS[1] && size >= 2 && size <= 10 && rows !== size;
+    if (fits && !back[kind]) back[kind] = { rows, size, review: true };
+  }
+
   const rounds = [];
   for (const kind of ROUNDS) {
     const [low, high] = kind === 'split' ? BIG_ROWS : SMALL_ROWS;
-    let rows;
-    let size;
-    do {
-      rows = random.int(low, high);
-      size = random.pick(sizes);
-    } while (rows === size || rounds.some((r) => r.rows === rows && r.size === size));
-    const total = rows * size;
+    let fact = back[kind];
+    while (!fact || rounds.some((r) => r.rows === fact.rows && r.size === fact.size)) {
+      const rows = random.int(low, high);
+      const size = random.pick(sizes);
+      fact = rows === size ? null : { rows, size };
+    }
+    const total = fact.rows * fact.size;
     // Near misses: one row too few or too many (or, after turning, the
     // count of the turned rows).
-    const misses = kind === 'turn' ? [total - rows, total + rows] : [total - size, total + size];
-    rounds.push({ kind, rows, size, choices: choicesFor(total, misses) });
+    const misses = kind === 'turn' ? [total - fact.rows, total + fact.rows] : [total - fact.size, total + fact.size];
+    rounds.push({ kind, ...fact, choices: choicesFor(total, misses) });
   }
   return { stage, rounds };
 }
@@ -90,7 +103,9 @@ export function verify(puzzle) {
     const [low, high] = kind === 'split' ? BIG_ROWS : SMALL_ROWS;
     if (kind !== ROUNDS[i]) problems.push(`round ${i + 1} should be ${ROUNDS[i]}`);
     if (rows < low || rows > high) problems.push(`round ${i + 1}: ${rows} rows`);
-    if (!sizes.includes(size)) problems.push(`round ${i + 1}: size ${size} isn't in stage ${stage + 1}`);
+    // A fact that came back for review can be from any level.
+    const sizeOk = round.review ? size >= 2 && size <= 10 : sizes.includes(size);
+    if (!sizeOk) problems.push(`round ${i + 1}: size ${size} isn't in stage ${stage + 1}`);
     if (rows === size) problems.push(`round ${i + 1}: rows and size are both ${size}`);
     if (choices.length !== 3 || new Set(choices).size !== 3 || !choices.includes(total(round))) {
       problems.push(`round ${i + 1} needs 3 different choices, one right`);
@@ -138,6 +153,7 @@ function garden(rows, size, { tappable = false, splitAt = 0 } = {}) {
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let misses = 0; // wrong answers in the whole puzzle (state.misses starts over each round)
+  const missed = new Set(); // the facts that had a wrong answer, so they come back another day
   container.replaceChildren();
   container.classList.add('grp', 'gr');
 
@@ -153,7 +169,10 @@ export function render(container, puzzle, onDone) {
 
   const roundNumber = (round) => puzzle.rounds.indexOf(round);
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status, misses, helped: 0 }));
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({
+    status: state.status, misses, helped: 0,
+    practiced: puzzle.rounds.map((round) => factKey(round.rows, round.size)), missed: [...missed],
+  }));
 
   /** Three answer buttons. `onRight` runs after a right answer. */
   function choices(round, onRight) {
@@ -164,6 +183,7 @@ export function render(container, puzzle, onDone) {
         state = check(state, n);
         if (!state.last.correct) {
           misses += 1;
+          missed.add(factKey(round.rows, round.size));
           message.textContent = `Not quite. ${hint(round, n)}`;
           wiggle(choice);
           return;

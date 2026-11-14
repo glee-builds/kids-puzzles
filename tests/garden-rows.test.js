@@ -63,3 +63,14 @@ test('hints point at the rows, the turn, or the two parts', () => {
   assert.match(hint(turn, 0), /Turning/);
   assert.match(hint(split, 0), new RegExp(`${SPLIT_AT * split.size} \\+ ${(split.rows - SPLIT_AT) * split.size}`));
 });
+
+// --- facts that come back ---
+
+test('a small missed fact comes back in the first round, a big one in the split round', () => {
+  everyDay((key) => {
+    const puzzle = generate(seedForDay(key), 1, ['4x7', '8x6']);
+    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assert.deepEqual([puzzle.rounds[0].rows, puzzle.rounds[0].size], [4, 7]);
+    assert.deepEqual([puzzle.rounds[2].rows, puzzle.rounds[2].size], [8, 6]);
+  }, 60);
+});

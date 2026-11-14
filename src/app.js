@@ -147,7 +147,10 @@ function finishGame(game, result) {
   // it's finished each day.
   const firstTime = !progressStore.isFinished(progress, playDay, game);
   progress = progressStore.recordFinish(progress, playDay, game);
-  if (firstTime) progress = progressStore.recordResult(progress, playDay, game, result, { maxLevel: GAMES[game].levels || 1 });
+  if (firstTime) {
+    progress = progressStore.recordResult(progress, playDay, game, result, { maxLevel: GAMES[game].levels || 1 });
+    if (result?.practiced) progress = progressStore.recordReview(progress, game, DAY, result);
+  }
   progressStore.save(progress);
   const hopped = (progress.totalDays || 0) > before;
   updateHome();
@@ -279,6 +282,10 @@ const part = async (name, key) => (await loadJson(`data/${name}.json`))[key];
 // starting the next day, so a puzzle never changes partway through a day.
 const levelFor = (game) => progressStore.levelOf(progress, game, playDay);
 
+// Spelling words and times facts that were missed come back a few days
+// later (see recordReview in src/progress.js). These are the ones due now.
+const reviewFor = (game) => progressStore.dueItems(progress, game, DAY);
+
 // Stories, themes, words, and sentences are dealt from a deck counted from
 // this date, so none repeats until the whole deck has been used.
 const DAY = progressStore.daysBetween('2026-01-01', playDay);
@@ -324,7 +331,7 @@ const GAMES = {
     art: '<span class="fix-art"><span class="fix-art-old">run</span><span class="fix-art-new">ran</span></span>',
   },
   'spell-it': {
-    title: 'Spell It', kind: 'words', legend: 'Listen, look, and spell', data: () => [part('spelling', 'words'), DAY],
+    title: 'Spell It', kind: 'words', legend: 'Listen, look, and spell', data: () => [part('spelling', 'words'), DAY, reviewFor('spell-it')],
     art: '<span class="spell-art"><span>s</span><span>p</span><span class="spell-art-blank">_</span><span>l</span><span>l</span></span>',
   },
   'end-marks': {
@@ -356,11 +363,11 @@ const GAMES = {
     art: '<span class="think-art"><span>12</span><span class="think-q">?</span><span>7</span></span>',
   },
   'bug-groups': {
-    title: 'Bug Groups', kind: 'numbers', legend: 'Equal groups make times facts', levels: 3, data: () => [levelFor('bug-groups')],
+    title: 'Bug Groups', kind: 'numbers', legend: 'Equal groups make times facts', levels: 3, data: () => [levelFor('bug-groups'), reviewFor('bug-groups')],
     art: '<span class="bugs-art"><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span></span>',
   },
   'garden-rows': {
-    title: 'Garden Rows', kind: 'numbers', legend: 'Rows of seeds make times facts', levels: 3, data: () => [levelFor('garden-rows')],
+    title: 'Garden Rows', kind: 'numbers', legend: 'Rows of seeds make times facts', levels: 3, data: () => [levelFor('garden-rows'), reviewFor('garden-rows')],
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
   maze: {
@@ -480,6 +487,9 @@ function drawGrownUps() {
       trend === 'well' ? '★ Going well' : trend === 'practice' ? '● Needs practice' : '',
     ].filter(Boolean).join(' · ');
     if (notes) about.append(make('span', `gu-note${trend === 'practice' ? ' gu-note-practice' : ''}`, notes));
+    // Missed words and facts that will come back for more practice.
+    const coming = (progress.review?.[name] || []).map((entry) => entry.item.replace(/^(\d+)x(\d+)$/, '$1 × $2'));
+    if (coming.length) about.append(make('span', 'gu-note', `Coming back for practice: ${coming.join(', ')}`));
     row.append(about, make('span', 'gu-times', times ? `${times} day${times === 1 ? '' : 's'}` : 'not yet'));
     list.append(row);
   }
