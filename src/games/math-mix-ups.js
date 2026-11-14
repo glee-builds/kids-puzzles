@@ -12,7 +12,9 @@
 //   area      how many small squares make this shape? (or how far around)
 //   sides     2 triangles and a square: how many sides in all?
 //
-// Every kind comes in two heats (the puzzle's two levels):
+// Every kind comes in two heats (the puzzle's two levels). A switch at the
+// top of the screen lets the player pick; the same kinds of round are there
+// at both heats, so switching keeps the player's place.
 //   1  Mild   about 2nd grade: one step.
 //   2  Spicy  about 3rd to 4th grade: the THINKING is harder (two unknowns,
 //             working backwards, keeping two sides equal), not the sums.
@@ -330,32 +332,47 @@ const MAKERS = {
   },
 };
 
-/** Make today's 3 rounds from a seed, a level (1 mild, 2 spicy), and the day number (which picks the kinds). */
-export function generate(seed, level = 1, dayNumber = 0) {
-  const random = createRandom(seed);
-  const at = clampLevel(level);
-  const rounds = kindsForDay(dayNumber).map((kind) => {
-    const { near, ...round } = MAKERS[kind](random, at === 2);
-    return { kind, ...round, choices: choicesFor(round.answer, near) };
+/**
+ * Make today's rounds from a seed and the day number (which picks the 3
+ * kinds). Returns { heats: [mild rounds, spicy rounds] }: the same kinds, in
+ * the same order, at both heats.
+ */
+export function generate(seed, dayNumber = 0) {
+  const kinds = kindsForDay(dayNumber);
+  const heats = HEATS.map((_, index) => {
+    const random = createRandom(seed + index);
+    return kinds.map((kind) => {
+      const { near, ...round } = MAKERS[kind](random, index === 1);
+      return { kind, ...round, choices: choicesFor(round.answer, near) };
+    });
   });
-  return { level: at, heat: HEATS[at - 1], rounds };
+  return { heats };
 }
 
-/** The starting state: round 0. */
-export function start(puzzle) {
-  return { puzzle, round: 0, tries: 0, status: 'playing', last: null };
+/** The rounds of a puzzle at a level (1 mild, 2 spicy). */
+export const roundsAt = (puzzle, level) => puzzle.heats[clampLevel(level) - 1];
+
+/** The starting state: round 0, at a level (1 mild, 2 spicy). */
+export function start(puzzle, level = 1) {
+  return { puzzle, level: clampLevel(level), round: 0, tries: 0, status: 'playing', last: null };
+}
+
+/** Switch to the other heat. The round stays where it is. */
+export function switchHeat(state, level) {
+  return { ...state, level: clampLevel(level), tries: 0 };
 }
 
 /** Answer the current round with a number. A miss stays on the round (no penalty). */
 export function check(state, answer) {
   if (state.status !== 'playing') throw new Error('All the rounds are done.');
-  const correct = answer === state.puzzle.rounds[state.round].answer;
+  const rounds = roundsAt(state.puzzle, state.level);
+  const correct = answer === rounds[state.round].answer;
   const next = correct ? state.round + 1 : state.round;
   return {
     ...state,
     round: next,
     tries: correct ? 0 : state.tries + 1,
-    status: next >= state.puzzle.rounds.length ? 'won' : 'playing',
+    status: next >= rounds.length ? 'won' : 'playing',
     last: { round: state.round, correct },
   };
 }
@@ -376,8 +393,16 @@ function numbersIn(round) {
 
 /** Confirm a puzzle is valid. Returns { ok, problems }. */
 export function verify(puzzle) {
+  if (!Array.isArray(puzzle.heats) || puzzle.heats.length !== HEATS.length) return { ok: false, problems: ['needs a mild and a spicy set of rounds'] };
+  const problems = puzzle.heats.flatMap((rounds) => verifyRounds(rounds).problems);
+  const [mild, spicy] = puzzle.heats.map((rounds) => (rounds || []).map((r) => r.kind).join());
+  if (mild !== spicy) problems.push('mild and spicy must have the same kinds of round');
+  return { ok: problems.length === 0, problems };
+}
+
+/** Confirm one heat's rounds are valid. Returns { ok, problems }. */
+function verifyRounds(rounds) {
   const problems = [];
-  const { rounds } = puzzle;
   if (!Array.isArray(rounds) || rounds.length !== ROUNDS_PER_DAY) return { ok: false, problems: [`needs ${ROUNDS_PER_DAY} rounds`] };
   if (new Set(rounds.map((r) => r.kind)).size !== rounds.length) problems.push('two rounds are the same kind');
   for (const round of rounds) {
@@ -532,35 +557,57 @@ const DRAW = {
  * once when finished: misses is the wrong picks; helped is always 0.
  */
 export function render(container, puzzle, onDone, session = {}) {
-  let state = start(puzzle);
+  // Start at the heat the player last picked (or the puzzle's level, to begin with).
+  let state = start(puzzle, session.saved?.level ?? session.level ?? 1);
   let misses = 0;
   // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
   if (session.saved) {
     state = { ...state, round: session.saved.round };
     misses = session.saved.misses;
   }
+  const count = puzzle.heats[0].length;
+  const keep = () => session.save?.({ level: state.level, round: state.round, misses });
   container.replaceChildren();
   container.classList.add('mm');
 
   const frame = roundFrame(container, {
-    count: puzzle.rounds.length,
+    count,
     prefix: 'mm',
     draw(i) {
-      const round = puzzle.rounds[i];
-      // The heat tag: one pepper for mild, two for spicy (and the word, so it isn't the picture alone).
-      const heat = make('p', `mm-heat mm-heat-${puzzle.level}`, `${'🌶️'.repeat(puzzle.level)} ${puzzle.heat}`);
-      question.append(heat, make('p', 'mm-ask', round.text));
+      const round = roundsAt(puzzle, state.level)[i];
+      question.append(heatSwitch(), make('p', 'mm-ask', round.text));
       stage.append(...DRAW[round.kind](round), choiceRow(round));
     },
   });
   const { question, stage, message } = frame;
+
+  /** The Mild / Spicy switch: peppers and a word on each side, and the picked one is marked. */
+  function heatSwitch() {
+    const row = make('div', 'mm-heats');
+    row.setAttribute('role', 'group');
+    row.setAttribute('aria-label', 'How spicy?');
+    HEATS.forEach((name, index) => {
+      const level = index + 1;
+      const picked = level === state.level;
+      const choice = button(`mm-heat mm-heat-${level}` + (picked ? ' mm-heat-on' : ''), `${'🌶️'.repeat(level)} ${name}`, () => {
+        if (level === state.level || state.status !== 'playing') return;
+        state = switchHeat(state, level);
+        session.setLevel?.(level); // remembered for the days after, too
+        keep();
+        frame.begin(state.round); // the same round, at the other heat
+      });
+      choice.setAttribute('aria-pressed', String(picked));
+      row.append(choice);
+    });
+    return row;
+  }
 
   /** The three answer buttons for a round. */
   function choiceRow(round) {
     const row = make('div', 'mm-choices');
     for (const n of round.choices) {
       const choice = button('lw-button mm-choice', String(n), () => {
-        if (state.round !== puzzle.rounds.indexOf(round)) return;
+        if (state.round !== roundsAt(puzzle, state.level).indexOf(round)) return;
         state = check(state, n);
         if (!state.last.correct) {
           misses += 1;
@@ -570,7 +617,7 @@ export function render(container, puzzle, onDone, session = {}) {
         }
         choice.classList.add('grp-right');
         for (const other of row.children) other.disabled = true;
-        session.save?.({ round: state.round, misses });
+        keep();
         frame.finish(`✓ ${round.why}`, state.round, () => onDone({ status: state.status, misses, helped: 0 }));
       });
       row.append(choice);
