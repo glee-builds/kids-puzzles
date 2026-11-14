@@ -17,7 +17,7 @@
 
 import { createRandom } from '../seed.js';
 import { stageFor, STAGES, choicesFor } from '../times.js';
-import { make, button, liveMessage, wiggle, progressDots } from '../ui.js';
+import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const ROUNDS = ['match', 'add', 'build'];
 export const MIN_GROUPS = 2;
@@ -178,24 +178,17 @@ export function render(container, puzzle, onDone) {
   container.replaceChildren();
   container.classList.add('grp');
 
-  const dots = progressDots(ROUNDS.length);
-  const question = make('div', 'grp-question');
-  const stage = make('div', 'grp-stage');
-  const message = liveMessage('grp-message', '');
-  const nextButton = button('button next-button', 'Next', () => drawRound());
-  nextButton.hidden = true;
-  container.append(dots.node, question, stage, message, nextButton);
+  const frame = roundFrame(container, {
+    count: ROUNDS.length,
+    prefix: 'grp',
+    draw(i) {
+      const round = puzzle.rounds[i];
+      ({ match: drawMatch, add: drawAdd, build: drawBuild })[round.kind](round);
+    },
+  });
+  const { question, stage, message } = frame;
 
-  function finishRound(text) {
-    message.textContent = text;
-    dots.update((i) => i < state.round, state.round);
-    if (state.status === 'won') {
-      container.classList.add('finished');
-      onDone({ status: state.status });
-      return;
-    }
-    nextButton.hidden = false;
-  }
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status }));
 
   function answer(value, node) {
     const round = puzzle.rounds[state.round];
@@ -205,16 +198,6 @@ export function render(container, puzzle, onDone) {
       if (node) wiggle(node);
     }
     return state.last.correct;
-  }
-
-  function drawRound() {
-    nextButton.hidden = true;
-    message.textContent = '';
-    stage.replaceChildren();
-    question.replaceChildren();
-    dots.update((i) => i < state.round, state.round);
-    const round = puzzle.rounds[state.round];
-    ({ match: drawMatch, add: drawAdd, build: drawBuild })[round.kind](round);
   }
 
   // 1. Which picture shows the groups?
@@ -332,5 +315,5 @@ export function render(container, puzzle, onDone) {
     stage.append(picture, controls, checkButton);
   }
 
-  drawRound();
+  frame.begin(0);
 }

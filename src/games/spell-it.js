@@ -10,7 +10,7 @@
 // with the phone's own built-in voice (no internet needed).
 
 import { createRandom, dealForDay } from '../seed.js';
-import { make, button, liveMessage, wiggle, progressDots, letterKeyboard } from '../ui.js';
+import { make, button, liveMessage, wiggle, letterKeyboard, roundFrame } from '../ui.js';
 
 export const WORDS_PER_DAY = 3;
 export const MAX_TRIES = 3; // tries to spell the whole word before it's shown
@@ -146,13 +146,15 @@ export function render(container, puzzle, onDone) {
   container.replaceChildren();
   container.classList.add('sp');
 
-  const dots = progressDots(puzzle.rounds.length);
-  const question = make('p', 'sp-ask');
-  const stage = make('div', 'sp-stage');
-  const message = liveMessage('sp-message', '');
-  const nextButton = button('button next-button', 'Next', () => drawRound());
-  nextButton.hidden = true;
-  container.append(dots.node, question, stage, message, nextButton);
+  const frame = roundFrame(container, {
+    count: puzzle.rounds.length,
+    prefix: 'sp',
+    draw(i) {
+      const round = puzzle.rounds[i];
+      ({ pick: drawPick, sound: drawSound, spell: drawSpell })[round.kind](round);
+    },
+  });
+  const { question, stage, message } = frame;
 
   function hearButton(round) {
     if (!canSpeak()) return make('span');
@@ -162,25 +164,7 @@ export function render(container, puzzle, onDone) {
     return button('lw-button sp-hear', '🔊 Hear it', () => say(`${round.word}. ${full} ${round.word}.`));
   }
 
-  function finishRound(text) {
-    message.textContent = text;
-    dots.update((i) => i < state.round, state.round);
-    if (state.status === 'won') {
-      container.classList.add('finished');
-      onDone({ status: state.status });
-      return;
-    }
-    nextButton.hidden = false;
-  }
-
-  function drawRound() {
-    nextButton.hidden = true;
-    message.textContent = '';
-    stage.replaceChildren();
-    dots.update((i) => i < state.round, state.round);
-    const round = puzzle.rounds[state.round];
-    ({ pick: drawPick, sound: drawSound, spell: drawSpell })[round.kind](round);
-  }
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status }));
 
   /** Choice buttons; `label` turns a choice into its text. */
   function choiceRow(round, values, label, onRight, wrongHint) {
@@ -277,5 +261,5 @@ export function render(container, puzzle, onDone) {
     stage.append(sentence, hearButton(round), boxes, keyboard);
   }
 
-  drawRound();
+  frame.begin(0);
 }
