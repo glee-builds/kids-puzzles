@@ -698,6 +698,23 @@ window.addEventListener('hashchange', show);
 updateHome();
 show();
 
+// ---------- A new day ----------
+
+// A home-screen app is rarely closed: it sleeps in the background and
+// wakes up where it was, still showing the day it was opened. So whenever
+// the app comes back to the front (and once a minute while it's open),
+// check the date. If it's a new day, start again on the home screen with
+// the new day's puzzles.
+function startNewDayIfNeeded() {
+  if (document.visibilityState !== 'visible' || dateKey() === today) return;
+  // Go to today's home screen: not yesterday's puzzles, and not a puzzle left open.
+  location.replace(location.pathname);
+}
+document.addEventListener('visibilitychange', startNewDayIfNeeded);
+window.addEventListener('pageshow', startNewDayIfNeeded);
+window.addEventListener('focus', startNewDayIfNeeded);
+setInterval(startNewDayIfNeeded, 60 * 1000);
+
 // ---------- Started ----------
 
 // Tells the check in index.html that the app's code loaded and ran. The

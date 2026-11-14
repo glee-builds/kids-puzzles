@@ -416,6 +416,38 @@ try {
     localStorage.setItem('kids-puzzles.progress', JSON.stringify({ ...progress, levels: {} }));
   })()`);
 
+  // A new day: the app is left open on a puzzle (as a home-screen app is),
+  // the date changes, and the app comes back to the front. It should go
+  // to the home screen with the new day's puzzles.
+  checked++;
+  {
+    await open('#maze', `document.querySelector('#game-maze').children.length > 0`);
+    const before = await evaluate('document.querySelector("#today-list").innerText');
+    await setDay(1); // from the next page load on, it's tomorrow...
+    await evaluate(`(() => {           // ...and for the page that's open now, too
+      const Real = Date;
+      const shift = 24 * 60 * 60 * 1000;
+      window.Date = class extends Real {
+        constructor(...args) { if (args.length) super(...args); else super(Real.now() + shift); }
+        static now() { return Real.now() + shift; }
+      };
+      window.leftOpen = true;
+      window.dispatchEvent(new Event('focus'));
+    })()`);
+    let problem = 'did not start the new day when the app came back to the front';
+    for (let tries = 0; tries < 50 && problem; tries++) {
+      await sleep(100);
+      try {
+        const now = await evaluate(`window.lilyPadStarted && !window.leftOpen && !location.hash && !document.getElementById('home').hidden
+          ? document.querySelector('#today-list').innerText : ''`);
+        if (now) problem = now === before ? 'started again, but still shows the old day\'s puzzles' : '';
+      } catch { /* the page is loading */ }
+    }
+    await setDay(0);
+    if (problem) problems.push(`New day: ${problem}`);
+    console.log(`${problem ? '✗' : '✓'} New day (left open overnight, then brought back)`);
+  }
+
   // Half-done puzzles: play part of one, load the page again, and see that it picked up.
   for (const [game, { play, check, finish }] of Object.entries(RESUMES)) {
     checked++;
