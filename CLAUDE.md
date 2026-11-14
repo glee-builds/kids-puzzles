@@ -18,7 +18,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Hosting:** GitHub Pages, deployed from the root of `main`.
 - **Repo:** public, named `kids-puzzles`. Nothing sensitive goes in it.
 - **Daily puzzles:** generated in the browser using today's date as a seed (`src/seed.js`). Same date, same puzzles. No server, no database.
-- **Levels:** puzzles with `levels` in `GAMES` (Number Pyramid, Magic Square, Maze, Bug Groups, Garden Rows) each keep their own level in saved progress: up after 3 easy days in a row, down after 2 hard ones, starting the next day (`recordResult` and `levelOf` in `src/progress.js`). Same date and same level, same puzzle. Every game's `render` calls `onDone({ status, misses, helped })`; that is how a day is rated easy, ok, or hard.
+- **Levels:** puzzles with `levels` in `GAMES` (for example Number Pyramid, Magic Square, Bug Groups, Garden Rows; not the Maze, which is one hard size) each keep their own level in saved progress: up after 3 easy days in a row, down after 2 hard ones, starting the next day (`recordResult` and `levelOf` in `src/progress.js`). Same date and same level, same puzzle. Every game's `render` calls `onDone({ status, misses, helped })`; that is how a day is rated easy, ok, or hard.
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
 - **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js` by level. Orange text means how many groups; teal (`--size-ink`) means how many in each.
 - **Spoken words:** Spell It's "Hear it" uses the device's built-in voice (`speechSynthesis`), approved 2026-11-13. `src/voice.js` picks the most natural English voice on the device and skips any voice that isn't stored on the device, so it makes no network request. Don't add other speech or audio services.
@@ -44,7 +44,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - Use original names, visuals, and colors. Do not use names, logos, or color schemes from existing commercial games.
 - Word games are aimed at about a 2nd to 3rd grade reading level (changed 2026-11-08; see `docs/decisions.md`). Mystery Word uses 5-letter words from `data/words/level-3.json`; Letter Scramble still uses the 3 to 4 letter lists.
 - No timers and no penalties. Use encouraging messages and one celebration at the end of the daily set.
-- No crosswords for now (too small on a phone). Mazes use finger tracing.
+- No crosswords for now (too small on a phone). Mazes use finger tracing; the Maze is 30 by 30 with a different outline each day, sized for an iPad (on a phone its paths are about 11px wide).
 
 ## Privacy (a child holds this phone)
 
