@@ -1,25 +1,42 @@
 // maze.js: trace a path through a maze with your finger.
 //
-// The maze is a grid of squares with walls between some of them. It is a
-// "perfect" maze: every square can be reached, and there is exactly one
-// route between any two squares, so there is exactly one way from the
-// start (top-left) to the star (bottom-right).
+// The maze is drawn on a 30 by 30 grid, but it isn't always a square: each
+// day it has a different outline (a round pond, a lily pad, a diamond...).
+// Squares outside the outline aren't part of the maze.
+//
+// It is a "perfect" maze: every square can be reached, and there is exactly
+// one route between any two squares. The star is put on the square that is
+// farthest from the start, so the one way there is as long as it can be.
 //
 // Squares are [row, col] pairs. Walls are stored per square as a number
-// made of these flags: N (wall above), E (right), S (below), W (left).
+// made of these flags: N (wall above), E (right), S (below), W (left). A
+// square outside the outline has null instead of a number.
 
 import { createRandom } from '../seed.js';
 import { make, button, liveMessage, trace } from '../ui.js';
 
-export const SIZE = 10;
-// Bigger as the player goes on (the app picks the level; see src/app.js).
-export const LEVEL_SIZES = [10, 12, 14];
+export const SIZE = 30;
 export const N = 1;
 export const E = 2;
 export const S = 4;
 export const W = 8;
 const ALL_WALLS = N | E | S | W;
-const HINT_STEPS = 3;
+const HINT_STEPS = 8;
+
+// The outlines. Each says whether a square is inside, given how far it is
+// from the middle of the grid: dr rows down and dc columns across (from
+// about -15 to 15), so the same rule works at any size.
+export const SHAPES = {
+  square: () => true,
+  pond: (dr, dc) => Math.hypot(dr, dc) <= 15.2,
+  // A lily pad: a pond with a wedge cut out of the top.
+  'lily pad': (dr, dc) => Math.hypot(dr, dc) <= 15.2 && !(dr < -2 && Math.abs(dc) < -dr * 0.35),
+  diamond: (dr, dc) => Math.abs(dr) + Math.abs(dc) <= 16,
+  plus: (dr, dc) => Math.abs(dr) <= 6 || Math.abs(dc) <= 6,
+  // A house: a pointed roof on top of a wide box.
+  house: (dr, dc) => (dr >= -3 ? Math.abs(dc) <= 12 : Math.abs(dc) <= dr + 16.5),
+  egg: (dr, dc) => (dr / 15.2) ** 2 + (dc / 11.5) ** 2 <= 1,
+};
 
 const MOVES = [
   { wall: N, opposite: S, dr: -1, dc: 0 },
@@ -31,25 +48,48 @@ const MOVES = [
 const key = ([r, c]) => `${r}-${c}`;
 const same = (a, b) => a[0] === b[0] && a[1] === b[1];
 
+/** True if [r, c] is a square of the maze (inside the grid and inside the outline). */
+const inMaze = (walls, r, c) => walls[r]?.[c] != null;
+
+/** How far every reachable square is from `from`, in steps, as a Map of "r-c" to steps. */
+function distances(puzzle, from) {
+  const steps = new Map([[key(from), 0]]);
+  const queue = [from];
+  while (queue.length > 0) {
+    const square = queue.shift();
+    for (const next of neighbors(puzzle, square)) {
+      if (!steps.has(key(next))) {
+        steps.set(key(next), steps.get(key(square)) + 1);
+        queue.push(next);
+      }
+    }
+  }
+  return steps;
+}
+
 /**
- * Make today's maze. It starts with every wall up, then wanders from the
- * start, knocking down walls into squares it hasn't visited yet, and backs
- * up when stuck. This always makes a perfect maze.
+ * Make today's maze. It picks an outline, then starts with every wall up
+ * and wanders from the start, knocking down walls into squares it hasn't
+ * visited yet, and backs up when stuck. This always makes a perfect maze.
+ * `shape` picks the outline by name; left out, the seed picks one.
  */
-export function generate(seed, level = 1) {
-  const size = LEVEL_SIZES[Math.min(Math.max(level, 1), LEVEL_SIZES.length) - 1];
+export function generate(seed, shape) {
+  const size = SIZE;
   const random = createRandom(seed);
-  const walls = Array.from({ length: size }, () => Array(size).fill(ALL_WALLS));
-  const visited = new Set([key([0, 0])]);
-  const stack = [[0, 0]];
+  const name = SHAPES[shape] ? shape : random.pick(Object.keys(SHAPES));
+  const middle = (size - 1) / 2;
+  const walls = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) =>
+    (SHAPES[name](r - middle, c - middle) ? ALL_WALLS : null)));
+
+  // Start at the first square of the top row of the outline.
+  const top = walls.findIndex((row) => row.some((w) => w != null));
+  const startSquare = [top, walls[top].findIndex((w) => w != null)];
+  const visited = new Set([key(startSquare)]);
+  const stack = [startSquare];
 
   while (stack.length > 0) {
     const [r, c] = stack[stack.length - 1];
-    const options = MOVES.filter(({ dr, dc }) => {
-      const nr = r + dr;
-      const nc = c + dc;
-      return nr >= 0 && nr < size && nc >= 0 && nc < size && !visited.has(key([nr, nc]));
-    });
+    const options = MOVES.filter(({ dr, dc }) => inMaze(walls, r + dr, c + dc) && !visited.has(key([r + dr, c + dc])));
     if (options.length === 0) {
       stack.pop();
       continue;
@@ -62,15 +102,23 @@ export function generate(seed, level = 1) {
     stack.push(next);
   }
 
-  return { size, walls, start: [0, 0], goal: [size - 1, size - 1] };
+  // The star goes on the square that takes the most steps to reach.
+  const puzzle = { size, shape: name, walls, start: startSquare, goal: startSquare };
+  let far = 0;
+  for (const [square, steps] of distances(puzzle, startSquare)) {
+    if (steps > far) {
+      far = steps;
+      puzzle.goal = square.split('-').map(Number);
+    }
+  }
+  return puzzle;
 }
 
 /** True when you can step from square `a` to square `b` (next to it, no wall). */
 export function canMove(puzzle, a, b) {
   const move = MOVES.find(({ dr, dc }) => a[0] + dr === b[0] && a[1] + dc === b[1]);
   if (!move) return false;
-  const inside = b[0] >= 0 && b[0] < puzzle.size && b[1] >= 0 && b[1] < puzzle.size;
-  return inside && (puzzle.walls[a[0]][a[1]] & move.wall) === 0;
+  return inMaze(puzzle.walls, b[0], b[1]) && inMaze(puzzle.walls, a[0], a[1]) && (puzzle.walls[a[0]][a[1]] & move.wall) === 0;
 }
 
 function neighbors(puzzle, square) {
@@ -79,8 +127,17 @@ function neighbors(puzzle, square) {
     .filter((next) => canMove(puzzle, square, next));
 }
 
+// The route for each puzzle, kept once it has been worked out: a big maze
+// asks for it on every step.
+const routes = new WeakMap();
+
 /** The one route from start to goal, as a list of squares. */
 export function solution(puzzle) {
+  if (!routes.has(puzzle)) routes.set(puzzle, findRoute(puzzle));
+  return routes.get(puzzle);
+}
+
+function findRoute(puzzle) {
   const cameFrom = new Map([[key(puzzle.start), null]]);
   const queue = [puzzle.start];
   while (queue.length > 0) {
@@ -154,13 +211,16 @@ export function verify(puzzle) {
 
   // Walls must match on both sides, and the outside edge must be closed.
   let openings = 0;
+  let squares = 0;
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size; c++) {
+      if (!inMaze(walls, r, c)) continue;
+      squares++;
       for (const { wall, opposite, dr, dc } of MOVES) {
         const nr = r + dr;
         const nc = c + dc;
         const open = (walls[r][c] & wall) === 0;
-        if (nr < 0 || nr >= size || nc < 0 || nc >= size) {
+        if (!inMaze(walls, nr, nc)) {
           if (open) problems.push(`square ${r},${c} has a hole in the outside wall`);
         } else if (open !== ((walls[nr][nc] & opposite) === 0)) {
           problems.push(`wall between ${r},${c} and ${nr},${nc} doesn't match`);
@@ -170,20 +230,14 @@ export function verify(puzzle) {
       }
     }
   }
+  if (!inMaze(walls, ...puzzle.start) || !inMaze(walls, ...puzzle.goal)) {
+    return { ok: false, problems: [...problems, 'the start and the star must be inside the maze'] };
+  }
 
   // A perfect maze: every square reachable, and exactly (squares - 1) openings.
-  const seen = new Set([key(puzzle.start)]);
-  const queue = [puzzle.start];
-  while (queue.length > 0) {
-    for (const next of neighbors(puzzle, queue.shift())) {
-      if (!seen.has(key(next))) {
-        seen.add(key(next));
-        queue.push(next);
-      }
-    }
-  }
-  if (seen.size !== size * size) problems.push('some squares cannot be reached');
-  if (openings / 2 !== size * size - 1) problems.push('there is more than one route somewhere (a loop)');
+  const seen = distances(puzzle, puzzle.start);
+  if (seen.size !== squares) problems.push('some squares cannot be reached');
+  if (openings / 2 !== squares - 1) problems.push('there is more than one route somewhere (a loop)');
   if (!solution(puzzle)) problems.push('there is no route from start to star');
 
   return { ok: problems.length === 0, problems };
@@ -227,16 +281,20 @@ export function render(container, puzzle, onDone, session = {}) {
   const squares = {};
   for (let r = 0; r < puzzle.size; r++) {
     for (let c = 0; c < puzzle.size; c++) {
+      const w = puzzle.walls[r][c];
+      if (w == null) {
+        grid.append(make('div', 'mz-out')); // outside the outline: an empty spot
+        continue;
+      }
       const square = make('div', 'mz-cell');
       square.dataset.r = r;
       square.dataset.c = c;
-      const w = puzzle.walls[r][c];
-      // Each square draws its top and left walls; the last row and column
-      // also draw the bottom and right edges.
+      // Each square draws its top and left walls. A square on the right or
+      // bottom edge of the outline also draws that edge.
       if (w & N) square.classList.add('mz-n');
       if (w & W) square.classList.add('mz-w');
-      if (c === puzzle.size - 1 && w & E) square.classList.add('mz-e');
-      if (r === puzzle.size - 1 && w & S) square.classList.add('mz-s');
+      if (w & E && puzzle.walls[r][c + 1] == null) square.classList.add('mz-e');
+      if (w & S && puzzle.walls[r + 1]?.[c] == null) square.classList.add('mz-s');
       grid.append(square);
       squares[key([r, c])] = square;
     }

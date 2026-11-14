@@ -436,7 +436,7 @@ const GAMES = {
     art: '<span class="coins-art"><i>10¢</i><i>5¢</i><i>1¢</i></span>',
   },
   maze: {
-    title: 'Maze', kind: 'fun', legend: 'Trace from the green dot to the star', levels: 3, data: () => [levelFor('maze')],
+    title: 'Maze', kind: 'fun', legend: 'Trace from the green dot to the star',
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
     art: '<span class="maze-art"></span>',
   },
