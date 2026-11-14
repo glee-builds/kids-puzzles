@@ -24,6 +24,9 @@ import { spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import resumesA from './resumes-a.mjs';
+import resumesB from './resumes-b.mjs';
+import resumesC from './resumes-c.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const PHONE = { width: 375, height: 667 };
@@ -269,6 +272,31 @@ const POKES = {
 // (A saved level above a puzzle's top is treated as its top.)
 const TOP_LEVELS = ['clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows', 'maze'];
 
+// Half-done puzzles: `play` plays part of a puzzle; then the page is
+// loaded again and `check` must be true: the puzzle picked up where it
+// left off. `doneDots(n)` is true when n rounds show as finished.
+const DONE_DOTS = `const doneDots = (n) => G.querySelectorAll('.so-dot-done').length === n;`;
+const RESUMES = {
+  'mystery-word': {
+    play: `await type('zzzzz'); await wait(350); await type('qqqqq'); await wait(350);`,
+    check: `[...G.querySelectorAll('.wg-tile')].slice(0, 10).map((tile) => tile.textContent.toLowerCase()).join('') === 'zzzzzqqqqq'`,
+  },
+  'bug-groups': { play: `await tapUntilRight('.grp-picture'); await next();`, check: `doneDots(1) && !G.querySelector('.grp-picture')` },
+  'garden-rows': {
+    play: `for (const row of G.querySelectorAll('button.gr-row')) row.click(); await wait(); await tapUntilRight('.grp-choice'); await next();`,
+    check: `doneDots(1) && Boolean(G.querySelector('.gr-turn'))`,
+  },
+  'spell-it': { play: `await tapUntilRight('.sp-choice'); await next();`, check: `doneDots(1)` },
+  'end-marks': { play: `await tapUntilRight('.em-mark'); await next(); await tapUntilRight('.em-mark'); await next();`, check: `doneDots(2)` },
+  'clock-time': { play: `for (let clock = 0; clock < 3; clock++) { await tapUntilRight('.ct-choice'); await next(); }`, check: `doneDots(3)` },
+  'coin-count': {
+    play: `const game = await import('/src/games/coin-count.js');
+      await type(game.generate(seed.seedFor(today, 'coin-count')).rounds[0].total); await next();`,
+    check: `doneDots(1) && G.querySelector('.cc-entry').textContent === '?¢'`,
+  },
+  ...resumesA, ...resumesB, ...resumesC,
+};
+
 // How each played puzzle should be rated, given how PLAYS plays it.
 const EXPECTED = {
   'number-line': 'easy',   // every answer right the first time
@@ -364,6 +392,36 @@ try {
     const progress = JSON.parse(localStorage.getItem('kids-puzzles.progress'));
     localStorage.setItem('kids-puzzles.progress', JSON.stringify({ ...progress, levels: {} }));
   })()`);
+
+  // Half-done puzzles: play part of one, load the page again, and see that it picked up.
+  for (const [game, { play, check }] of Object.entries(RESUMES)) {
+    checked++;
+    const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
+    const inPage = (code) => evaluate(`(async () => { const G = document.getElementById('game-${game}'); ${HELPERS} ${DONE_DOTS} ${code} })()`);
+    let problem = '';
+    try {
+      await evaluate(`(() => {
+        localStorage.removeItem('kids-puzzles.half-done');
+        const progress = JSON.parse(localStorage.getItem('kids-puzzles.progress'));
+        const finished = Object.fromEntries(Object.entries(progress.finished).map(([day, games]) => [day, games.filter((name) => name !== '${game}')]));
+        localStorage.setItem('kids-puzzles.progress', JSON.stringify({ ...progress, finished }));
+      })()`);
+      if (!await open(`#${game}`, ready)) problem = 'did not draw';
+      else {
+        await inPage(play);
+        await sleep(300);
+        if (!await open(`#${game}`, ready)) problem = 'did not draw after loading again';
+        else if (await evaluate(`document.getElementById('game-${game}').dataset.resumed`) !== 'yes') problem = 'started over instead of picking up';
+        else if (!await inPage(`return ${check};`)) problem = 'picked up, but not where it left off';
+      }
+    } catch (error) {
+      problem = `broke: ${String(error.message).split('\n')[0]}`;
+    }
+    for (const error of errors) problem += `${problem ? '; ' : ''}logged an error: ${String(error).split('\n')[0]}`;
+    if (problem) problems.push(`${game} (half-done): ${problem}`);
+    console.log(`${problem ? '✗' : '✓'} ${game} (half-done, then loaded again)`);
+  }
+  await evaluate(`localStorage.removeItem('kids-puzzles.half-done')`);
 
   // Offline: wait until the service worker has saved every file, turn the
   // web server off, and open every screen again. Nothing can come from the

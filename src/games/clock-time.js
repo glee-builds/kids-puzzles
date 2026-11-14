@@ -150,9 +150,15 @@ function clockFace(hour, minute) {
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
  * once when finished: misses is the wrong picks; helped is always 0.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let misses = 0;
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    state = { ...state, round: session.saved.round };
+    misses = session.saved.misses;
+  }
+  const keep = () => session.save?.({ round: state.round, misses });
   container.replaceChildren();
   container.classList.add('ct');
 
@@ -177,6 +183,7 @@ export function render(container, puzzle, onDone) {
           }
           choice.classList.add('grp-right');
           for (const other of row.children) other.disabled = true;
+          keep();
           frame.finish(`✓ It's ${time}!`, state.round, () => onDone({ status: state.status, misses, helped: 0 }));
         });
         row.append(choice);
@@ -185,5 +192,5 @@ export function render(container, puzzle, onDone) {
     },
   });
   const { question, stage, message } = frame;
-  frame.begin(0);
+  frame.begin(state.round);
 }

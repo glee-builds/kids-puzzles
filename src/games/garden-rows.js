@@ -161,10 +161,17 @@ function garden(rows, size, { tappable = false, splitAt = 0 } = {}) {
  * once when finished: misses is how many wrong answers were given, and
  * helped is always 0 (this game never gives an answer away).
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let misses = 0; // wrong answers in the whole puzzle (state.misses starts over each round)
   const missed = new Set(); // the facts that had a wrong answer, so they come back another day
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    state = { ...state, round: session.saved.round };
+    misses = session.saved.misses;
+    for (const item of session.saved.missed || []) missed.add(item);
+  }
+  const keep = () => session.save?.({ round: state.round, misses, missed: [...missed] });
   container.replaceChildren();
   container.classList.add('grp', 'gr');
 
@@ -180,10 +187,13 @@ export function render(container, puzzle, onDone) {
 
   const roundNumber = (round) => puzzle.rounds.indexOf(round);
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({
-    status: state.status, misses, helped: 0,
-    practiced: puzzle.rounds.map((round) => factKey(round.rows, round.size)), missed: [...missed],
-  }));
+  const finishRound = (text) => {
+    keep();
+    frame.finish(text, state.round, () => onDone({
+      status: state.status, misses, helped: 0,
+      practiced: puzzle.rounds.map((round) => factKey(round.rows, round.size)), missed: [...missed],
+    }));
+  };
 
   /** Three answer buttons. `onRight` runs after a right answer. */
   function choices(round, onRight) {
@@ -308,5 +318,5 @@ export function render(container, puzzle, onDone) {
     }));
   }
 
-  frame.begin(0);
+  frame.begin(state.round);
 }

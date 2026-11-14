@@ -169,9 +169,10 @@ const CHEERS = ['Good try!', 'Nice thinking!', 'Keep going!', 'Getting closer!',
  * or revealed. misses is the wrong guesses; helped is 1 if the word had to
  * be shown, else 0.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let typed = '';
+  const newGuesses = []; // the guesses made since the puzzle was opened (for saving a half-done puzzle)
 
   container.replaceChildren();
   container.classList.add('wg');
@@ -228,6 +229,8 @@ export function render(container, puzzle, onDone) {
       return;
     }
     state = check(state, typed);
+    session.save?.({ guesses: [...(session.saved?.guesses || []), ...newGuesses, typed] });
+    newGuesses.push(typed);
     typed = '';
     draw();
 
@@ -244,10 +247,13 @@ export function render(container, puzzle, onDone) {
     }
     // After 3 wrong guesses, a sentence that the word fits takes the place
     // of the color key (by now the colors are familiar).
-    if (state.status === 'playing' && puzzle.sentence && state.guesses.length === GUESSES_BEFORE_SENTENCE) {
-      legend.className = 'wg-sentence';
-      legend.textContent = `Clue: ${puzzle.sentence}`;
-    }
+    if (state.guesses.length === GUESSES_BEFORE_SENTENCE) showSentence();
+  }
+
+  function showSentence() {
+    if (state.status !== 'playing' || !puzzle.sentence) return;
+    legend.className = 'wg-sentence';
+    legend.textContent = `Clue: ${puzzle.sentence}`;
   }
 
   function finish() {
@@ -289,5 +295,12 @@ export function render(container, puzzle, onDone) {
   }
 
 
+  // Pick up a half-done puzzle: make its saved guesses again, in order.
+  // (A finished puzzle is never saved, so this always leaves it still in play.)
+  for (const guess of session.saved?.guesses || []) {
+    if (state.status === 'playing') state = check(state, guess);
+  }
+  if (state.guesses.length >= GUESSES_BEFORE_SENTENCE) showSentence();
+  if (state.guesses.length) message.textContent = 'Welcome back! Keep going.';
   draw();
 }

@@ -5,7 +5,7 @@
 // An empty address shows the home screen. Using the address means the
 // phone's back gesture returns to the home screen too.
 
-import { dateKey, seedFor } from './seed.js';
+import { dateKey, seedFor, hashString } from './seed.js';
 import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
 import { make, button } from './ui.js';
@@ -470,6 +470,41 @@ function showHowTo(name, area) {
   area.before(card);
 }
 
+// ---------- Half-done puzzles ----------
+
+// If the phone locks or the app reloads partway through a puzzle, the
+// puzzle picks up where it left off. Each game saves a small snapshot as
+// it goes (session.save) and is handed it back when it starts again
+// (session.saved). Snapshots are kept for the day being played only, and
+// only if the puzzle is still exactly the same one.
+const HALF_DONE_KEY = 'kids-puzzles.half-done';
+
+function readHalfDone() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(HALF_DONE_KEY));
+    if (stored && stored.day === playDay && typeof stored.games === 'object') return stored;
+  } catch { /* nothing saved, or storage is off */ }
+  return { day: playDay, games: {} };
+}
+
+function writeHalfDone(name, entry) {
+  const stored = readHalfDone();
+  if (entry) stored.games[name] = entry;
+  else delete stored.games[name];
+  try { localStorage.setItem(HALF_DONE_KEY, JSON.stringify(stored)); } catch { /* storage is off: nothing is kept */ }
+}
+
+/** What a game gets for saving and restoring: { saved, save(snapshot) }. */
+function sessionFor(name, puzzle) {
+  // A fingerprint of the puzzle: a snapshot of a different puzzle (a new level, new words) is ignored.
+  const fingerprint = hashString(JSON.stringify(puzzle));
+  const entry = readHalfDone().games[name];
+  return {
+    saved: entry && entry.fingerprint === fingerprint ? entry.snapshot : undefined,
+    save: (snapshot) => writeHalfDone(name, { fingerprint, snapshot }),
+  };
+}
+
 /** Load a game's file and data, make today's puzzle, and draw it. */
 async function startGame(name) {
   const { file = name, data = () => [] } = GAMES[name];
@@ -477,7 +512,23 @@ async function startGame(name) {
   try {
     const [game, extras] = await Promise.all([import(`./games/${file}.js`), Promise.all(data())]);
     const puzzle = game.generate(seedFor(playDay, file), ...extras);
-    game.render(area, puzzle, (result) => finishGame(name, result));
+    const onDone = (result) => {
+      writeHalfDone(name, null); // finished: nothing left to pick up
+      finishGame(name, result);
+    };
+    const session = sessionFor(name, puzzle);
+    try {
+      game.render(area, puzzle, onDone, session);
+      area.dataset.resumed = session.saved === undefined ? '' : 'yes';
+    } catch (error) {
+      // A snapshot that can't be restored must never break the puzzle: forget it and start fresh.
+      if (session.saved === undefined) throw error;
+      console.warn('Could not pick up the half-done puzzle; starting it fresh.', error);
+      writeHalfDone(name, null);
+      area.className = 'game';
+      area.dataset.resumed = '';
+      game.render(area, puzzle, onDone, sessionFor(name, puzzle));
+    }
     showHowTo(name, area);
   } catch (error) {
     area.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
@@ -605,6 +656,7 @@ function drawGrownUps() {
     button('lw-button', 'Cancel', () => { ask.hidden = true; startOver.hidden = false; }),
     button('lw-button gu-reset', 'Yes, start over', () => {
       progressStore.save(progressStore.emptyProgress());
+      try { localStorage.removeItem(HALF_DONE_KEY); } catch { /* storage is off */ }
       location.hash = '';
       location.reload();
     }),

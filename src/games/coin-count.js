@@ -114,10 +114,16 @@ function coinNode(coin, names) {
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
  * once when finished: misses is the wrong totals; helped is the totals shown.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let typed = '';
   let misses = 0;
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    state = { ...state, round: session.saved.round, shown: session.saved.shown || [] };
+    misses = session.saved.misses;
+  }
+  const keep = () => session.save?.({ round: state.round, misses, shown: state.shown });
   let waiting = false; // a handful is finished and Next hasn't been pressed
   container.replaceChildren();
   container.classList.add('cc');
@@ -165,6 +171,7 @@ export function render(container, puzzle, onDone) {
     const text = correct
       ? `✓ ${CHEERS[state.last.round % CHEERS.length]} ${countingOn(round.coins)}.`
       : `It's ${round.total}¢. Count on: ${countingOn(round.coins)}.`;
+    keep();
     frame.finish(text, state.round, () => {
       stopKeys();
       onDone({ status: state.status, misses, helped: state.shown.length });
@@ -187,5 +194,5 @@ export function render(container, puzzle, onDone) {
   });
   container.append(pad);
 
-  frame.begin(0);
+  frame.begin(state.round);
 }

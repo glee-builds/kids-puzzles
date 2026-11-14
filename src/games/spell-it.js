@@ -168,10 +168,17 @@ function sentenceLine(sentence, word) {
  * once when finished: misses is how many wrong answers were given, and
  * helped is how many words were shown after 3 tries.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let misses = 0; // wrong answers in the whole puzzle (state.tries starts over each round)
   const missed = new Set(); // the words that had a wrong answer, so they come back another day
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    state = { ...state, round: session.saved.round, shown: session.saved.shown || [] };
+    misses = session.saved.misses;
+    for (const item of session.saved.missed || []) missed.add(item);
+  }
+  const keep = () => session.save?.({ round: state.round, misses, missed: [...missed], shown: state.shown });
   container.replaceChildren();
   container.classList.add('sp');
 
@@ -193,10 +200,13 @@ export function render(container, puzzle, onDone) {
     return button('lw-button sp-hear', '🔊 Hear it', () => say(`${round.word}. ${full} ${round.word}.`));
   }
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({
-    status: state.status, misses, helped: state.shown.length,
-    practiced: puzzle.rounds.map((round) => round.word), missed: [...missed],
-  }));
+  const finishRound = (text) => {
+    keep();
+    frame.finish(text, state.round, () => onDone({
+      status: state.status, misses, helped: state.shown.length,
+      practiced: puzzle.rounds.map((round) => round.word), missed: [...missed],
+    }));
+  };
 
   /** Choice buttons; `label` turns a choice into its text. */
   function choiceRow(round, values, label, onRight, wrongHint) {
@@ -302,5 +312,5 @@ export function render(container, puzzle, onDone) {
     stage.append(sentence, hearButton(round), boxes, keyboard);
   }
 
-  frame.begin(0);
+  frame.begin(state.round);
 }
