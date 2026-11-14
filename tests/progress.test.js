@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, recordReview, dueItems, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS,
+  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, recordReview, dueItems, weekSummary, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS,
 } from '../src/progress.js';
 
 // A stand-in for the browser's localStorage, so tests run in Node.
@@ -283,4 +283,13 @@ test('an item seen by chance before it is due keeps its date', () => {
   let p = recordReview(emptyProgress(), 'spell-it', 100, { practiced: ['whale'], missed: ['whale'] });
   p = recordReview(p, 'spell-it', 101, { practiced: ['whale'], missed: [] });
   assert.deepEqual(dueItems(p, 'spell-it', 102), ['whale']);
+});
+
+test('weekSummary counts puzzles and days in the last 7 days only', () => {
+  let p = recordFinish(emptyProgress(), '2026-11-01', 'maze');          // 8 days before: too old
+  p = recordFinish(p, '2026-11-03', 'maze');                            // 6 days before: counts
+  p = recordFinish(p, '2026-11-03', 'word-search');
+  p = recordFinish(p, '2026-11-09', 'maze');                            // today
+  assert.deepEqual(weekSummary(p, '2026-11-09'), { puzzles: 3, days: 2 });
+  assert.deepEqual(weekSummary(emptyProgress(), '2026-11-09'), { puzzles: 0, days: 0 });
 });

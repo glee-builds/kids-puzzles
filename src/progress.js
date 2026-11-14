@@ -169,6 +169,20 @@ export function trend(progress, game) {
   return null;
 }
 
+/** The last 7 days, ending on `today`: how many puzzles were finished, on how many days. */
+export function weekSummary(progress, today) {
+  let puzzles = 0;
+  let days = 0;
+  for (const [day, games] of Object.entries(progress.finished || {})) {
+    const ago = daysBetween(day, today);
+    if (ago >= 0 && ago < 7 && games.length) {
+      puzzles += games.length;
+      days += 1;
+    }
+  }
+  return { puzzles, days };
+}
+
 /** Remember that a puzzle's "How to play" card was read. Returns new progress. */
 export function markSeen(progress, game) {
   const seen = progress.seen || [];

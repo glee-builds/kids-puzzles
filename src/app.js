@@ -82,6 +82,7 @@ function drawPond() {
   }
   drawCatchUp();
   drawStickerLink();
+  drawWeek();
 }
 
 /** The link between today's and yesterday's puzzles, when it's needed. */
@@ -207,6 +208,14 @@ function showGift(sticker) {
     drawStickerLink();
     celebrate();
   };
+}
+
+/** A look back on the home screen: puzzles finished in the last 7 days. */
+function drawWeek() {
+  const { puzzles, days } = progressStore.weekSummary(progress, today);
+  const note = document.getElementById('week-note');
+  note.hidden = puzzles < 2;
+  note.textContent = `This week: ${puzzles} puzzles on ${days} day${days === 1 ? '' : 's'}. Nice work!`;
 }
 
 function drawStickerLink() {
