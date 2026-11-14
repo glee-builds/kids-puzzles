@@ -302,6 +302,16 @@ async function words(...names) {
 /** One part of a data file, e.g. part('stories', 'stories'). */
 const part = async (name, key) => (await loadJson(`data/${name}.json`))[key];
 
+/**
+ * The space a maze has on this screen, { width, height }, so it can be
+ * shaped to fill it: tall on a phone, wide on an iPad held sideways. The
+ * numbers match `.mz-grid` and the tablet rule in styles.css.
+ */
+function mazeRoom() {
+  const zoom = matchMedia('(min-width: 700px) and (min-height: 900px)').matches ? 1.3 : 1;
+  return { width: Math.round(innerWidth / zoom) - 12, height: Math.round(innerHeight / zoom) - 250 };
+}
+
 // Some puzzles have levels (`levels` in GAMES). Each one's level goes up
 // after 3 easy days in a row and down after 2 hard ones (src/progress.js),
 // starting the next day, so a puzzle never changes partway through a day.
@@ -446,12 +456,12 @@ const GAMES = {
     art: '<span class="coins-art"><i>10¢</i><i>5¢</i><i>1¢</i></span>',
   },
   maze: {
-    title: 'Maze', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20],
+    title: 'Maze', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
     art: '<span class="maze-art"></span>',
   },
   'big-maze': {
-    title: 'Big Maze', kind: 'fun', file: 'maze', legend: 'A really big one. Take your time!', data: () => [30],
+    title: 'Big Maze', kind: 'fun', file: 'maze', legend: 'A really big one. Take your time!', data: () => [30, undefined, mazeRoom()],
     how: ["This maze is huge, and the star is far away.", "Put your finger on the green dot and trace the path."],
     art: '<span class="maze-art maze-art-big"></span>',
   },

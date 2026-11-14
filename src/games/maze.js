@@ -5,6 +5,11 @@
 // always a square: each day it has a different outline (a round pond, a
 // lily pad, a diamond...). Squares outside the outline aren't part of it.
 //
+// The grid is shaped to fit the screen (`gridFor`): tall and narrow on a
+// phone, close to square on an iPad held upright, wide on one held
+// sideways. It has about the same number of squares either way, so the
+// squares can be as big as the screen allows.
+//
 // It is a "perfect" maze: every square can be reached, and there is exactly
 // one route between any two squares. The star is put on the square that is
 // farthest from the start, so the one way there is as long as it can be.
@@ -27,8 +32,8 @@ const HINT_STEPS = 8;
 
 // The outlines. Each says whether a square is inside, given how far it is
 // from the middle of the grid: dr rows down and dc columns across, both
-// counted as if the grid were 30 wide (about -15 to 15), so the same rule
-// works at any size.
+// counted as if the grid were 30 by 30 (about -15 to 15), so the same rule
+// works at any size, and stretches with a grid that is taller or wider.
 export const SHAPES = {
   square: () => true,
   pond: (dr, dc) => Math.hypot(dr, dc) <= 15.2,
@@ -71,19 +76,34 @@ function distances(puzzle, from) {
 }
 
 /**
+ * How many columns and rows a maze of `size` gets, to fill `room`: the
+ * space for the maze on the screen, { width, height }. It keeps about
+ * size x size squares, in the shape of the room. With no room given (or
+ * one that isn't a real size) the grid is size by size.
+ */
+export function gridFor(size, room) {
+  if (!(room?.width > 0) || !(room?.height > 0)) return { cols: size, rows: size };
+  // Never more than twice as long one way as the other.
+  const shape = Math.min(Math.max(room.width / room.height, 0.5), 2);
+  const cols = Math.round(size * Math.sqrt(shape));
+  return { cols, rows: Math.round((size * size) / cols) };
+}
+
+/**
  * Make today's maze. It picks an outline, then starts with every wall up
  * and wanders from the start, knocking down walls into squares it hasn't
  * visited yet, and backs up when stuck. This always makes a perfect maze.
- * `size` is how many squares across (30 if left out). `shape` picks the
- * outline by name; left out, the seed picks one.
+ * `size` is how many squares across a square one would be (30 if left
+ * out). `shape` picks the outline by name; left out, the seed picks one.
+ * `room` is the space on the screen ({ width, height }); see gridFor.
  */
-export function generate(seed, size = SIZE, shape) {
+export function generate(seed, size = SIZE, shape, room) {
   // A different size gets different random numbers, so the day's two mazes don't match.
   const random = createRandom(seed + (size - SIZE));
   const name = SHAPES[shape] ? shape : random.pick(Object.keys(SHAPES));
-  const middle = (size - 1) / 2;
-  const walls = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) =>
-    (SHAPES[name]((r - middle) * (SIZE / size), (c - middle) * (SIZE / size)) ? ALL_WALLS : null)));
+  const { cols, rows } = gridFor(size, room);
+  const walls = Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) =>
+    (SHAPES[name]((r - (rows - 1) / 2) * (SIZE / rows), (c - (cols - 1) / 2) * (SIZE / cols)) ? ALL_WALLS : null)));
 
   // Start at the first square of the top row of the outline.
   const top = walls.findIndex((row) => row.some((w) => w != null));
@@ -107,7 +127,7 @@ export function generate(seed, size = SIZE, shape) {
   }
 
   // The star goes on the square that takes the most steps to reach.
-  const puzzle = { size, shape: name, walls, start: startSquare, goal: startSquare };
+  const puzzle = { size, cols, rows, shape: name, walls, start: startSquare, goal: startSquare };
   let far = 0;
   for (const [square, steps] of distances(puzzle, startSquare)) {
     if (steps > far) {
@@ -208,16 +228,17 @@ export function offRoute(state) {
 /** Confirm a maze is valid. Returns { ok, problems }. */
 export function verify(puzzle) {
   const problems = [];
-  const { size, walls } = puzzle;
-  if (!Array.isArray(walls) || walls.length !== size || walls.some((row) => row.length !== size)) {
-    return { ok: false, problems: [`walls must be ${size} by ${size}`] };
+  const { walls } = puzzle;
+  const { cols = puzzle.size, rows = puzzle.size } = puzzle;
+  if (!Array.isArray(walls) || walls.length !== rows || walls.some((row) => row.length !== cols)) {
+    return { ok: false, problems: [`walls must be ${cols} across and ${rows} down`] };
   }
 
   // Walls must match on both sides, and the outside edge must be closed.
   let openings = 0;
   let squares = 0;
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
       if (!inMaze(walls, r, c)) continue;
       squares++;
       for (const { wall, opposite, dr, dc } of MOVES) {
@@ -281,10 +302,12 @@ export function render(container, puzzle, onDone, session = {}) {
   const message = liveMessage('mz-message', 'Put your finger on the green dot and trace to the star.');
 
   const grid = make('div', 'mz-grid');
-  grid.style.setProperty('--size', puzzle.size);
+  const { cols = puzzle.size, rows = puzzle.size } = puzzle;
+  grid.style.setProperty('--cols', cols);
+  grid.style.setProperty('--rows', rows);
   const squares = {};
-  for (let r = 0; r < puzzle.size; r++) {
-    for (let c = 0; c < puzzle.size; c++) {
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
       const w = puzzle.walls[r][c];
       if (w == null) {
         grid.append(make('div', 'mz-out')); // outside the outline: an empty spot
@@ -346,7 +369,7 @@ export function render(container, puzzle, onDone, session = {}) {
     // maze never walks itself toward a far-away finger.
     const end = state.path[state.path.length - 1];
     if (Math.abs(target[0] - end[0]) + Math.abs(target[1] - end[1]) > 2) return;
-    for (let guard = 0; guard < puzzle.size * 2; guard++) {
+    for (let guard = 0; guard < 8; guard++) {
       const end = state.path[state.path.length - 1];
       if (same(end, target)) break;
       const prev = state.path[state.path.length - 2];

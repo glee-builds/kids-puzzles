@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
 import { everyDay, dayKey } from './helpers.js';
 import {
-  generate, verify, solution, canMove, start, step, hintSquares, offRoute, SIZE, SMALL_SIZE, SHAPES, N, E, S, W,
+  generate, verify, solution, canMove, start, step, hintSquares, offRoute, gridFor, SIZE, SMALL_SIZE, SHAPES, N, E, S, W,
 } from '../src/games/maze.js';
 
 const seedForDay = (key) => seedFor(key, 'maze');
@@ -159,4 +159,53 @@ test('the day\'s two mazes are different mazes, and often different outlines', (
 
 test('leaving the size out makes the big maze', () => {
   assert.deepEqual(generate(seedForDay('2026-11-14')), generate(seedForDay('2026-11-14'), SIZE));
+});
+
+// --- shaped to the screen ---
+
+const ROOMS = {
+  'small phone': { width: 363, height: 417 },
+  'tall phone': { width: 378, height: 594 },
+  'iPad upright': { width: 579, height: 538 },
+  'iPad sideways': { width: 1012, height: 518 },
+};
+
+test('gridFor: with no room the grid is square; with room it takes its shape and keeps about the same squares', () => {
+  assert.deepEqual(gridFor(20), { cols: 20, rows: 20 });
+  assert.deepEqual(gridFor(20, { width: 0, height: 100 }), { cols: 20, rows: 20 });
+  assert.deepEqual(gridFor(20, { width: 300, height: 300 }), { cols: 20, rows: 20 });
+  for (const size of [SMALL_SIZE, SIZE]) {
+    for (const [name, room] of Object.entries(ROOMS)) {
+      const { cols, rows } = gridFor(size, room);
+      assert.ok(Math.abs(cols * rows - size * size) <= size, `${name}: ${cols} x ${rows}`);
+      assert.equal(cols > rows, room.width > room.height, `${name}: ${cols} x ${rows}`);
+    }
+  }
+  const tall = gridFor(20, ROOMS['tall phone']);
+  assert.ok(tall.rows > tall.cols + 4, 'a tall phone gets a tall maze');
+});
+
+test('gridFor: a very long, thin room is never more than twice as long one way', () => {
+  const { cols, rows } = gridFor(20, { width: 2000, height: 100 });
+  assert.ok(cols <= rows * 2 + 1, `${cols} x ${rows}`);
+});
+
+test('every outline makes a valid maze in every screen shape, at both sizes', () => {
+  for (const size of [SMALL_SIZE, SIZE]) {
+    for (const [name, room] of Object.entries(ROOMS)) {
+      for (const shape of Object.keys(SHAPES)) {
+        const puzzle = generate(seedForDay('2026-11-14'), size, shape, room);
+        const result = verify(puzzle);
+        assert.ok(result.ok, `${size}, ${name}, ${shape}: ${result.problems.join('; ')}`);
+        assert.equal(puzzle.walls.length, puzzle.rows);
+        assert.equal(puzzle.walls[0].length, puzzle.cols);
+        assert.ok(solution(puzzle).length >= size * 2, `${size}, ${name}, ${shape}: the route is ${solution(puzzle).length} squares`);
+      }
+    }
+  }
+});
+
+test('the same day and the same screen always make the same maze', () => {
+  const room = ROOMS['tall phone'];
+  assert.deepEqual(generate(seedForDay('2026-11-14'), SMALL_SIZE, undefined, room), generate(seedForDay('2026-11-14'), SMALL_SIZE, undefined, room));
 });
