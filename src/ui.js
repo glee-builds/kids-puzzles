@@ -2,7 +2,8 @@
 //
 // Each game draws its own screen; these are the pieces several games need
 // the same way: making elements, a message line, the "not quite" wiggle,
-// progress dots, finger tracing on a grid, and drag-or-tap.
+// progress dots, the number pad, the letter keyboard, finger tracing on a
+// grid, and drag-or-tap.
 
 /** A new element, e.g. make('p', 'ws-message', 'Hello'). */
 export function make(tag, className, text) {
@@ -48,6 +49,84 @@ export function progressDots(count) {
     });
   }
   return { node, update };
+}
+
+/**
+ * Call `onKey(event)` for computer-keyboard presses, but only while
+ * `container` is on screen. (Handy for testing on a laptop; phones use the
+ * on-screen keys.) Returns a function that stops listening.
+ */
+export function onKeys(container, onKey) {
+  const listener = (event) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (container.closest('[hidden]')) return;
+    onKey(event);
+  };
+  document.addEventListener('keydown', listener);
+  return () => document.removeEventListener('keydown', listener);
+}
+
+/**
+ * The number pad: 1 to 9, erase, 0, and Check. A computer keyboard's
+ * digits, Backspace, and Enter work too while `container` is on screen.
+ * Returns { node, stop }; call stop() when the game is finished.
+ */
+export function numberPad(container, { onDigit, onErase, onCheck }, extraClass = '') {
+  const node = make('div', `np-pad ${extraClass}`.trim());
+  for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
+    const key = button('np-key', label);
+    if (label === 'Check') {
+      key.classList.add('np-key-check');
+      key.addEventListener('click', onCheck);
+    } else if (label === '⌫') {
+      key.setAttribute('aria-label', 'Erase a digit');
+      key.addEventListener('click', onErase);
+    } else {
+      key.addEventListener('click', () => onDigit(label));
+    }
+    node.append(key);
+  }
+  const stop = onKeys(container, (event) => {
+    if (/^[0-9]$/.test(event.key)) onDigit(event.key);
+    else if (event.key === 'Backspace') onErase();
+    else if (event.key === 'Enter') onCheck();
+  });
+  return { node, stop };
+}
+
+// QWERTY rows, like a phone or computer keyboard.
+const KEY_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+
+/**
+ * The on-screen letter keyboard. With onGo and onErase, the bottom row also
+ * has Go (left) and Erase (right). A computer keyboard's letters (and
+ * Backspace and Enter) work too while `container` is on screen.
+ * Returns { node, keys, stop }: keys[letter] is each letter's button, and
+ * stop() ends the computer-keyboard listening.
+ */
+export function letterKeyboard(container, { onLetter, onErase, onGo }, extraClass = '') {
+  const node = make('div', `wg-keyboard ${extraClass}`.trim());
+  const keys = {};
+  KEY_ROWS.forEach((letters, index) => {
+    const row = make('div', 'wg-key-row' + (index === 1 ? ' wg-key-row-middle' : ''));
+    const isBottom = index === KEY_ROWS.length - 1;
+    if (isBottom && onGo) {
+      const goKey = row.appendChild(button('wg-key wg-key-wide wg-key-go', 'Go', onGo));
+      goKey.setAttribute('aria-label', 'Check my word');
+    }
+    for (const letter of letters) keys[letter] = row.appendChild(button('wg-key', letter, () => onLetter(letter)));
+    if (isBottom && onErase) {
+      const eraseKey = row.appendChild(button('wg-key wg-key-wide', '⌫', onErase));
+      eraseKey.setAttribute('aria-label', 'Erase a letter');
+    }
+    node.append(row);
+  });
+  const stop = onKeys(container, (event) => {
+    if (/^[a-z]$/i.test(event.key)) onLetter(event.key.toLowerCase());
+    else if (event.key === 'Backspace') onErase?.();
+    else if (event.key === 'Enter') onGo?.();
+  });
+  return { node, keys, stop };
 }
 
 /**

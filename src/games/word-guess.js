@@ -8,7 +8,7 @@
 // This file holds the game's rules only. The screen comes later, in render().
 
 import { dealForDay } from '../seed.js';
-import { make, button, liveMessage } from '../ui.js';
+import { make, button, liveMessage, letterKeyboard } from '../ui.js';
 
 export const MAX_GUESSES = 6;
 
@@ -147,10 +147,6 @@ export function clue(state) {
 // The screen: board, message line, and on-screen ABC keyboard.
 // ---------------------------------------------------------------------------
 
-// QWERTY rows, like a phone or computer keyboard. The bottom row also
-// holds Go (left) and Erase (right).
-const KEY_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
-
 const MARK_WORDS = {
   here: 'right spot',
   elsewhere: 'in the word, different spot',
@@ -201,29 +197,7 @@ export function render(container, puzzle, onDone) {
 
   const message = liveMessage('wg-message', `Find the ${puzzle.length}-letter mystery word!`);
 
-  // Keyboard.
-  const keyboard = make('div', 'wg-keyboard');
-  const keys = {};
-  function addKey(row, label, onTap, extraClass = '') {
-    const key = button(`wg-key ${extraClass}`.trim(), label, onTap);
-    row.append(key);
-    return key;
-  }
-  KEY_ROWS.forEach((letters, index) => {
-    const row = make('div', 'wg-key-row');
-    const isBottom = index === KEY_ROWS.length - 1;
-    if (index === 1) row.classList.add('wg-key-row-middle');
-    if (isBottom) {
-      const goKey = addKey(row, 'Go', submitGuess, 'wg-key-wide wg-key-go');
-      goKey.setAttribute('aria-label', 'Check my word');
-    }
-    for (const letter of letters) keys[letter] = addKey(row, letter, () => typeLetter(letter));
-    if (isBottom) {
-      const backKey = addKey(row, '⌫', eraseLetter, 'wg-key-wide');
-      backKey.setAttribute('aria-label', 'Erase a letter');
-    }
-    keyboard.append(row);
-  });
+  const { node: keyboard, keys, stop: stopKeys } = letterKeyboard(container, { onLetter: typeLetter, onErase: eraseLetter, onGo: submitGuess });
 
   container.append(legend, board, message, keyboard);
 
@@ -264,7 +238,7 @@ export function render(container, puzzle, onDone) {
   }
 
   function finish() {
-    document.removeEventListener('keydown', onKeydown);
+    stopKeys();
     container.classList.add('finished');
     onDone({ status: state.status, guesses: state.guesses.length });
   }
@@ -299,15 +273,6 @@ export function render(container, puzzle, onDone) {
     }
   }
 
-  // A computer keyboard works too, which helps when testing on a laptop.
-  function onKeydown(event) {
-    if (event.metaKey || event.ctrlKey || event.altKey) return;
-    if (container.closest('[hidden]')) return; // only while this game is on screen
-    if (/^[a-z]$/i.test(event.key)) typeLetter(event.key.toLowerCase());
-    else if (event.key === 'Backspace') eraseLetter();
-    else if (event.key === 'Enter') submitGuess();
-  }
-  document.addEventListener('keydown', onKeydown);
 
   draw();
 }

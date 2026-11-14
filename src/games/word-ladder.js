@@ -13,7 +13,7 @@
 // word the player makes isn't turned away. Hints prefer phonics words.
 
 import { createRandom } from '../seed.js';
-import { make, button, liveMessage, wiggle, progressDots } from '../ui.js';
+import { make, button, liveMessage, wiggle, progressDots, letterKeyboard } from '../ui.js';
 
 export const LENGTHS = [3, 4];  // one ladder of each, in this order
 const ABC = 'abcdefghijklmnopqrstuvwxyz';
@@ -209,7 +209,6 @@ export function hint(state) {
 // buttons.
 // ---------------------------------------------------------------------------
 
-const KEY_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
 const ORDINALS = ['first', 'second', 'third', 'fourth'];
 
 /** One rung: a word as a row of small letter tiles. `changed` marks the new letter. */
@@ -237,16 +236,7 @@ export function render(container, puzzle, onDone) {
   const rungs = make('div', 'wl-rungs');
   const message = liveMessage('wl-message');
 
-  const keyboard = make('div', 'wg-keyboard wl-keyboard');
-  for (const [index, letters] of KEY_ROWS.entries()) {
-    const row = make('div', 'wg-key-row');
-    if (index === 1) row.classList.add('wg-key-row-middle');
-    for (const letter of letters) {
-      const key = button('wg-key wl-key', letter, () => typeLetter(letter));
-      row.append(key);
-    }
-    keyboard.append(row);
-  }
+  const { node: keyboard } = letterKeyboard(container, { onLetter: typeLetter }, 'wl-keyboard');
 
   const buttons = make('div', 'button-row');
   const backButton = button('lw-button', '↩ Back', () => {
