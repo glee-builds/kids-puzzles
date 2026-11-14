@@ -295,6 +295,7 @@ const DAY = progressStore.daysBetween('2026-01-01', playDay);
 //   title, legend  shown at the top of its screen
 //   kind           'words' or 'numbers': which group its card is in
 //   levels         how many levels it has, if more than one
+//   how            how to play, shown the first time the puzzle is opened
 //   art            the little picture on its card (styled in styles.css)
 //   file           its file in src/games/, if not the same as the name
 //                  (also the name its daily seed uses)
@@ -304,74 +305,92 @@ const DAY = progressStore.daysBetween('2026-01-01', playDay);
 const GAMES = {
   'mystery-word': {
     title: 'Mystery Word', kind: 'words', file: 'word-guess', data: () => [words('level-3'), DAY],
+    how: ["Guess the hidden 5-letter word. You get 6 tries.", "Green letters are in the right spot. Purple letters are in the word, but somewhere else."],
     art: '<span class="mini mini-a">A</span><span class="mini mini-q">?</span>',
   },
   'letter-scramble': {
     title: 'Letter Scramble', kind: 'words', legend: 'Put the letters back in order', data: () => [words('level-1', 'level-2')],
+    how: ["The letters are mixed up.", "Drag or tap them into the boxes to spell a word."],
     art: '<span class="scramble-art"><span>t</span><span>a</span><span>c</span></span>',
   },
   'story-order': {
     title: 'Story Order', kind: 'words', legend: 'Put the story in order', data: () => [part('stories', 'stories'), DAY],
+    how: ["The story is out of order.", "Put the sentences back: what happens first, next, and last?"],
     art: '<span class="story-art"><span>1</span><span>2</span><span>3</span></span>',
   },
   'word-search': {
     title: 'Word Search', kind: 'words', legend: 'Find the hidden words', data: () => [part('search-themes', 'themes'), DAY],
+    how: ["Words are hiding in the letters.", "Slide your finger along a word to find it."],
     art: '<span class="search-art"><span>c</span><span class="search-art-hit">a</span><span>x</span><span>q</span><span class="search-art-hit">n</span><span>o</span><span>e</span><span class="search-art-hit">t</span><span>p</span></span>',
   },
   'word-ladder': {
     title: 'Word Ladder', kind: 'words', legend: 'Change one letter at a time', data: () => [words('ladder'), words('level-1', 'level-2')],
+    how: ["Turn the top word into the bottom word.", "Tap one letter, then tap a new letter. Every step must be a real word."],
     art: '<span class="ladder-art"><span>c<b>a</b>t</span><span>c<b>o</b>t</span><span>c<b>o</b>g</span></span>',
   },
   'word-clues': {
     title: 'Word Clues', kind: 'words', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY],
+    how: ["Read the short story.", "Use its clues to work out what the new word means."],
     art: '<span class="clue-art"><span class="clue-glass"></span><span class="clue-word">wow</span></span>',
   },
   'fix-sentence': {
     title: 'Fix the Sentence', kind: 'words', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY],
+    how: ["One word in the sentence is wrong.", "Tap it, then pick the word that fixes it."],
     art: '<span class="fix-art"><span class="fix-art-old">run</span><span class="fix-art-new">ran</span></span>',
   },
   'spell-it': {
     title: 'Spell It', kind: 'words', legend: 'Listen, look, and spell', data: () => [part('spelling', 'words'), DAY, reviewFor('spell-it')],
+    how: ["Read the sentence and find the missing word. Tap Hear it to listen.", "Pick it, sound it out, then spell it."],
     art: '<span class="spell-art"><span>s</span><span>p</span><span class="spell-art-blank">_</span><span>l</span><span>l</span></span>',
   },
   'end-marks': {
     title: 'End Marks', kind: 'words', legend: 'Telling, asking, or a strong feeling?', data: () => [loadJson('data/end-marks.json'), DAY],
+    how: ["Every sentence needs an end mark.", "A period tells. A question mark asks. An exclamation mark shows a strong feeling."],
     art: '<span class="marks-art"><span>.</span><span>?</span><span>!</span></span>',
   },
   'number-pyramid': {
     title: 'Number Pyramid', kind: 'numbers', legend: 'Each brick = the two bricks under it, added', levels: 3, data: () => [levelFor('number-pyramid')],
+    how: ["Each brick is the two bricks under it, added together.", "Tap an empty brick and type its number."],
     art: '<span class="bricks"><span class="brick-row"><span>9</span></span><span class="brick-row"><span>4</span><span>5</span></span></span>',
   },
   'magic-square': {
     title: 'Magic Square', kind: 'numbers', legend: 'Rows, columns, and diagonals all add up the same', levels: 3, data: () => [levelFor('magic-square')],
+    how: ["Every row, column, and diagonal adds up to the same number.", "Tap a ? square and type its number."],
     art: '<span class="square-art"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>',
   },
   'number-line': {
     title: 'Number Line Hop', kind: 'numbers', legend: 'Where will the frog land?',
+    how: ["The frog hops along the number line.", "Type the number where it will land."],
     art: '<span class="hop-art"><img class="hop-frog" src="assets/frog.svg" alt=""></span>',
   },
   'fact-families': {
     title: 'Fact Families', kind: 'numbers', legend: 'Three numbers make four facts. Drag them in!',
+    how: ["Three numbers make four facts.", "Drag the numbers into each fact to light up the house."],
     art: '<span class="house-art"><span class="house-art-roof"></span><span class="house-art-body"><span></span><span></span></span></span>',
   },
   'find-the-mistake': {
     title: 'Find the Mistake', kind: 'numbers', legend: 'The frog got one step wrong. Find it and fix it!',
+    how: ["The frog made one mistake.", "Tap the step that is wrong, then fix it."],
     art: '<span class="oops-art"><span>3+4=8</span><span class="oops-mark">✗</span></span>',
   },
   'word-problems': {
     title: 'Think It Through', kind: 'numbers', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')],
+    how: ["Read the story problem carefully.", "One number doesn't help. Tap it, then solve the problem."],
     art: '<span class="think-art"><span>12</span><span class="think-q">?</span><span>7</span></span>',
   },
   'bug-groups': {
     title: 'Bug Groups', kind: 'numbers', legend: 'Equal groups make times facts', levels: 3, data: () => [levelFor('bug-groups'), reviewFor('bug-groups')],
+    how: ["Bugs sit in equal groups on lily pads.", "Count the groups, and how many are in each one."],
     art: '<span class="bugs-art"><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span></span>',
   },
   'garden-rows': {
     title: 'Garden Rows', kind: 'numbers', legend: 'Rows of seeds make times facts', levels: 3, data: () => [levelFor('garden-rows'), reviewFor('garden-rows')],
+    how: ["Seeds grow in rows. Each row is a group.", "Add the rows, turn the garden, and split the big ones."],
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
   maze: {
     title: 'Maze', kind: 'numbers', legend: 'Trace from the green dot to the star', levels: 3, data: () => [levelFor('maze')],
+    how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
     art: '<span class="maze-art"></span>',
   },
 };
@@ -397,6 +416,25 @@ function makeScreen(name, { title, legend }) {
   return screen;
 }
 
+/**
+ * The first time a puzzle is opened, show how to play in place of the
+ * puzzle. "Got it!" brings the puzzle back and remembers not to ask again.
+ */
+function showHowTo(name, area) {
+  const { how } = GAMES[name];
+  if (!how || (progress.seen || []).includes(name) || progress.plays?.[name]) return;
+  const card = make('div', 'how-to');
+  card.append(make('h2', 'how-title', 'How to play'), ...how.map((line) => make('p', 'how-line', line)));
+  card.append(button('button how-ok', 'Got it!', () => {
+    progress = progressStore.markSeen(progress, name);
+    progressStore.save(progress);
+    card.remove();
+    area.hidden = false;
+  }));
+  area.hidden = true;
+  area.before(card);
+}
+
 /** Load a game's file and data, make today's puzzle, and draw it. */
 async function startGame(name) {
   const { file = name, data = () => [] } = GAMES[name];
@@ -405,6 +443,7 @@ async function startGame(name) {
     const [game, extras] = await Promise.all([import(`./games/${file}.js`), Promise.all(data())]);
     const puzzle = game.generate(seedFor(playDay, file), ...extras);
     game.render(area, puzzle, (result) => finishGame(name, result));
+    showHowTo(name, area);
   } catch (error) {
     area.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
     console.error(error);

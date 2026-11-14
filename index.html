@@ -20,6 +20,14 @@
     <img class="splash-frog" src="assets/frog.svg" alt="">
     <p class="splash-name">Lily Pad</p>
   </div>
+  <script>
+    // The splash shows once each time the app is opened, not on every page
+    // load (switching to yesterday's puzzles loads the page again).
+    try {
+      if (sessionStorage.getItem('lily-pad-opened')) document.getElementById('splash').remove();
+      else sessionStorage.setItem('lily-pad-opened', '1');
+    } catch (error) { /* no storage (private browsing): the splash just shows each time */ }
+  </script>
 
   <div class="app">
 
