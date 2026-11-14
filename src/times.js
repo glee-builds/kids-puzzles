@@ -6,6 +6,8 @@
 //   level 1: 2s, 5s, and 10s (easy to count by)
 //   level 2: adds 3s and 4s
 //   level 3: 3s, 4s, and 6s to 9s (the harder facts)
+//   level 4: the same facts, with quick recall (Bug Groups) and sharing,
+//            the start of dividing (Garden Rows)
 
 export const STAGES = [
   { sizes: [2, 5, 10], name: '2s, 5s, and 10s' },

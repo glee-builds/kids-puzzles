@@ -110,3 +110,21 @@ test('missed facts come back in the add and build rounds, even from another leve
 test('facts that do not fit the lily pads are ignored', () => {
   assert.deepEqual(generate(seedForDay('2026-11-13'), 1, ['9x9', '8x3', 'junk']), sample);
 });
+
+// --- level 4: quick recall ---
+
+test('level 4 asks two facts from memory, then a build, every day for two years', () => {
+  everyDay((key) => {
+    const puzzle = generate(seedForDay(key), 4);
+    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assert.deepEqual(puzzle.rounds.map((r) => r.kind), ['recall', 'recall', 'build']);
+    assert.equal(puzzle.stage, 2); // the hardest facts
+  });
+});
+
+test('recall: the product is right, and a miss gets skip-counting as a hint', () => {
+  const round = { kind: 'recall', groups: 4, size: 3, choices: [9, 12, 15] };
+  assert.equal(isRight(round, 12), true);
+  assert.equal(isRight(round, 9), false);
+  assert.match(hint(round, 9), /Count by 3s: 3, 6, 9, …/);
+});

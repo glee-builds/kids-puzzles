@@ -16,12 +16,16 @@ import { stageFor, STAGES, choicesFor, factKey, parseFact } from '../times.js';
 import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const ROUNDS = ['add', 'turn', 'split'];
+// Level 4: sharing (the start of dividing) takes the place of turning.
+export const SHARE_ROUNDS = ['add', 'share', 'split'];
+const roundsFor = (level) => (level >= 4 ? SHARE_ROUNDS : ROUNDS);
 export const SMALL_ROWS = [2, 5];  // rows in the first two rounds (from, to)
 export const BIG_ROWS = [6, 9];    // rows in the split round
 export const SPLIT_AT = 5;         // the split round always splits off 5 rows
 
 /**
- * Make today's 3 rounds. `level` (1 to 3) picks the row sizes. `review` is
+ * Make today's 3 rounds. `level` picks the row sizes (1 to 3), and at
+ * level 4 a sharing round takes the place of turning. `review` is
  * a list of facts to bring back (see recordReview in src/progress.js).
  */
 export function generate(seed, level = 1, review = []) {
@@ -39,7 +43,7 @@ export function generate(seed, level = 1, review = []) {
   }
 
   const rounds = [];
-  for (const kind of ROUNDS) {
+  for (const kind of roundsFor(level)) {
     const [low, high] = kind === 'split' ? BIG_ROWS : SMALL_ROWS;
     let fact = back[kind];
     while (!fact || rounds.some((r) => r.rows === fact.rows && r.size === fact.size)) {
@@ -51,12 +55,17 @@ export function generate(seed, level = 1, review = []) {
     // Near misses: one row too few or too many (or, after turning, the
     // count of the turned rows).
     const misses = kind === 'turn' ? [total - fact.rows, total + fact.rows] : [total - fact.size, total + fact.size];
-    rounds.push({ kind, ...fact, choices: choicesFor(total, misses) });
+    // Sharing asks how many in each row, so its near misses are one more or one fewer.
+    const choices = kind === 'share' ? choicesFor(fact.size, [fact.size - 1, fact.size + 1]) : choicesFor(total, misses);
+    rounds.push({ kind, ...fact, choices });
   }
-  return { stage, rounds };
+  return { stage, level, rounds };
 }
 
 export const total = (round) => round.rows * round.size;
+
+/** The right answer to a round: the seeds in each row when sharing, else all the seeds. */
+export const answerOf = (round) => (round.kind === 'share' ? round.size : total(round));
 
 /** The starting state: round 0, no misses. */
 export function start(puzzle) {
@@ -67,7 +76,7 @@ export function start(puzzle) {
 export function check(state, answer) {
   if (state.status !== 'playing') throw new Error('All the rounds are done.');
   const round = state.puzzle.rounds[state.round];
-  const correct = answer === total(round);
+  const correct = answer === answerOf(round);
   const next = correct ? state.round + 1 : state.round;
   return {
     ...state,
@@ -82,6 +91,7 @@ export function check(state, answer) {
 export function hint(round, answer) {
   const { kind, rows, size } = round;
   if (kind === 'turn') return `Turning doesn't add or take away seeds. How many were there before it turned?`;
+  if (kind === 'share') return `Every row gets the same number. Count the seeds in one row.`;
   if (kind === 'split') {
     const rest = rows - SPLIT_AT;
     return `Add the two parts: ${SPLIT_AT * size} + ${rest * size}.`;
@@ -93,21 +103,22 @@ export function hint(round, answer) {
 /** Confirm a puzzle is valid. Returns { ok, problems }. */
 export function verify(puzzle) {
   const problems = [];
-  const { rounds, stage } = puzzle;
-  if (!Array.isArray(rounds) || rounds.length !== ROUNDS.length) {
-    return { ok: false, problems: [`there must be ${ROUNDS.length} rounds`] };
+  const { rounds, stage, level = 1 } = puzzle;
+  const kinds = roundsFor(level);
+  if (!Array.isArray(rounds) || rounds.length !== kinds.length) {
+    return { ok: false, problems: [`there must be ${kinds.length} rounds`] };
   }
   const sizes = STAGES[stage]?.sizes || [];
   rounds.forEach((round, i) => {
     const { kind, rows, size, choices } = round;
     const [low, high] = kind === 'split' ? BIG_ROWS : SMALL_ROWS;
-    if (kind !== ROUNDS[i]) problems.push(`round ${i + 1} should be ${ROUNDS[i]}`);
+    if (kind !== kinds[i]) problems.push(`round ${i + 1} should be ${kinds[i]}`);
     if (rows < low || rows > high) problems.push(`round ${i + 1}: ${rows} rows`);
     // A fact that came back for review can be from any level.
     const sizeOk = round.review ? size >= 2 && size <= 10 : sizes.includes(size);
     if (!sizeOk) problems.push(`round ${i + 1}: size ${size} isn't in stage ${stage + 1}`);
     if (rows === size) problems.push(`round ${i + 1}: rows and size are both ${size}`);
-    if (choices.length !== 3 || new Set(choices).size !== 3 || !choices.includes(total(round))) {
+    if (choices.length !== 3 || new Set(choices).size !== 3 || !choices.includes(answerOf(round))) {
       problems.push(`round ${i + 1} needs 3 different choices, one right`);
     }
   });
@@ -162,7 +173,7 @@ export function render(container, puzzle, onDone) {
     prefix: 'grp',
     draw(i) {
       const round = puzzle.rounds[i];
-      ({ add: drawAdd, turn: drawTurn, split: drawSplit })[round.kind](round);
+      ({ add: drawAdd, turn: drawTurn, split: drawSplit, share: drawShare })[round.kind](round);
     },
   });
   const { question, stage, message } = frame;
@@ -259,6 +270,23 @@ export function render(container, puzzle, onDone) {
     });
     drawGarden();
     stage.append(box, turnButton, after);
+  }
+
+  // Level 4. Share seeds equally into rows: the start of dividing.
+  function drawShare(round) {
+    const { rows, size } = round;
+    question.append(line('grp-ask', `${total(round)} seeds are shared into `, rowsText(rows), ' equal rows. How many are in each row?'));
+    const { node, rowNodes } = garden(rows, size);
+    for (const row of rowNodes) row.classList.add('gr-row-lit');
+    const after = make('div', 'grp-then');
+    after.append(choices(round, () => {
+      after.replaceChildren(
+        line('grp-sum', `${total(round)} ÷ `, rowsText(rows), ' = ', sizeText(size)),
+        line('grp-says', 'Sharing equally is dividing. The ÷ says "shared into."'),
+      );
+      finishRound(`✓ ${size} in each row!`);
+    }));
+    stage.append(node, after);
   }
 
   // 3. Split a big fact into 5 rows and the rest.

@@ -74,3 +74,29 @@ test('a small missed fact comes back in the first round, a big one in the split 
     assert.deepEqual([puzzle.rounds[2].rows, puzzle.rounds[2].size], [8, 6]);
   }, 60);
 });
+
+// --- level 4: sharing ---
+
+test('level 4 has a sharing round in the middle, every day for two years', () => {
+  everyDay((key) => {
+    const puzzle = generate(seedForDay(key), 4);
+    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assert.deepEqual(puzzle.rounds.map((r) => r.kind), ['add', 'share', 'split']);
+    const share = puzzle.rounds[1];
+    assert.ok(share.choices.includes(share.size));
+  });
+});
+
+test('sharing is answered with how many are in each row', () => {
+  const puzzle = { stage: 2, level: 4, rounds: [
+    { kind: 'add', rows: 2, size: 3, choices: [3, 6, 9] },
+    { kind: 'share', rows: 3, size: 4, choices: [3, 4, 5] },
+    { kind: 'split', rows: 7, size: 6, choices: [36, 42, 48] },
+  ] };
+  let state = check(start(puzzle), 6);
+  state = check(state, 12); // all the seeds: not what sharing asks
+  assert.equal(state.last.correct, false);
+  assert.match(hint(puzzle.rounds[1], 12), /one row/);
+  state = check(state, 4);
+  assert.equal(state.round, 2);
+});
