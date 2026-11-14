@@ -18,7 +18,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Hosting:** GitHub Pages, deployed from the root of `main`.
 - **Repo:** public, named `kids-puzzles`. Nothing sensitive goes in it.
 - **Daily puzzles:** generated in the browser using today's date as a seed (`src/seed.js`). Same date, same puzzles. No server, no database.
-- **Levels:** Number Pyramid, Magic Square, and the Maze get harder as the pond grows: level 2 after 30 puzzle days, level 3 after 60 (`LEVEL` in `src/app.js`; each game's `LEVELS`). Same date and same level, same puzzle. Level 1 is the original puzzle.
+- **Levels:** Number Pyramid, Magic Square, and the Maze get harder as the pond grows: level 2 after 30 puzzle days, level 3 after 60 (`LEVEL` in `src/app.js`; each game's `LEVELS`). Same date and same level, same puzzle. The Maze is 10x10, then 12x12, then 14x14 (made harder 2026-11-13).
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
 - **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js`, growing with how many days that puzzle has been played (`playsBefore` in `src/app.js`). Orange text means how many groups; teal (`--size-ink`) means how many in each.
 - **Spoken words:** Spell It's "Hear it" uses the phone's built-in voice (`speechSynthesis`), approved 2026-11-13. It makes no network request. Don't add other speech or audio services.

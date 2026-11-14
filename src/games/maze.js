@@ -11,9 +11,9 @@
 import { createRandom } from '../seed.js';
 import { make, button, liveMessage, trace } from '../ui.js';
 
-export const SIZE = 8;
+export const SIZE = 10;
 // Bigger as the player goes on (the app picks the level; see src/app.js).
-export const LEVEL_SIZES = [8, 9, 10];
+export const LEVEL_SIZES = [10, 12, 14];
 export const N = 1;
 export const E = 2;
 export const S = 4;
