@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, load, save, STORAGE_KEY, KEEP_DAYS,
+  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS,
 } from '../src/progress.js';
 
 // A stand-in for the browser's localStorage, so tests run in Node.
@@ -202,4 +202,58 @@ test('a sticker is added once and kept through later puzzles', () => {
 test('progress saved before stickers existed loads with none', () => {
   const old = { streak: 1, totalDays: 1, lastDay: '2026-11-08', finished: { '2026-11-08': ['maze'] }, plays: { maze: 1 } };
   assert.deepEqual(load({ getItem: () => JSON.stringify(old) }).stickers, []);
+});
+
+// --- how puzzles went, and levels ---
+
+test('rate: easy with no misses, hard with help or many misses', () => {
+  assert.equal(rate({ misses: 0, helped: 0 }), 'easy');
+  assert.equal(rate({ misses: 2, helped: 0 }), 'ok');
+  assert.equal(rate({ misses: 4, helped: 0 }), 'hard');
+  assert.equal(rate({ misses: 0, helped: 1 }), 'hard');
+  assert.equal(rate(), 'easy');
+});
+
+const days = (p, game, scores, first = 1, options = { maxLevel: 3 }) => scores.reduce((progress, score, i) => {
+  const result = { easy: { misses: 0 }, ok: { misses: 1 }, hard: { helped: 1 } }[score];
+  return recordResult(progress, `2026-12-${String(first + i).padStart(2, '0')}`, game, result, options);
+}, p);
+
+test('three easy days in a row move a puzzle up a level, the next day', () => {
+  let p = days(emptyProgress(), 'maze', ['easy', 'easy']);
+  assert.equal(levelOf(p, 'maze', '2026-12-03'), 1);
+  p = days(p, 'maze', ['easy'], 3);
+  assert.equal(levelOf(p, 'maze', '2026-12-03'), 1); // not partway through the day
+  assert.equal(levelOf(p, 'maze', '2026-12-04'), 2);
+});
+
+test('an ok day breaks the run, and the top level is the limit', () => {
+  let p = days(emptyProgress(), 'maze', ['easy', 'easy', 'ok', 'easy', 'easy']);
+  assert.equal(levelOf(p, 'maze', '2026-12-20'), 1);
+  p = days(emptyProgress(), 'maze', Array(12).fill('easy'));
+  assert.equal(levelOf(p, 'maze', '2026-12-20'), 3);
+});
+
+test('two hard days in a row move a puzzle down, but not below 1', () => {
+  let p = days(emptyProgress(), 'maze', ['easy', 'easy', 'easy', 'hard', 'hard']);
+  assert.equal(levelOf(p, 'maze', '2026-12-20'), 1);
+  p = days(p, 'maze', ['hard', 'hard'], 6);
+  assert.equal(levelOf(p, 'maze', '2026-12-20'), 1);
+});
+
+test('a puzzle starts from its start level and keeps the last 10 days', () => {
+  let p = days(emptyProgress(), 'maze', ['hard', 'hard'], 1, { maxLevel: 3, startLevel: 3 });
+  assert.equal(levelOf(p, 'maze', '2026-12-20', 3), 2);
+  assert.equal(levelOf(emptyProgress(), 'maze', '2026-12-20', 2), 2);
+  p = days(emptyProgress(), 'word-search', Array(14).fill('ok'));
+  assert.equal(p.results['word-search'].length, RESULTS_KEPT);
+  assert.equal(levelOf(p, 'word-search', '2026-12-20'), 1); // one level only
+});
+
+test('trend: going well, needs practice, or nothing to say yet', () => {
+  assert.equal(trend(days(emptyProgress(), 'maze', ['easy']), 'maze'), null);
+  assert.equal(trend(days(emptyProgress(), 'maze', ['easy', 'ok', 'easy']), 'maze'), 'well');
+  assert.equal(trend(days(emptyProgress(), 'maze', ['hard', 'easy', 'hard']), 'maze'), 'practice');
+  assert.equal(trend(days(emptyProgress(), 'maze', ['hard', 'easy', 'easy']), 'maze'), null);
+  assert.equal(trend(emptyProgress(), 'maze'), null);
 });

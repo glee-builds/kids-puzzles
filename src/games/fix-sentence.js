@@ -126,10 +126,15 @@ export function hint(state) {
 
 const CHEERS = ['You fixed it!', 'Sharp eyes!', 'Great editing!', 'You got it!'];
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: how many wrong answers, and how many answers were shown.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let cheerCount = 0;
+  let misses = 0; // wrong answers in the whole puzzle
+  let helped = 0; // wrong words the game showed after too many taps
 
   container.replaceChildren();
   container.classList.add('fs');
@@ -153,6 +158,8 @@ export function render(container, puzzle, onDone) {
   function tap(position) {
     if (state.phase !== 'find' || state.fine.includes(position)) return;
     state = check(state, { tap: position });
+    if (!state.last.correct) misses++;
+    if (state.last.shown) helped++;
     if (state.last.correct) message.textContent = 'You found it! Now pick the right word.';
     else if (state.last.shown) message.textContent = 'That word is fine ✓. Here\'s the wrong one. Pick the right word.';
     else message.textContent = hint(state);
@@ -162,6 +169,7 @@ export function render(container, puzzle, onDone) {
   function pick(word) {
     if (state.phase !== 'fix') return;
     state = check(state, { pick: word });
+    if (!state.last.correct) misses++;
     message.textContent = state.last.correct
       ? `✓ ${CHEERS[cheerCount++ % CHEERS.length]} ${current(state).why}`
       : `↺ Not that one. ${hint(state)}`;
@@ -174,7 +182,7 @@ export function render(container, puzzle, onDone) {
       bubble.textContent = 'Thank you for fixing my sentences!';
       message.textContent = 'You fixed every sentence!';
       nextButton.hidden = true;
-      onDone({ status: state.status });
+      onDone({ status: state.status, misses, helped });
       return;
     }
     message.textContent = '';

@@ -11,7 +11,7 @@
 // The same colors everywhere: orange is how many groups (pads), teal is
 // how many in each group (bugs on a pad).
 //
-// The group sizes grow with play (see src/times.js). The number of groups
+// The group sizes grow with the level (see src/times.js). The number of groups
 // stays 2 to 5, so the pads fit on a phone screen; Garden Rows has bigger
 // facts.
 
@@ -25,13 +25,10 @@ export const MAX_GROUPS = 5;
 export const MAX_PADS = 5;  // the + button stops here when building
 export const MAX_BUGS = 10; // bugs on one pad
 
-/**
- * Make today's 3 rounds. `plays` is how many days this puzzle has been
- * finished before, which picks the group sizes.
- */
-export function generate(seed, plays = 0) {
+/** Make today's 3 rounds. `level` (1 to 3) picks the group sizes. */
+export function generate(seed, level = 1) {
   const random = createRandom(seed);
-  const stage = stageFor(plays);
+  const stage = stageFor(level);
   const { sizes } = STAGES[stage];
   const facts = [];
   while (facts.length < ROUNDS.length) {
@@ -172,9 +169,14 @@ function pad(count, className = 'grp-pad') {
   return node;
 }
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is how many wrong answers were given, and
+ * helped is always 0 (this game never gives an answer away).
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
+  let misses = 0; // wrong answers in the whole puzzle (state.misses starts over each round)
   container.replaceChildren();
   container.classList.add('grp');
 
@@ -188,12 +190,13 @@ export function render(container, puzzle, onDone) {
   });
   const { question, stage, message } = frame;
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status }));
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status, misses, helped: 0 }));
 
   function answer(value, node) {
     const round = puzzle.rounds[state.round];
     state = check(state, value);
     if (!state.last.correct) {
+      misses += 1;
       message.textContent = `Not quite. ${hint(round, value)}`;
       if (node) wiggle(node);
     }

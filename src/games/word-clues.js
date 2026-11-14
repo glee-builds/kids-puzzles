@@ -144,10 +144,15 @@ function markWord(text, word) {
   return out;
 }
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is how many wrong choices were picked.
+ * helped is always 0: there is no Hint button and no answer is shown.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let cheerCount = 0;
+  let misses = 0; // wrong choices, counted across every step
 
   container.replaceChildren();
   container.classList.add('wc');
@@ -164,6 +169,7 @@ export function render(container, puzzle, onDone) {
   function choose(choice) {
     if (state.done) return;
     state = check(state, choice);
+    if (!state.last.correct) misses += 1;
     message.textContent = state.last.correct ? `✓ ${CHEERS[cheerCount++ % CHEERS.length]}` : `↺ Not that one. ${hint(state)}`;
     draw();
   }
@@ -173,7 +179,7 @@ export function render(container, puzzle, onDone) {
     if (state.status === 'won') {
       message.textContent = `You learned "${puzzle.entries[0].word}" and "${puzzle.entries[1].word}" today!`;
       nextButton.hidden = true;
-      onDone({ status: state.status });
+      onDone({ status: state.status, misses, helped: 0 });
       return;
     }
     message.textContent = '';

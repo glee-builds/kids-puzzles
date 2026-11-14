@@ -221,12 +221,18 @@ function rung(word, className, changed = -1) {
 
 const changedAt = (before, after) => [...after].findIndex((ch, i) => ch !== before[i]);
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is how many letter changes were turned away
+ * (not a word, or a word already on the ladder) and helped is how many
+ * times Hint was pressed.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let selected = null;  // which letter of the current word is picked
   let reading = false;  // showing a finished ladder before the next one
   let shownIndex = 0;
+  let misses = 0; // words turned away, counted across both ladders
 
   container.replaceChildren();
   container.classList.add('wl');
@@ -286,16 +292,18 @@ export function render(container, puzzle, onDone) {
       reading = true;
       message.textContent = state.status === 'won' ? 'You climbed both ladders!' : `You made ${big(word)}!`;
     } else if (result === 'unknown') {
+      misses += 1;
       message.textContent = `${big(word)} isn't a word I know. Try another letter.`;
-      wiggle();
+      wiggle(rungs);
     } else if (result === 'used') {
+      misses += 1;
       message.textContent = `${big(word)} is already on the ladder. Try another letter.`;
-      wiggle();
+      wiggle(rungs);
     }
     draw();
     if (state.status === 'won') {
       container.classList.add('finished');
-      onDone({ status: state.status });
+      onDone({ status: state.status, misses, helped: state.hints });
     }
   }
 
@@ -321,12 +329,8 @@ export function render(container, puzzle, onDone) {
     draw();
     if (state.status === 'won') {
       container.classList.add('finished');
-      onDone({ status: state.status });
+      onDone({ status: state.status, misses, helped: state.hints });
     }
-  }
-
-  function wiggle() {
-    wiggle(rungs);
   }
 
   function draw() {

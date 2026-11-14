@@ -121,7 +121,11 @@ export function verify(puzzle) {
 const CHEERS = ['That\'s the story!', 'Great reading!', 'You got the order!'];
 const ORDINALS = ['first', 'second', 'third', 'last'];
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is how many wrong orders were tried and
+ * helped is how many times Hint was pressed.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let slots = Array(SENTENCES).fill(null); // sentence position in each slot
@@ -129,6 +133,7 @@ export function render(container, puzzle, onDone) {
   let reading = false; // showing a finished story as a paragraph
   let shownIndex = 0;  // the story on screen
   let cheerCount = 0;
+  let misses = 0; // wrong orders, counted across both stories
 
   container.replaceChildren();
   container.classList.add('so');
@@ -216,12 +221,13 @@ export function render(container, puzzle, onDone) {
         message.textContent = 'You put every story in order!';
         container.classList.add('finished');
         draw();
-        onDone({ status: state.status });
+        onDone({ status: state.status, misses, helped: state.hints });
         return;
       }
       draw();
       return;
     }
+    misses += 1;
     const right = state.last.marks.filter(Boolean).length;
     slots = slots.map((s, k) => (state.locked[k] ? s : null));
     message.textContent = right > 0

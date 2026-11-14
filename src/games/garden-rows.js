@@ -8,7 +8,7 @@
 //      seeds, so 3 × 5 = 5 × 3.
 //   3. Split it: a bigger fact like 7 × 6 is split into 5 rows and 2 rows,
 //      5 × 6 + 2 × 6, which are easier.
-// Row sizes grow with play (see src/times.js). Up to 9 rows, so this one
+// Row sizes grow with the level (see src/times.js). Up to 9 rows, so this one
 // reaches the harder facts like 7 × 8.
 
 import { createRandom } from '../seed.js';
@@ -20,13 +20,10 @@ export const SMALL_ROWS = [2, 5];  // rows in the first two rounds (from, to)
 export const BIG_ROWS = [6, 9];    // rows in the split round
 export const SPLIT_AT = 5;         // the split round always splits off 5 rows
 
-/**
- * Make today's 3 rounds. `plays` is how many days this puzzle has been
- * finished before, which picks the row sizes.
- */
-export function generate(seed, plays = 0) {
+/** Make today's 3 rounds. `level` (1 to 3) picks the row sizes. */
+export function generate(seed, level = 1) {
   const random = createRandom(seed);
-  const stage = stageFor(plays);
+  const stage = stageFor(level);
   const { sizes } = STAGES[stage];
   const rounds = [];
   for (const kind of ROUNDS) {
@@ -133,9 +130,14 @@ function garden(rows, size, { tappable = false, splitAt = 0 } = {}) {
   return { node, rowNodes };
 }
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is how many wrong answers were given, and
+ * helped is always 0 (this game never gives an answer away).
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
+  let misses = 0; // wrong answers in the whole puzzle (state.misses starts over each round)
   container.replaceChildren();
   container.classList.add('grp', 'gr');
 
@@ -151,7 +153,7 @@ export function render(container, puzzle, onDone) {
 
   const roundNumber = (round) => puzzle.rounds.indexOf(round);
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status }));
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status, misses, helped: 0 }));
 
   /** Three answer buttons. `onRight` runs after a right answer. */
   function choices(round, onRight) {
@@ -161,6 +163,7 @@ export function render(container, puzzle, onDone) {
         if (state.round !== roundNumber(round)) return;
         state = check(state, n);
         if (!state.last.correct) {
+          misses += 1;
           message.textContent = `Not quite. ${hint(round, n)}`;
           wiggle(choice);
           return;

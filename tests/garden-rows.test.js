@@ -10,34 +10,34 @@ import {
 } from '../src/games/garden-rows.js';
 
 const seedForDay = (key) => seedFor(key, 'garden-rows');
-const sample = generate(seedForDay('2026-11-13'), 0);
+const sample = generate(seedForDay('2026-11-13'), 1);
 
-test('every day for two years, at every stage, makes valid rounds', () => {
-  for (const plays of [0, 7, 14]) {
+test('every day for two years, at every level, makes valid rounds', () => {
+  for (const level of [1, 2, 3]) {
     everyDay((key) => {
-      const puzzle = generate(seedForDay(key), plays);
+      const puzzle = generate(seedForDay(key), level);
       const result = verify(puzzle);
-      assert.ok(result.ok, `${key}, ${plays} plays: ${result.problems.join('; ')}`);
-      assert.equal(puzzle.stage, stageFor(plays));
+      assert.ok(result.ok, `${key}, level ${level}: ${result.problems.join('; ')}`);
+      assert.equal(puzzle.stage, stageFor(level));
     });
   }
 });
 
 test('the split round always has more than 5 rows to split', () => {
   everyDay((key) => {
-    const split = generate(seedForDay(key), 14).rounds[2];
+    const split = generate(seedForDay(key), 3).rounds[2];
     assert.ok(split.rows > SPLIT_AT && split.rows <= BIG_ROWS[1]);
   });
 });
 
 test('the harder facts show up once the 6s to 9s start', () => {
   const sizes = new Set();
-  everyDay((key) => { for (const r of generate(seedForDay(key), 14).rounds) sizes.add(r.size); }, 60);
+  everyDay((key) => { for (const r of generate(seedForDay(key), 3).rounds) sizes.add(r.size); }, 60);
   for (const n of [6, 7, 8, 9]) assert.ok(sizes.has(n), `${n}s`);
 });
 
 test('the same day and stage always make the same rounds', () => {
-  assert.deepEqual(generate(seedForDay('2026-11-13'), 0), sample);
+  assert.deepEqual(generate(seedForDay('2026-11-13'), 1), sample);
 });
 
 test('verify catches a missing right answer', () => {

@@ -159,8 +159,10 @@ const MARK_RANK = { none: 1, elsewhere: 2, here: 3 };
 const CHEERS = ['Good try!', 'Nice thinking!', 'Keep going!', 'Getting closer!', 'You can do it!'];
 
 /**
- * Draw the game inside `container`. Calls onDone({ status, guesses })
- * once, when the word is found or revealed.
+ * Draw the game inside `container`. Calls
+ * onDone({ status, misses, helped, guesses }) once, when the word is found
+ * or revealed. misses is the wrong guesses; helped is 1 if the word had to
+ * be shown, else 0.
  */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
@@ -240,7 +242,9 @@ export function render(container, puzzle, onDone) {
   function finish() {
     stopKeys();
     container.classList.add('finished');
-    onDone({ status: state.status, guesses: state.guesses.length });
+    const won = state.status === 'won';
+    const guesses = state.guesses.length;
+    onDone({ status: state.status, misses: won ? guesses - 1 : guesses, helped: won ? 0 : 1, guesses });
   }
 
   function draw() {

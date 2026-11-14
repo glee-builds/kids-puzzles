@@ -177,9 +177,14 @@ const PAUSE = 700; // ms to show a right or wrong fact before clearing it
 /** "15-7=8" -> "15 − 7 = 8" */
 const pretty = (fact) => fact.replace(/([+\-=])/g, ' $1 ').replace('-', '−');
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is how many wrong answers were given, and
+ * helped is how many windows filled themselves in.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
+  let misses = 0;             // wrong facts in the whole puzzle
   let viewHouse = 0;          // the house on screen (stays on a lit house until "Next")
   let boxes = [null, null, null]; // roof index (0 whole, 1 and 2 parts) in each box
   let busy = false;           // true while a fact is being judged
@@ -290,6 +295,8 @@ export function render(container, puzzle, onDone) {
     const houseBefore = state.house;
     state = check(state, boxes.map((i) => numbers[i]));
     const { result } = state.last;
+    // The 3rd miss on a window is 'shown': still a wrong fact.
+    if (result === 'wrong' || result === 'shown') misses += 1;
 
     if (result === 'lit' || result === 'shown') {
       if (result === 'shown') {
@@ -321,7 +328,7 @@ export function render(container, puzzle, onDone) {
         if (state.status === 'won') {
           container.classList.add('finished');
           draw();
-          onDone({ status: state.status });
+          onDone({ status: state.status, misses, helped: state.revealed.length });
           return;
         }
       }

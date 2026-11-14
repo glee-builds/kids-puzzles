@@ -204,7 +204,11 @@ export function hint(state) {
 // Trace across or down with a finger; the trace snaps to a straight line.
 // ---------------------------------------------------------------------------
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is always 0 (a trace that isn't a word is
+ * not a wrong answer) and helped is how many times Hint was pressed.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let anchor = null;   // the square the trace started on
@@ -281,7 +285,7 @@ export function render(container, puzzle, onDone) {
     draw();
     if (state.status === 'won') {
       container.classList.add('finished');
-      onDone({ status: state.status });
+      onDone({ status: state.status, misses: 0, helped: state.hints });
     }
   }
 
