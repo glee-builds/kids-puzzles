@@ -727,6 +727,20 @@ function startNewDayIfNeeded() {
   // Go to today's home screen: not yesterday's puzzles, and not a puzzle left open.
   location.replace(location.pathname);
 }
+// The Refresh button at the bottom of the home screen does the same by
+// hand: it loads the app again, which gets the newest version (when the
+// device is online) and today's puzzles. Half-done puzzles are kept.
+document.getElementById('refresh').addEventListener('click', async (event) => {
+  event.target.textContent = 'Refreshing…';
+  event.target.disabled = true;
+  try {
+    // Ask for the newest service worker too, so the offline copy is up to date.
+    const worker = await navigator.serviceWorker?.getRegistration();
+    await worker?.update();
+  } catch { /* offline, or no service worker: loading again still works */ }
+  location.replace(location.pathname);
+});
+
 document.addEventListener('visibilitychange', startNewDayIfNeeded);
 window.addEventListener('pageshow', startNewDayIfNeeded);
 window.addEventListener('focus', startNewDayIfNeeded);

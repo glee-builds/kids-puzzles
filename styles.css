@@ -1153,8 +1153,27 @@ button {
 /* ---------- For grown-ups ---------- */
 
 .grown-up-link {
-  margin: 20px 0 8px;
+  margin: 20px 0 0;
   text-align: center;
+}
+
+/* Refresh, at the very bottom of the home screen: quiet, but easy to tap. */
+.refresh {
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.refresh-button {
+  min-height: 48px;
+  padding: 0 18px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
 .grown-up-link a {
