@@ -304,7 +304,7 @@ const DAY = progressStore.daysBetween('2026-01-01', playDay);
 // and its screen are built from the entry.
 const GAMES = {
   'mystery-word': {
-    title: 'Mystery Word', kind: 'words', file: 'word-guess', data: () => [words('level-3'), DAY],
+    title: 'Mystery Word', kind: 'words', file: 'word-guess', data: () => [words('level-3'), DAY, part('spelling', 'words')],
     how: ["Guess the hidden 5-letter word. You get 6 tries.", "Green letters are in the right spot. Purple letters are in the word, but somewhere else."],
     art: '<span class="mini mini-a">A</span><span class="mini mini-q">?</span>',
   },

@@ -3517,3 +3517,13 @@ button.gr-row {
   font-size: 1.15rem;
   cursor: pointer;
 }
+
+/* Mystery Word: the clue sentence that replaces the color key after 3 wrong guesses. */
+.wg-sentence {
+  margin: 0 0 2px; /* two lines must fit where the one-line color key was */
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--words-ink);
+}

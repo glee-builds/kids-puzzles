@@ -19,10 +19,15 @@ export const MAX_GUESSES = 6;
 // The word is dealt from a deck, one a day, so no word repeats until the
 // whole list has been used. (The seed isn't needed; every game's generate
 // takes one so they all work the same way.)
-export function generate(seed, words, dayNumber) {
+export function generate(seed, words, dayNumber, sentences = []) {
   const [answer] = dealForDay(words, 1, dayNumber, 'word-guess');
-  return { answer, length: answer.length, maxGuesses: MAX_GUESSES };
+  // A sentence with a blank where the word goes, if there is one for this
+  // word (from data/spelling.json). It's shown after a few wrong guesses.
+  const sentence = sentences.find((entry) => entry.word === answer)?.sentence || null;
+  return { answer, length: answer.length, maxGuesses: MAX_GUESSES, sentence };
 }
+
+export const GUESSES_BEFORE_SENTENCE = 3;
 
 /** The starting state for a puzzle: no guesses yet. */
 export function start(puzzle) {
@@ -236,6 +241,12 @@ export function render(container, puzzle, onDone) {
       message.textContent = 'Clue: just one letter is missing!';
     } else {
       message.textContent = CHEERS[(state.guesses.length - 1) % CHEERS.length];
+    }
+    // After 3 wrong guesses, a sentence that the word fits takes the place
+    // of the color key (by now the colors are familiar).
+    if (state.status === 'playing' && puzzle.sentence && state.guesses.length === GUESSES_BEFORE_SENTENCE) {
+      legend.className = 'wg-sentence';
+      legend.textContent = `Clue: ${puzzle.sentence}`;
     }
   }
 

@@ -187,3 +187,13 @@ test('verify: catches broken puzzles', () => {
   assert.equal(verify({ answer: 'cat', length: 4, maxGuesses: 6 }).ok, false);
   assert.equal(verify({ answer: 'cat', length: 3, maxGuesses: 99 }).ok, false);
 });
+
+// --- the clue sentence ---
+
+test('a puzzle carries the sentence for its word, if there is one', () => {
+  const answer = generate(0, words, 3).answer;
+  const sentences = [{ word: answer, sentence: 'The ___ sat on a log.' }, { word: 'zzz', sentence: 'No.' }];
+  assert.equal(generate(0, words, 3, sentences).sentence, 'The ___ sat on a log.');
+  assert.equal(generate(0, words, 3).sentence, null);
+  assert.equal(generate(0, words, 3, [{ word: 'zzz', sentence: 'No.' }]).sentence, null);
+});
