@@ -203,7 +203,7 @@ function showGift(sticker) {
     keepSticker(sticker);
     for (const node of buttons) node.hidden = false;
     gift.hidden = true;
-    shown.replaceChildren(make('span', 'gift-picture', sticker.picture), make('span', 'gift-name', `A new sticker: ${sticker.name}!`));
+    shown.replaceChildren(make('span', 'gift-picture sticker-art', sticker.picture), make('span', 'gift-name', `A new sticker: ${sticker.name}!`));
     shown.hidden = false;
     drawStickerLink();
     celebrate();
@@ -235,21 +235,33 @@ function drawStickers() {
   area.append(make('p', 'sb-count', owned.length === STICKERS.length
     ? 'Your sticker book is full. Wow!'
     : `${owned.length} of ${STICKERS.length} stickers. Finish a puzzle to open a gift!`));
+  // Each page of the album is a card in its own soft color, with the
+  // stickers stuck on at slightly different angles.
   PAGES.forEach((page, p) => {
     const mine = STICKERS.filter((s) => s.page === p);
     const have = mine.filter((s) => owned.includes(s.id)).length;
-    area.append(make('h2', 'sb-page', `${page.name} · ${have} of ${mine.length}`));
+    const album = make('section', `sb-album sb-album-${p}`);
+    const heading = make('h2', 'sb-page', page.name);
+    heading.append(make('span', `sb-have${have === mine.length ? ' sb-have-all' : ''}`, have === mine.length ? '★ All 15' : `${have} of ${mine.length}`));
     const grid = make('div', 'sb-grid');
-    for (const sticker of mine) {
+    mine.forEach((sticker, i) => {
       const got = owned.includes(sticker.id);
-      const spot = make('span', 'sb-sticker' + (got ? '' : ' sb-empty') + (sticker.id === newest ? ' sb-new' : ''), got ? sticker.picture : '?');
+      const spot = make('span', 'sb-sticker' + (got ? '' : ' sb-empty') + (sticker.id === newest ? ' sb-new' : ''));
+      // A sticker not collected yet shows as a pale outline of what's coming.
+      const art = make('span', 'sticker-art', sticker.picture);
+      art.style.setProperty('--tilt', `${TILTS[i % TILTS.length]}deg`);
+      spot.append(art);
       spot.setAttribute('role', 'img');
       spot.setAttribute('aria-label', got ? sticker.name : 'A sticker you don\'t have yet');
       grid.append(spot);
-    }
-    area.append(grid);
+    });
+    album.append(heading, grid);
+    area.append(album);
   });
 }
+
+// How far each sticker in a row is turned, so they look stuck on by hand.
+const TILTS = [-7, 4, -3, 6, -5, 3, -6, 5, -2, 7];
 
 // ---------- Celebration: falling stars ----------
 
