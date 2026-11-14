@@ -95,3 +95,18 @@ test('the turned-around picture is wrong, and the hint says why', () => {
   assert.equal(isRight(match, turned), false);
   assert.match(hint(match, turned), new RegExp(`${match.size} groups of ${match.groups}`));
 });
+
+// --- facts that come back ---
+
+test('missed facts come back in the add and build rounds, even from another level', () => {
+  everyDay((key) => {
+    const puzzle = generate(seedForDay(key), 1, ['4x7', '3x9']);
+    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assert.deepEqual([puzzle.rounds[1].groups, puzzle.rounds[1].size], [4, 7]);
+    assert.deepEqual([puzzle.rounds[2].groups, puzzle.rounds[2].size], [3, 9]);
+  }, 60);
+});
+
+test('facts that do not fit the lily pads are ignored', () => {
+  assert.deepEqual(generate(seedForDay('2026-11-13'), 1, ['9x9', '8x3', 'junk']), sample);
+});

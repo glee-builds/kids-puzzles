@@ -17,6 +17,9 @@
 //   - levels holds each leveled puzzle's level. It goes up after 3 easy
 //     days in a row and down after 2 hard days in a row, starting the next
 //     day, so a puzzle never changes partway through a day.
+//   - review lists things that were missed (a spelling word, a times
+//     fact) so they come back: 2 days later, then 7 days after that if it
+//     goes well. Miss it again and it starts over.
 //   - stickers lists the stickers collected, oldest first (src/stickers.js).
 //   - plays counts how many days each game has been finished, ever (for
 //     the grown-up page). The day-by-day history keeps the last 4 weeks.
@@ -27,7 +30,7 @@ export const KEEP_DAYS = 28; // how many days of "finished" history to keep (4 w
 export function emptyProgress() {
   // previous: the last day and streak before lastDay, so a caught-up day
   // can join the two runs back together.
-  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [], results: {}, levels: {} };
+  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [], results: {}, levels: {}, review: {} };
 }
 
 /** Whole days from one "YYYY-MM-DD" to another (b minus a). */
@@ -122,6 +125,33 @@ export function recordResult(progress, day, game, result, { maxLevel = 1, startL
     ? progress.levels
     : { ...progress.levels, [game]: now === level ? { now, was: level, since: null } : { now, was: level, since: day } };
   return { ...progress, results, levels };
+}
+
+export const REVIEW_GAPS = [2, 7]; // days until a missed item comes back, then comes back again
+export const REVIEW_KEPT = 20;     // the most items one puzzle keeps for review
+
+/** The items of `game` that are due to come back on day number `dayNumber`, oldest first. */
+export function dueItems(progress, game, dayNumber) {
+  return (progress.review?.[game] || []).filter((entry) => entry.due <= dayNumber).map((entry) => entry.item);
+}
+
+/**
+ * Update a puzzle's review list after it's played. `practiced` is every
+ * item in today's puzzle; `missed` is the ones that went wrong.
+ *   - A missed item comes back in 2 days.
+ *   - An item that was due and went well comes back once more, 7 days
+ *     later; after that it's done.
+ * Returns new progress.
+ */
+export function recordReview(progress, game, dayNumber, { practiced = [], missed = [] } = {}) {
+  let list = (progress.review?.[game] || []).filter((entry) => !missed.includes(entry.item));
+  list = list.flatMap((entry) => {
+    if (!practiced.includes(entry.item) || entry.due > dayNumber) return [entry];
+    const step = entry.step + 1;
+    return step < REVIEW_GAPS.length ? [{ ...entry, step, due: dayNumber + REVIEW_GAPS[step] }] : [];
+  });
+  for (const item of missed) list.push({ item, step: 0, due: dayNumber + REVIEW_GAPS[0] });
+  return { ...progress, review: { ...progress.review, [game]: list.slice(-REVIEW_KEPT) } };
 }
 
 /**

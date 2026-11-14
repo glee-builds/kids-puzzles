@@ -86,3 +86,16 @@ test('a wrong pick or sound stays on the round (no limit, no penalty)', () => {
   for (let i = 0; i < 5; i++) state = check(state, wrong);
   assert.equal(state.round, 0);
 });
+
+// --- words that come back ---
+
+test('a missed word comes back, as the word to spell', () => {
+  const usual = generate(seedForDay('2026-11-13'), WORDS, 0);
+  const missed = WORDS.find((w) => !usual.rounds.some((r) => r.word === w.word)).word;
+  const puzzle = generate(seedForDay('2026-11-13'), WORDS, 0, [missed]);
+  assert.equal(verify(puzzle).ok, true);
+  assert.equal(puzzle.rounds[2].word, missed);
+  assert.equal(puzzle.rounds[2].kind, 'spell');
+  // A word that isn't in the list is ignored.
+  assert.deepEqual(generate(seedForDay('2026-11-13'), WORDS, 0, ['zzzzz']), usual);
+});
