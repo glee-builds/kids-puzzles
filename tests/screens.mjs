@@ -190,7 +190,17 @@ const PLAYS = {
     const spots = game.positions(game.generate(seed.seedFor(today, 'number-line')));
     for (const spot of spots.slice(1)) await type(spot);`,
   'mystery-word': `
-    for (let guess = 0; guess < 6; guess++) { await type('zzzzz'); await wait(350); }`,
+    for (let guess = 0; guess < 6; guess++) {
+      await type('zzzzz'); await wait(350);
+      // After the third wrong guess the clue sentence shows, and the screen must still fit.
+      if (guess === 2) {
+        if (!G.querySelector('.wg-sentence')) throw new Error('no clue sentence after 3 wrong guesses');
+        // Try the longest sentence in the list too.
+        G.querySelector('.wg-sentence').textContent = 'Clue: The ___ moved slowly across the leaf, leaving a shiny line.';
+        await wait();
+        if (document.documentElement.scrollHeight > innerHeight) throw new Error('the clue sentence makes the screen ' + (document.documentElement.scrollHeight - innerHeight) + 'px too tall');
+      }
+    }`,
   'bug-groups': `
     await tapUntilRight('.grp-picture'); await next();
     for (const pad of G.querySelectorAll('button.grp-pad')) pad.click();
