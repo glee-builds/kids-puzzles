@@ -51,6 +51,7 @@ const FILES = [
   'data/end-marks.json',
   'data/fix-sentences.json',
   'data/rich-words.json',
+  'data/search-clues.json',
   'data/search-themes.json',
   'data/spelling.json',
   'data/stories.json',
