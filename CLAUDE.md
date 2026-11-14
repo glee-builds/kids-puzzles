@@ -21,7 +21,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Levels:** puzzles with `levels` in `GAMES` (Number Pyramid, Magic Square, Maze, Bug Groups, Garden Rows) each keep their own level in saved progress: up after 3 easy days in a row, down after 2 hard ones, starting the next day (`recordResult` and `levelOf` in `src/progress.js`). Same date and same level, same puzzle. Every game's `render` calls `onDone({ status, misses, helped })`; that is how a day is rated easy, ok, or hard.
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
 - **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js` by level. Orange text means how many groups; teal (`--size-ink`) means how many in each.
-- **Spoken words:** Spell It's "Hear it" uses the phone's built-in voice (`speechSynthesis`), approved 2026-11-13. It makes no network request. Don't add other speech or audio services.
+- **Spoken words:** Spell It's "Hear it" uses the device's built-in voice (`speechSynthesis`), approved 2026-11-13. `src/voice.js` picks the most natural English voice on the device and skips any voice that isn't stored on the device, so it makes no network request. Don't add other speech or audio services.
 - **Groups:** puzzles are in five groups (`GROUPS` in `src/app.js`): Spelling, Reading, Numbers, Everyday Math, and Just for Fun. Each has a color and a shape (`.kind-...` in `styles.css`).
 - **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins a group and the rotation through its `kind` in `GAMES`.
 - **Sticker gifts:** the first finish of each puzzle each day gives a gift with a new sticker (`src/stickers.js`; never a repeat). The sticker book is the `#stickers` screen. Stickers are emoji from 2019 or earlier; no image files.
@@ -62,6 +62,7 @@ src/app.js          the GAMES list, game screens, streak, navigation
 src/seed.js         date -> repeatable random numbers
 src/games/          one file per game
 src/ui.js           screen helpers the games share (buttons, tracing, drag-or-tap)
+src/voice.js        reading aloud: picks the device's best voice
 src/stickers.js     the sticker book: pages, stickers, and which gift comes next
 src/today.js        which 5 puzzles make up Today's set
 src/times.js        which times facts the multiplication puzzles use, by stage

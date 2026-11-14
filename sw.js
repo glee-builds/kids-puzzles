@@ -28,6 +28,7 @@ const FILES = [
   'src/times.js',
   'src/today.js',
   'src/ui.js',
+  'src/voice.js',
   'src/games/bug-groups.js',
   'src/games/clock-time.js',
   'src/games/coin-count.js',
