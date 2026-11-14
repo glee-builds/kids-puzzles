@@ -29,6 +29,7 @@ const FILES = [
   'src/games/bug-groups.js',
   'src/games/fact-families.js',
   'src/games/find-the-mistake.js',
+  'src/games/garden-rows.js',
   'src/games/fix-sentence.js',
   'src/games/letter-scramble.js',
   'src/games/magic-square.js',
