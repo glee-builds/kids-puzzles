@@ -22,7 +22,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
 - **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js` by level. Orange text means how many groups; teal (`--size-ink`) means how many in each.
 - **Spoken words:** Spell It's "Hear it" uses the device's built-in voice (`speechSynthesis`), approved 2026-11-13. `src/voice.js` picks the most natural English voice on the device and skips any voice that isn't stored on the device, so it makes no network request. Don't add other speech or audio services.
-- **Groups:** puzzles are in five groups (`GROUPS` in `src/app.js`): Spelling, Reading, Numbers, Everyday Math, and Just for Fun. Each has a color and a shape (`.kind-...` in `styles.css`).
+- **Groups:** puzzles are in five groups (`GROUPS` in `src/app.js`): Spelling, Reading, Numbers, Everyday Math, and Just for Fun (the two mazes). Each has a color and a shape (`.kind-...` in `styles.css`).
 - **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins a group and the rotation through its `kind` in `GAMES`.
 - **Sticker gifts:** the first finish of each puzzle each day gives a gift with a new sticker (`src/stickers.js`; never a repeat). The sticker book is the `#stickers` screen. Stickers are emoji from 2019 or earlier; no image files.
 - **Yesterday's puzzles:** after a missed day, the home screen links to `?day=yesterday`, which plays that day's puzzles; finishing one fills in the missed day (`playDay` in `src/app.js`, catching up in `src/progress.js`). Only yesterday.
@@ -44,7 +44,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - Use original names, visuals, and colors. Do not use names, logos, or color schemes from existing commercial games.
 - Word games are aimed at about a 2nd to 3rd grade reading level (changed 2026-11-08; see `docs/decisions.md`). Mystery Word uses 5-letter words from `data/words/level-3.json`; Letter Scramble still uses the 3 to 4 letter lists.
 - No timers and no penalties. Use encouraging messages and one celebration at the end of the daily set.
-- No crosswords for now (too small on a phone). Mazes use finger tracing; the Maze is 30 by 30 with a different outline each day, sized for an iPad (on a phone its paths are about 11px wide).
+- No crosswords for now (too small on a phone). Mazes use finger tracing; there are two a day from the same file: the Maze (20 by 20) and the Big Maze (30 by 30, sized for an iPad; on a phone its paths are about 11px wide), each with a different outline each day.
 
 ## Privacy (a child holds this phone)
 
