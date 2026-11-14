@@ -29,6 +29,8 @@ const FILES = [
   'src/today.js',
   'src/ui.js',
   'src/games/bug-groups.js',
+  'src/games/clock-time.js',
+  'src/games/coin-count.js',
   'src/games/end-marks.js',
   'src/games/fact-families.js',
   'src/games/find-the-mistake.js',

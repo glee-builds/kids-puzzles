@@ -3555,3 +3555,184 @@ button.gr-row {
   color: var(--words-ink);
   font-weight: 800;
 }
+
+/* ---------- Clock Time ---------- */
+/* Right answers use .grp-right (a teal ring and a check mark). */
+
+.ct-question,
+.cc-question {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.ct-stage,
+.cc-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ct-clock {
+  width: min(230px, 38dvh);
+  height: auto;
+}
+
+.ct-face {
+  fill: var(--surface);
+  stroke: var(--text);
+  stroke-width: 2.5;
+}
+
+.ct-number {
+  fill: var(--text);
+  font-size: 9px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.ct-tick {
+  stroke: var(--muted);
+  stroke-width: 0.8;
+}
+
+.ct-hand { stroke-linecap: round; }
+
+/* The short hand is thick and orange; the long hand is thin and teal. */
+.ct-hour {
+  stroke: var(--numbers-ink);
+  stroke-width: 4.5;
+}
+
+.ct-minute {
+  stroke: var(--size-ink);
+  stroke-width: 2.5;
+}
+
+.ct-pin { fill: var(--text); }
+
+.ct-key {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.ct-key-hour { color: var(--numbers-ink); }
+.ct-key-minute { color: var(--size-ink); }
+
+.ct-choices {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ct-choice {
+  min-width: 92px;
+  font-size: 1.4rem;
+}
+
+/* Home card art: a little clock at 3 o'clock. */
+.clock-art {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--numbers-ink);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.clock-art i,
+.clock-art b {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  transform-origin: bottom center;
+}
+
+.clock-art i { height: 14px; background: var(--size-ink); }
+.clock-art b { height: 9px; background: var(--numbers-ink); transform: rotate(90deg); }
+
+/* ---------- Coin Count ---------- */
+
+.cc-coins {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 120px;
+}
+
+/* A coin: a circle with its value or name. Bigger coins are worth more,
+   except the dime, which really is the smallest. */
+.cc-coin {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 3px solid var(--muted);
+  background: var(--border);
+  color: var(--on-go);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.cc-quarter { width: 66px; height: 66px; font-size: 0.95rem; }
+.cc-nickel { width: 56px; height: 56px; }
+.cc-penny { width: 50px; height: 50px; background: var(--go); border-color: var(--numbers-ink); }
+.cc-dime { width: 46px; height: 46px; }
+
+.cc-entry {
+  margin: 0;
+  min-width: 110px;
+  padding: 4px 14px;
+  border: 3px dashed var(--muted);
+  border-radius: 12px;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+/* The right total: a solid teal box with a check. A shown total: a solid muted box. */
+.cc-entry-right {
+  border-style: solid;
+  border-color: var(--here);
+}
+
+.cc-entry-right::after { content: " ✓"; color: var(--here); }
+
+.cc-entry-shown {
+  border-style: solid;
+  color: var(--muted);
+}
+
+.cc .np-pad { margin-top: auto; }
+
+/* Home card art: three little coins. */
+.coins-art {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.coins-art i {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+  background: var(--border);
+  color: var(--on-go);
+  font-style: normal;
+  font-size: 0.55rem;
+  font-weight: 800;
+}
+
+.coins-art i:last-child { background: var(--go); border-color: var(--numbers-ink); }
