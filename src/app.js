@@ -388,12 +388,12 @@ const GAMES = {
     art: '<span class="think-art"><span>12</span><span class="think-q">?</span><span>7</span></span>',
   },
   'bug-groups': {
-    title: 'Bug Groups', kind: 'numbers', legend: 'Equal groups make times facts', levels: 3, data: () => [levelFor('bug-groups'), reviewFor('bug-groups')],
+    title: 'Bug Groups', kind: 'numbers', legend: 'Equal groups make times facts', levels: 4, data: () => [levelFor('bug-groups'), reviewFor('bug-groups')],
     how: ["Bugs sit in equal groups on lily pads.", "Count the groups, and how many are in each one."],
     art: '<span class="bugs-art"><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span></span>',
   },
   'garden-rows': {
-    title: 'Garden Rows', kind: 'numbers', legend: 'Rows of seeds make times facts', levels: 3, data: () => [levelFor('garden-rows'), reviewFor('garden-rows')],
+    title: 'Garden Rows', kind: 'numbers', legend: 'Rows of seeds make times facts', levels: 4, data: () => [levelFor('garden-rows'), reviewFor('garden-rows')],
     how: ["Seeds grow in rows. Each row is a group.", "Add the rows, turn the garden, and split the big ones."],
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },

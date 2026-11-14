@@ -256,6 +256,10 @@ const POKES = {
     if (!message()) throw new Error('typing letters did nothing');`,
 };
 
+// The puzzles that have levels. Each is also opened at its top level.
+// (A saved level above a puzzle's top is treated as its top.)
+const TOP_LEVELS = ['letter-scramble', 'word-search', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows', 'maze'];
+
 // How each played puzzle should be rated, given how PLAYS plays it.
 const EXPECTED = {
   'number-line': 'easy',   // every answer right the first time
@@ -334,6 +338,21 @@ try {
   await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-sticker").length > 100' });
   await checkScreen('For grown-ups', '#grown-ups', { ready: 'document.querySelectorAll(".gu-day").length === 28' });
   await checkScreen('Yesterday home', '?day=yesterday', { ready: 'document.getElementById("today-title").textContent.includes("Yesterday")' });
+
+  // Puzzles with levels, at their top level: do they still draw and fit?
+  const levels = Object.fromEntries(TOP_LEVELS.map((game) => [game, { now: 9, was: 9, since: null }]));
+  await evaluate(`(() => {
+    const progress = JSON.parse(localStorage.getItem('kids-puzzles.progress'));
+    localStorage.setItem('kids-puzzles.progress', JSON.stringify({ ...progress, levels: ${JSON.stringify(levels)} }));
+  })()`);
+  for (const game of TOP_LEVELS) {
+    const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
+    await checkScreen(`${game} (top level)`, `#${game}`, { ready, fits: true });
+  }
+  await evaluate(`(() => {
+    const progress = JSON.parse(localStorage.getItem('kids-puzzles.progress'));
+    localStorage.setItem('kids-puzzles.progress', JSON.stringify({ ...progress, levels: {} }));
+  })()`);
 
   // More days, if asked for: does each puzzle still fit the screen?
   for (let offset = 1; offset < DAYS; offset++) {

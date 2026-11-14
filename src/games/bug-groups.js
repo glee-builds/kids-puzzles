@@ -20,13 +20,17 @@ import { stageFor, STAGES, choicesFor, factKey, parseFact } from '../times.js';
 import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const ROUNDS = ['match', 'add', 'build'];
+// Level 4: quick recall. The fact comes first and the picture after, as a check.
+export const RECALL_ROUNDS = ['recall', 'recall', 'build'];
+const roundsFor = (level) => (level >= 4 ? RECALL_ROUNDS : ROUNDS);
 export const MIN_GROUPS = 2;
 export const MAX_GROUPS = 5;
 export const MAX_PADS = 5;  // the + button stops here when building
 export const MAX_BUGS = 10; // bugs on one pad
 
 /**
- * Make today's 3 rounds. `level` (1 to 3) picks the group sizes. `review`
+ * Make today's 3 rounds. `level` picks the group sizes (1 to 3), and at
+ * level 4 the first two rounds are quick recall (4 × 3 = ?). `review`
  * is a list of facts to bring back (see recordReview in src/progress.js).
  */
 export function generate(seed, level = 1, review = []) {
@@ -62,8 +66,15 @@ export function generate(seed, level = 1, review = []) {
     uneven,
   ]);
 
+  if (level >= 4) {
+    // Near misses for a fact: one group too few, one too many.
+    const recall = (fact) => ({ kind: 'recall', ...fact, choices: choicesFor(fact.groups * fact.size, [fact.groups * fact.size - fact.size, fact.groups * fact.size + fact.size]) });
+    return { stage, level, rounds: [recall(m), recall(a), { kind: 'build', ...b }] };
+  }
+
   return {
     stage,
+    level,
     rounds: [
       { kind: 'match', ...m, pictures },
       // Near misses for "how many 3s": the size itself, and the total.
@@ -80,6 +91,7 @@ export const shows = (pads, groups, size) => pads.length === groups && pads.ever
 export function isRight(round, answer) {
   if (round.kind === 'match') return shows(round.pictures[answer] || [], round.groups, round.size);
   if (round.kind === 'add') return answer === round.groups;
+  if (round.kind === 'recall') return answer === round.groups * round.size;
   return answer.pads === round.groups && answer.bugs === round.size;
 }
 
@@ -118,6 +130,10 @@ export function hint(round, answer) {
     if (answer === groups * size) return `${answer} is all the bugs. How many ${size}s did you add?`;
     return `Count the ${size}s you added, one for each pad.`;
   }
+  if (round.kind === 'recall') {
+    const counting = Array.from({ length: groups }, (_, i) => size * (i + 1)).slice(0, -1).join(', ');
+    return `${groups} groups of ${size}. Count by ${size}s: ${counting}, …`;
+  }
   if (answer.pads !== groups) return `Pads are the groups. Make ${groups} pad${groups === 1 ? '' : 's'}.`;
   return `Put ${size} bugs on each pad.`;
 }
@@ -125,15 +141,19 @@ export function hint(round, answer) {
 /** Confirm a puzzle is valid. Returns { ok, problems }. */
 export function verify(puzzle) {
   const problems = [];
-  const { rounds, stage } = puzzle;
-  if (!Array.isArray(rounds) || rounds.length !== ROUNDS.length) {
-    return { ok: false, problems: [`there must be ${ROUNDS.length} rounds`] };
+  const { rounds, stage, level = 1 } = puzzle;
+  const kinds = roundsFor(level);
+  if (!Array.isArray(rounds) || rounds.length !== kinds.length) {
+    return { ok: false, problems: [`there must be ${kinds.length} rounds`] };
   }
   const sizes = STAGES[stage]?.sizes || [];
   const seen = new Set();
   rounds.forEach((round, i) => {
     const { kind, groups, size } = round;
-    if (kind !== ROUNDS[i]) problems.push(`round ${i + 1} should be ${ROUNDS[i]}`);
+    if (kind !== kinds[i]) problems.push(`round ${i + 1} should be ${kinds[i]}`);
+    if (kind === 'recall' && (round.choices.length !== 3 || new Set(round.choices).size !== 3 || !round.choices.includes(groups * size))) {
+      problems.push('recall needs 3 different choices, one right');
+    }
     if (groups < MIN_GROUPS || groups > MAX_GROUPS) problems.push(`round ${i + 1}: ${groups} groups`);
     // A fact that came back for review can be from any level.
     const sizeOk = round.review ? size >= 2 && size <= MAX_BUGS : sizes.includes(size);
@@ -200,7 +220,7 @@ export function render(container, puzzle, onDone) {
     prefix: 'grp',
     draw(i) {
       const round = puzzle.rounds[i];
-      ({ match: drawMatch, add: drawAdd, build: drawBuild })[round.kind](round);
+      ({ match: drawMatch, add: drawAdd, build: drawBuild, recall: drawRecall })[round.kind](round);
     },
   });
   const { question, stage, message } = frame;
@@ -289,6 +309,27 @@ export function render(container, puzzle, onDone) {
       }
       ask.append(row);
     }
+  }
+
+  // Level 4. Quick recall: the fact first, then the picture to check it.
+  function drawRecall(round) {
+    const { groups, size } = round;
+    question.append(line('grp-ask', 'What is ', groupsText(groups), ' × ', sizeText(size), '?'));
+    const row = make('div', 'grp-choices');
+    for (const n of round.choices) {
+      const choice = button('lw-button grp-choice', String(n), () => {
+        if (state.round !== puzzle.rounds.indexOf(round)) return;
+        if (!answer(n, choice)) return;
+        choice.classList.add('grp-right');
+        for (const other of row.children) other.disabled = true;
+        const picture = make('div', 'grp-pads');
+        for (let i = 0; i < groups; i++) picture.append(pad(size));
+        stage.prepend(picture, line('grp-sum', groupsText(groups), ' × ', sizeText(size), ` = ${groups * size}`));
+        finishRound(`✓ ${COUNT_WORDS[groups]} ${SIZE_WORDS[size]} make ${groups * size}!`);
+      });
+      row.append(choice);
+    }
+    stage.append(row);
   }
 
   // 3. Build the fact with + and − buttons.
