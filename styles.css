@@ -3879,3 +3879,444 @@ button.gr-row {
   line-height: 1.3;
   color: var(--words-ink);
 }
+
+/* ---------- Math Mix-Ups ---------- */
+/* Right answers use .grp-right (a teal ring and a check mark). */
+
+.mm-ask,
+.gi-ask {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.mm-stage,
+.gi-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The three shapes: each has its own color and its own outline. */
+.mm-shape {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+}
+
+.mm-triangle {
+  background: var(--words);
+  clip-path: polygon(50% 4%, 100% 96%, 0 96%);
+}
+
+.mm-circle {
+  border-radius: 50%;
+  background: var(--numbers);
+}
+
+.mm-square {
+  border-radius: 5px;
+  background: var(--here);
+}
+
+.mm-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mm-line {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.mm-line-ask {
+  padding-top: 8px;
+  border-top: 2px dashed var(--border);
+}
+
+/* The balance: two pans on a level bar, with a post in the middle. */
+.mm-scale {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  padding-bottom: 26px;
+  position: relative;
+}
+
+.mm-pan {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: center;
+  align-content: flex-start;
+  gap: 4px;
+  width: 132px;
+  min-height: 40px;
+  padding: 6px 6px 8px;
+  border-bottom: 5px solid var(--text);
+}
+
+.mm-pan .mm-shape {
+  width: 24px;
+  height: 24px;
+}
+
+.mm-post {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  margin-left: -16px;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 26px solid var(--text);
+}
+
+.mm-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.mm-machine {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mm-run {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.mm-box {
+  min-width: 64px;
+  padding: 6px 10px;
+  border: 2px solid var(--text);
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.mm-box-ask {
+  border-style: dashed;
+  color: var(--numbers-ink);
+}
+
+/* The heat tag: one pepper and "Mild", or two and "Spicy". */
+.mm-heat {
+  width: fit-content;
+  margin: 0 auto 2px;
+  padding: 2px 10px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.mm-heat-2 {
+  border-color: var(--words);
+  color: var(--words-ink);
+}
+
+.mm-pentagon {
+  background: var(--size-ink);
+  clip-path: polygon(50% 2%, 100% 38%, 81% 98%, 19% 98%, 0 38%);
+}
+
+.mm-hexagon {
+  background: var(--muted);
+  clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%);
+}
+
+/* A number sentence with a dashed box for the missing number. */
+.mm-sentence {
+  margin: 14px 0;
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.mm-blank {
+  display: inline-block;
+  min-width: 46px;
+  padding: 0 6px;
+  border: 3px dashed var(--numbers-ink);
+  border-radius: 10px;
+  color: var(--numbers-ink);
+}
+
+.mm-pattern {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 10px 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.mm-pattern .mm-box {
+  min-width: 46px;
+  padding: 8px 2px;
+}
+
+/* A shape made of small squares. */
+.mm-area {
+  display: grid;
+  grid-template-columns: repeat(var(--wide), 34px);
+  grid-auto-rows: 34px;
+  margin: 6px 0;
+}
+
+.mm-unit {
+  border: 2px solid var(--text);
+  margin: -1px;
+  background: var(--here);
+}
+
+.mm-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 300px;
+  margin: 8px 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.mm-group .mm-shape {
+  width: 44px;
+  height: 44px;
+}
+
+.mm-choices,
+.gi-choices {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.mm-choice,
+.gi-choice {
+  min-width: 72px;
+  font-size: 1.4rem;
+}
+
+/* Home card art: a triangle, a circle, and a square. */
+.mix-art {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mix-art i { width: 20px; height: 20px; background: var(--words); clip-path: polygon(50% 4%, 100% 96%, 0 96%); }
+.mix-art b { width: 18px; height: 18px; border-radius: 50%; background: var(--numbers); }
+.mix-art u { width: 17px; height: 17px; border-radius: 4px; background: var(--here); }
+
+/* ---------- Graph It ---------- */
+
+.gi-story { text-align: left; font-weight: 400; font-size: 1.05rem; line-height: 1.4; }
+.gi-do { margin: 0 0 6px; text-align: center; font-weight: 700; }
+
+.gi-graph { width: 100%; }
+
+.gi-title {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* The bar graph: numbers up the side, a line across for each one. */
+.gi-plot {
+  --row: 15px;
+  display: flex;
+  height: calc(var(--lines) * var(--row));
+  margin-top: 8px;
+}
+
+.gi-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 26px;
+  margin: -7px 4px -7px 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: right;
+  color: var(--muted);
+}
+
+.gi-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  border-left: 2px solid var(--text);
+  border-bottom: 2px solid var(--text);
+  background: repeating-linear-gradient(to top, transparent 0 calc(var(--row) - 1px), var(--border) calc(var(--row) - 1px) var(--row));
+}
+
+.gi-column {
+  width: 44px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.gi-bar {
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  transition: height 150ms ease-out;
+}
+
+/* Each bar has its own color and its own pattern, so it isn't color alone. */
+.gi-bar-0 { background: var(--words); }
+.gi-bar-1 { background: repeating-linear-gradient(45deg, var(--numbers) 0 6px, var(--star) 6px 12px); }
+.gi-bar-2 { background: var(--here); }
+.gi-bar-3 { background: repeating-linear-gradient(0deg, var(--pad) 0 5px, var(--fun-ink) 5px 7px); }
+
+.gi-labels {
+  display: flex;
+  justify-content: space-around;
+  margin-left: 30px;
+  padding-top: 2px;
+}
+
+.gi-label {
+  width: 60px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* The picture graph: a row of lily pads for each thing, and a key. */
+.gi-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  border-bottom: 1px solid var(--border);
+}
+
+.gi-row-name {
+  width: 68px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: right;
+  padding-right: 4px;
+}
+
+.gi-picture {
+  display: inline-block;
+  width: 26px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--pad);
+  border: 2px solid var(--fun-ink);
+  vertical-align: middle;
+}
+
+.gi-key {
+  margin: 6px 0 0;
+  text-align: center;
+  font-weight: 800;
+}
+
+.gi-steppers {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  padding-left: 30px;
+}
+
+.gi-stepper { display: flex; gap: 4px; }
+
+.gi-step {
+  width: 44px;
+  min-height: 48px;
+  font-size: 1.4rem;
+}
+
+.gi-check { width: 100%; }
+
+/* The line graph. */
+.gi-line { width: min(100%, 300px); height: auto; }
+.gi-grid { stroke: var(--border); stroke-width: 1; }
+.gi-axis { fill: var(--text); font-size: 9px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+.gi-axis-side { text-anchor: end; }
+.gi-path { fill: none; stroke: var(--words-ink); stroke-width: 2.5; stroke-linejoin: round; }
+.gi-dot { fill: var(--numbers); stroke: var(--text); stroke-width: 1.5; }
+
+/* The grid for "across 4, up 2": numbers along the bottom and up the side. */
+.gi-grid-spots {
+  display: grid;
+  grid-template-columns: repeat(var(--wide), 44px);
+  grid-auto-rows: 44px;
+}
+
+.gi-number {
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.gi-spot {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Where the frog starts (level 3): a dot. Where it is: a green square with a check. */
+.gi-spot-from { background: radial-gradient(circle, var(--numbers) 0 30%, var(--surface) 34%); }
+
+.gi-spot-right {
+  background: var(--pad);
+  position: relative;
+}
+
+.gi-spot-right::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: var(--on-go);
+}
+
+/* Home card art: three bars. */
+.graph-art {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 36px;
+  padding: 0 4px;
+  border-left: 3px solid var(--text);
+  border-bottom: 3px solid var(--text);
+}
+
+.graph-art i { width: 9px; border-radius: 2px 2px 0 0; }
+.graph-art i:nth-child(1) { height: 16px; background: var(--words); }
+.graph-art i:nth-child(2) { height: 30px; background: var(--numbers); }
+.graph-art i:nth-child(3) { height: 22px; background: var(--here); }

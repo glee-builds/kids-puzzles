@@ -208,6 +208,20 @@ const PLAYS = {
     }`,
   'clock-time': `
     for (let clock = 0; clock < 5; clock++) { await tapUntilRight('.ct-choice'); await next(); }`,
+  'math-mix-ups': `
+    for (let round = 0; round < 3; round++) { await tapUntilRight('.mm-choice'); await next(); }`,
+  'graph-it': `
+    const game = await import('/src/games/graph-it.js');
+    const [, build, , spot] = game.generate(seed.seedFor(today, 'graph-it')).rounds;
+    await tapUntilRight('.gi-choice'); await next();
+    // Build the graph: one wrong try first, then press + on each bar until it matches the story.
+    G.querySelector('.gi-check').click(); await wait();
+    build.values.forEach((value, i) => { for (let n = 0; n < value / build.step; n++) G.querySelectorAll('[aria-label^="More"]')[i].click(); });
+    G.querySelector('.gi-check').click(); await wait(); await next();
+    await tapUntilRight('.gi-choice'); await next();
+    // The spot: the turned-around one first (a miss), then the right one.
+    G.querySelector('[data-across="' + spot.up + '"][data-up="' + spot.across + '"]')?.click(); await wait();
+    G.querySelector('[data-across="' + spot.across + '"][data-up="' + spot.up + '"]').click();`,
   'coin-count': `
     const game = await import('/src/games/coin-count.js');
     const rounds = game.generate(seed.seedFor(today, 'coin-count')).rounds;
@@ -270,7 +284,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
+const TOP_LEVELS = ['math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
 
 // Half-done puzzles: `play` plays part of a puzzle; then the page is
 // loaded again and `check` must be true: the puzzle picked up where it
@@ -289,6 +303,8 @@ const RESUMES = {
     check: `doneDots(1) && Boolean(G.querySelector('.gr-turn'))`,
   },
   'spell-it': { play: `await tapUntilRight('.sp-choice'); await next();`, check: `doneDots(1)` },
+  'math-mix-ups': { play: `await tapUntilRight('.mm-choice'); await next();`, check: `doneDots(1) && Boolean(G.querySelector('.mm-heat'))` },
+  'graph-it': { play: `await tapUntilRight('.gi-choice'); await next();`, check: `doneDots(1) && Boolean(G.querySelector('.gi-check'))` },
   'end-marks': { play: `await tapUntilRight('.em-mark'); await next(); await tapUntilRight('.em-mark'); await next();`, check: `doneDots(2)` },
   'clock-time': {
     play: `for (let clock = 0; clock < 3; clock++) { await tapUntilRight('.ct-choice'); await next(); }`,
