@@ -12,6 +12,7 @@
 //   - Finishing counts whether the word was found or shown: no penalties.
 //   - totalDays counts every day with a finished puzzle, ever. It never goes
 //     down, so the frog on the lily pads never hops backward.
+//   - stickers lists the stickers collected, oldest first (src/stickers.js).
 //   - plays counts how many days each game has been finished, ever (for
 //     the grown-up page). The day-by-day history keeps the last 4 weeks.
 
@@ -21,7 +22,7 @@ export const KEEP_DAYS = 28; // how many days of "finished" history to keep (4 w
 export function emptyProgress() {
   // previous: the last day and streak before lastDay, so a caught-up day
   // can join the two runs back together.
-  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {} };
+  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [] };
 }
 
 /** Whole days from one "YYYY-MM-DD" to another (b minus a). */
@@ -61,7 +62,7 @@ export function recordFinish(progress, day, game) {
   const plays = { ...progress.plays };
   if (isNew) plays[game] = (plays[game] || 0) + 1;
 
-  return { streak, totalDays, lastDay, previous, finished, plays };
+  return { ...progress, streak, totalDays, lastDay, previous, finished, plays };
 }
 
 /**
@@ -72,6 +73,12 @@ export function currentStreak(progress, today) {
   if (!progress.lastDay) return 0;
   const gap = daysBetween(progress.lastDay, today);
   return gap === 0 || gap === 1 ? progress.streak : 0;
+}
+
+/** Add a sticker (by id) to the collection. Returns new progress. */
+export function addSticker(progress, id) {
+  const stickers = progress.stickers || [];
+  return stickers.includes(id) ? progress : { ...progress, stickers: [...stickers, id] };
 }
 
 /** Whether `game` was finished on `day`. Without a game: whether any was. */

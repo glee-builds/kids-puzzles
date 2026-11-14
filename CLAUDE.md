@@ -22,6 +22,8 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
 - **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js`, growing with how many days that puzzle has been played (`playsBefore` in `src/app.js`). Orange text means how many groups; teal (`--size-ink`) means how many in each.
 - **Spoken words:** Spell It's "Hear it" uses the phone's built-in voice (`speechSynthesis`), approved 2026-11-13. It makes no network request. Don't add other speech or audio services.
+- **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins the rotation by having a card with class `card-words` or `card-numbers`.
+- **Sticker gifts:** the first finish of each puzzle each day gives a gift with a new sticker (`src/stickers.js`; never a repeat). The sticker book is the `#stickers` screen. Stickers are emoji from 2019 or earlier; no image files.
 - **Yesterday's puzzles:** after a missed day, the home screen links to `?day=yesterday`, which plays that day's puzzles; finishing one fills in the missed day (`playDay` in `src/app.js`, catching up in `src/progress.js`). Only yesterday.
 - **Difficulty:** lives in data, not code. Hand-curated word lists by level in `data/words/` (JSON).
 - **Game modules:** each game is one file in `src/games/` that exports:
@@ -59,6 +61,8 @@ src/app.js          the GAMES list, game screens, streak, navigation
 src/seed.js         date -> repeatable random numbers
 src/games/          one file per game
 src/ui.js           screen helpers the games share (buttons, tracing, drag-or-tap)
+src/stickers.js     the sticker book: pages, stickers, and which gift comes next
+src/today.js        which 5 puzzles make up Today's set
 src/times.js        which times facts the multiplication puzzles use, by stage
 sw.js               service worker: offline play, newest files when online
 data/words/         curated word lists by level (JSON)

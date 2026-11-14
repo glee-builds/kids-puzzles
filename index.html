@@ -32,8 +32,20 @@
         <p class="pond-caption" id="pond-caption"></p>
         <!-- Links to yesterday's puzzles after a missed day. Filled in by app.js. -->
         <a class="catch-up" id="catch-up" hidden></a>
-        <p class="subtitle" id="subtitle">Pick a puzzle!</p>
+        <!-- Opens the sticker book. The count is filled in by app.js. -->
+        <a class="sticker-link" id="sticker-link" href="#stickers"></a>
       </header>
+
+      <!-- Today's set: 5 puzzles picked for today. Filled in by app.js. -->
+      <section class="today" aria-labelledby="today-title">
+        <h2 class="today-title" id="today-title">Today's 5</h2>
+        <p class="today-count" id="today-count"></p>
+        <nav class="today-list" id="today-list" aria-label="Today's puzzles"></nav>
+      </section>
+
+      <!-- Every puzzle, for free choice. Closed until tapped. -->
+      <details class="all-puzzles">
+      <summary>All puzzles</summary>
 
       <section class="group group-words" aria-labelledby="group-words">
         <h2 class="group-title" id="group-words">Words</h2>
@@ -74,8 +86,12 @@
           </span>
           <span class="card-name">Word Ladder</span>
           <span class="card-status" id="status-word-ladder">Play</span>
+        </a>
+
         <a class="card card-play card-words" href="#word-clues">
+          <span class="card-art" aria-hidden="true">
             <span class="clue-art"><span class="clue-glass"></span><span class="clue-word">wow</span></span>
+          </span>
           <span class="card-name">Word Clues</span>
           <span class="card-status" id="status-word-clues">Play</span>
         </a>
@@ -184,6 +200,8 @@
         </nav>
       </section>
 
+      </details>
+
       <p class="grown-up-link"><a href="#grown-ups">For grown-ups</a></p>
     </section>
 
@@ -197,8 +215,13 @@
       <img class="done-star" src="assets/frog.svg" alt="">
       <p class="done-title" id="done-title">You did it!</p>
       <p class="done-streak" id="done-streak"></p>
-      <p class="done-note">Come back tomorrow for new puzzles.</p>
-      <a class="button" href="#">Pick another puzzle</a>
+      <!-- The gift: tap to open it and get a sticker. Filled in by app.js. -->
+      <button class="gift" type="button" id="gift" hidden>
+        <span class="gift-box" aria-hidden="true">🎁</span>
+        <span class="gift-label">Tap to open your gift!</span>
+      </button>
+      <p class="gift-sticker" id="gift-sticker" hidden></p>
+      <a class="button" href="#" id="done-next">Pick another puzzle</a>
       <button class="link-button" type="button" id="done-close">See my puzzle</button>
     </div>
   </section>

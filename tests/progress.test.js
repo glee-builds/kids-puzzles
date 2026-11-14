@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, load, save, STORAGE_KEY, KEEP_DAYS,
+  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, load, save, STORAGE_KEY, KEEP_DAYS,
 } from '../src/progress.js';
 
 // A stand-in for the browser's localStorage, so tests run in Node.
@@ -186,4 +186,20 @@ test('progress saved before catching up existed still loads', () => {
   p = recordFinish(p, '2026-11-09', 'maze');
   p = recordFinish(p, '2026-11-08', 'maze');
   assert.equal(p.streak, 5); // 3 days up to the 7th, then the 8th and 9th
+});
+
+// --- stickers ---
+
+test('a sticker is added once and kept through later puzzles', () => {
+  let p = addSticker(emptyProgress(), '0-0');
+  p = addSticker(p, '0-0');
+  p = addSticker(p, '1-3');
+  assert.deepEqual(p.stickers, ['0-0', '1-3']);
+  p = recordFinish(p, '2026-11-13', 'maze');
+  assert.deepEqual(p.stickers, ['0-0', '1-3']);
+});
+
+test('progress saved before stickers existed loads with none', () => {
+  const old = { streak: 1, totalDays: 1, lastDay: '2026-11-08', finished: { '2026-11-08': ['maze'] }, plays: { maze: 1 } };
+  assert.deepEqual(load({ getItem: () => JSON.stringify(old) }).stickers, []);
 });
