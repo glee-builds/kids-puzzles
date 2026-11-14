@@ -2,9 +2,11 @@
 //
 // Each day has one theme from data/search-themes.json (dealt in a fixed
 // shuffled order, so none repeats until all have been used) and 10 of its
-// words, hidden in a 15x15 grid. Words run across (left to right) or down
-// (top to bottom). The player traces a word with a finger, in either
-// direction. Found words turn teal in the grid and get a check in the list.
+// words, hidden in a 15x15 grid. At level 1, words run across (left to
+// right) or down (top to bottom). Level 2 adds words on a slant, and level
+// 3 adds words written backward or upward. The player traces a word with a
+// finger, from either end. Found words turn teal in the grid and get a
+// check in the list.
 //
 // The other squares are filled with letters from the day's words. A grid
 // is only used if every word appears exactly once, and if the filler
@@ -18,8 +20,14 @@ export const WORDS_PER_DAY = 10;
 export const MIN_WORD = 3;
 export const MAX_WORD = 8;
 
-// Words to place: across (row stays, column grows) or down.
-const PLACE = [[0, 1], [1, 0]];
+// The ways a word can run at each level, as [rows, columns] per letter:
+// across and down; then on a slant too; then backward and upward too.
+export const PLACE_BY_LEVEL = [
+  [[0, 1], [1, 0]],
+  [[0, 1], [1, 0], [1, 1]],
+  [[0, 1], [1, 0], [1, 1], [0, -1], [-1, 0]],
+];
+const placesFor = (level = 1) => PLACE_BY_LEVEL[Math.min(Math.max(level, 1), PLACE_BY_LEVEL.length) - 1];
 // Every straight line in the grid, for checking what can be read in it.
 const LINES = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, -1], [1, -1], [-1, 1]];
 // Words the random filler must not spell, in any direction.
@@ -51,10 +59,13 @@ function findAll(grid, word, directions) {
   return spots;
 }
 
-/** How many different sets of squares spell `word` across, down, or backward. */
-function countSpots(grid, word) {
+/**
+ * How many different sets of squares spell `word`, forward or backward:
+ * across and down, and on a slant too once the level has slanted words.
+ */
+function countSpots(grid, word, level = 1) {
   const seen = new Set();
-  for (const cells of findAll(grid, word, LINES.slice(0, 4))) {
+  for (const cells of findAll(grid, word, level >= 2 ? LINES : LINES.slice(0, 4))) {
     seen.add(cells.map(([r, c]) => key(r, c)).sort().join(' '));
   }
   return seen.size;
@@ -64,11 +75,13 @@ function countSpots(grid, word) {
 const overlaps = (a, b) => a.includes(b) || b.includes(a) || a.includes(reverse(b)) || b.includes(reverse(a));
 
 /** Every place `word` fits in the grid so far (empty squares or matching letters). */
-function spotsFor(grid, word) {
+function spotsFor(grid, word, level) {
   const spots = [];
-  for (const [dr, dc] of PLACE) {
-    for (let r = 0; r + dr * (word.length - 1) < SIZE; r++) {
-      for (let c = 0; c + dc * (word.length - 1) < SIZE; c++) {
+  const inside = (n) => n >= 0 && n < SIZE;
+  for (const [dr, dc] of placesFor(level)) {
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (!inside(r + dr * (word.length - 1)) || !inside(c + dc * (word.length - 1))) continue;
         const cells = [...word].map((_, i) => [r + dr * i, c + dc * i]);
         if (cells.every(([rr, cc], i) => grid[rr][cc] === null || grid[rr][cc] === word[i])) spots.push(cells);
       }
@@ -78,11 +91,11 @@ function spotsFor(grid, word) {
 }
 
 /** Hide the words in an empty grid, each in a random spot where it fits. Returns { grid, placed } or null. */
-function layOut(random, words) {
+function layOut(random, words, level) {
   const grid = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
   const placed = [];
   for (const word of words) {
-    const spots = spotsFor(grid, word);
+    const spots = spotsFor(grid, word, level);
     if (!spots.length) return null;
     const cells = random.pick(spots);
     cells.forEach(([r, c], i) => { grid[r][c] = word[i]; });
@@ -91,8 +104,8 @@ function layOut(random, words) {
   return { grid, placed };
 }
 
-/** Make today's puzzle from a seed, the themes, and the day number. */
-export function generate(seed, themes, dayNumber) {
+/** Make today's puzzle from a seed, the themes, the day number, and the level (1 to 3). */
+export function generate(seed, themes, dayNumber, level = 1) {
   const random = createRandom(seed);
   const theme = themeForDay(themes, dayNumber);
 
@@ -105,13 +118,13 @@ export function generate(seed, themes, dayNumber) {
       if (words.length < WORDS_PER_DAY && !words.some((w) => overlaps(w, word))) words.push(word);
     }
     // Longest first: they are the hardest to fit.
-    const layout = layOut(random, [...words].sort((a, b) => b.length - a.length));
+    const layout = layOut(random, [...words].sort((a, b) => b.length - a.length), level);
     if (!layout) continue;
 
     const letters = words.join('');
     for (let fill = 0; fill < 20; fill++) {
       const grid = layout.grid.map((row) => row.map((ch) => ch ?? random.pick(letters)));
-      const puzzle = { theme: theme.name, words, grid, placed: layout.placed };
+      const puzzle = { theme: theme.name, words, grid, placed: layout.placed, level };
       if (verify(puzzle).ok) return puzzle;
     }
   }
@@ -121,14 +134,14 @@ export function generate(seed, themes, dayNumber) {
 /** Confirm a puzzle is valid: every word hidden exactly once, nothing unkind. */
 export function verify(puzzle) {
   const problems = [];
-  const { words, grid, placed } = puzzle;
+  const { words, grid, placed, level = 1 } = puzzle;
   if (words.length !== WORDS_PER_DAY) problems.push(`there must be ${WORDS_PER_DAY} words`);
   if (grid.length !== SIZE || grid.some((row) => row.length !== SIZE)) problems.push(`grid must be ${SIZE}x${SIZE}`);
   if (grid.flat().some((ch) => !/^[a-z]$/.test(ch ?? ''))) problems.push('every square needs a letter');
   for (const word of words) {
     if (word.length < MIN_WORD || word.length > MAX_WORD) problems.push(`${word} is not ${MIN_WORD} to ${MAX_WORD} letters`);
     if (!placed.some((p) => p.word === word)) problems.push(`${word} was not placed`);
-    const count = countSpots(grid, word);
+    const count = countSpots(grid, word, level);
     if (count !== 1) problems.push(`${word} appears ${count} times`);
   }
   // A SKIP word inside a hidden word is fine ("hell" in "shell"); one the
@@ -148,10 +161,23 @@ export function start(puzzle) {
   return { puzzle, found: [], hints: 0, hinted: null, status: 'playing', last: null };
 }
 
-/** The squares along a straight line from `from` toward `to` (across or down only). */
-export function lineBetween(from, to) {
+/**
+ * The squares along a straight line from `from` toward `to`: across or
+ * down, or (with `slant`) on a slant when the finger is nearer to that.
+ */
+export function lineBetween(from, to, slant = false) {
   const dr = to[0] - from[0];
   const dc = to[1] - from[1];
+  // Nearer a slant than a straight line: the shorter side is over half the longer.
+  if (slant && Math.min(Math.abs(dr), Math.abs(dc)) * 2 > Math.max(Math.abs(dr), Math.abs(dc))) {
+    const cells = [];
+    for (let i = 0; i <= Math.round((Math.abs(dr) + Math.abs(dc)) / 2); i++) {
+      const cell = [from[0] + Math.sign(dr) * i, from[1] + Math.sign(dc) * i];
+      if (cell.some((n) => n < 0 || n >= SIZE)) break;
+      cells.push(cell);
+    }
+    return cells;
+  }
   const across = Math.abs(dc) >= Math.abs(dr);
   const length = (across ? Math.abs(dc) : Math.abs(dr)) + 1;
   const step = Math.sign(across ? dc : dr);
@@ -219,7 +245,8 @@ export function render(container, puzzle, onDone) {
   container.classList.add('ws');
 
   const title = make('h2', 'ws-theme', puzzle.theme);
-  const message = liveMessage('ws-message', 'Trace a word across or down.');
+  const HOW = ['Trace a word across or down.', 'Words go across, down, or on a slant.', 'Across, down, slanted, or backward!'];
+  const message = liveMessage('ws-message', HOW[(puzzle.level || 1) - 1]);
 
   const grid = make('div', 'ws-grid');
   const cells = puzzle.grid.map((row, r) => row.map((ch, c) => {
@@ -257,7 +284,7 @@ export function render(container, puzzle, onDone) {
       return true;
     },
     onMove(square) {
-      picked = lineBetween(anchor, square);
+      picked = lineBetween(anchor, square, (puzzle.level || 1) >= 2);
       draw();
     },
     onEnd: finishTrace,

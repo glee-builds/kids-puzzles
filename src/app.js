@@ -319,7 +319,7 @@ const GAMES = {
     art: '<span class="story-art"><span>1</span><span>2</span><span>3</span></span>',
   },
   'word-search': {
-    title: 'Word Search', kind: 'words', legend: 'Find the hidden words', data: () => [part('search-themes', 'themes'), DAY],
+    title: 'Word Search', kind: 'words', legend: 'Find the hidden words', levels: 3, data: () => [part('search-themes', 'themes'), DAY, levelFor('word-search')],
     how: ["Words are hiding in the letters.", "Slide your finger along a word to find it."],
     art: '<span class="search-art"><span>c</span><span class="search-art-hit">a</span><span>x</span><span>q</span><span class="search-art-hit">n</span><span>o</span><span>e</span><span class="search-art-hit">t</span><span>p</span></span>',
   },
