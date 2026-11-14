@@ -3357,3 +3357,99 @@ button.gr-row {
   border-color: var(--star);
   box-shadow: 0 0 0 2px var(--star);
 }
+
+/* ---------- Today's set (home screen) ---------- */
+
+.today {
+  margin: 4px 0 14px;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.today-title {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.today-count {
+  margin: 2px 0 8px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.today-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.today-row {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* The number in a circle: purple for words, orange for numbers. */
+.today-number {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--words);
+  color: #ffffff;
+}
+
+.today-numbers .today-number {
+  background: var(--numbers);
+  color: var(--on-go);
+}
+
+.today-name { flex: 1; font-size: 1.1rem; }
+
+.today-status { color: var(--muted); font-size: 0.95rem; }
+
+/* The next puzzle to play stands out. */
+.today-next {
+  border-color: var(--go);
+  box-shadow: 0 0 0 2px var(--go);
+}
+
+.today-next .today-status { color: var(--text); }
+
+/* A finished puzzle: a teal check in the circle, and "Done". */
+.today-done .today-number {
+  background: var(--here);
+  color: #ffffff;
+}
+
+.today-done .today-name { color: var(--muted); }
+
+/* "All puzzles": closed until tapped. */
+.all-puzzles > summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--words-ink);
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.all-puzzles > summary::-webkit-details-marker { display: none; }
+.all-puzzles > summary::after { content: "▾"; }
+.all-puzzles[open] > summary::after { content: "▴"; }
