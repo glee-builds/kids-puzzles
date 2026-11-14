@@ -105,3 +105,54 @@ test('hint: first letter of the next word, then the whole word', () => {
   const state = check(result.state, placedCells(sample, word));
   assert.equal(hint(state).word, sample.words[1]);
 });
+
+// --- levels ---
+
+const direction = (cells) => [Math.sign(cells[1][0] - cells[0][0]), Math.sign(cells[1][1] - cells[0][1])].join(',');
+
+test('levels 2 and 3 make a valid grid every day for a year', () => {
+  for (const level of [2, 3]) {
+    everyDay((key, day) => {
+      const puzzle = generate(seedForDay(key), THEMES, day, level);
+      const result = verify(puzzle);
+      assert.ok(result.ok, `level ${level}, ${key}: ${result.problems.join('; ')}`);
+    }, 365);
+  }
+});
+
+test('level 1 has only across and down; level 2 adds slants; level 3 adds backward and upward', () => {
+  const seen = { 1: new Set(), 2: new Set(), 3: new Set() };
+  for (const level of [1, 2, 3]) {
+    everyDay((key, day) => {
+      for (const { cells } of generate(seedForDay(key), THEMES, day, level).placed) seen[level].add(direction(cells));
+    }, 30);
+  }
+  assert.deepEqual([...seen[1]].sort(), ['0,1', '1,0']);
+  assert.deepEqual([...seen[2]].sort(), ['0,1', '1,0', '1,1']);
+  assert.deepEqual([...seen[3]].sort(), ['-1,0', '0,-1', '0,1', '1,0', '1,1']);
+});
+
+test('level 1 is the same as no level', () => {
+  assert.deepEqual(generate(seedForDay('2026-11-08'), THEMES, 0, 1).grid, sample.grid);
+});
+
+test('lineBetween snaps to a slant only when asked, and stays in the grid', () => {
+  assert.deepEqual(lineBetween([2, 2], [5, 5], true), [[2, 2], [3, 3], [4, 4], [5, 5]]);
+  assert.deepEqual(lineBetween([2, 2], [5, 4], true), [[2, 2], [3, 3], [4, 4], [5, 5]]); // nearly a slant
+  assert.deepEqual(lineBetween([2, 2], [5, 5]), [[2, 2], [2, 3], [2, 4], [2, 5]]);         // level 1: across
+  assert.deepEqual(lineBetween([2, 2], [2, 6], true), [[2, 2], [2, 3], [2, 4], [2, 5], [2, 6]]);
+  assert.deepEqual(lineBetween([13, 13], [14, 14], true), [[13, 13], [14, 14]]);
+});
+
+test('a backward word at level 3 is found by tracing from either end', () => {
+  let puzzle;
+  let backward;
+  everyDay((key, day) => {
+    if (backward) return;
+    puzzle = generate(seedForDay(key), THEMES, day, 3);
+    backward = puzzle.placed.find(({ cells }) => ['0,-1', '-1,0'].includes(direction(cells)));
+  }, 30);
+  assert.ok(backward);
+  assert.equal(check(start(puzzle), backward.cells).last.result, 'found');
+  assert.equal(check(start(puzzle), [...backward.cells].reverse()).last.result, 'found');
+});
