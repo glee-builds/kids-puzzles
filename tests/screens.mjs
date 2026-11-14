@@ -231,12 +231,34 @@ const PLAYS = {
     }`,
 };
 
+// Short pokes at puzzles that aren't played to the end: do something a
+// player might, and let the error check catch a crash.
+const POKES = {
+  // Change each letter of the first word to q, x, and z: most are not words,
+  // which makes the ladder wiggle and say so.
+  'word-ladder': `
+    for (const letter of 'qxz') {
+      for (let k = 0; k < 3; k++) {
+        G.querySelectorAll('button.wl-tile')[k]?.click(); await wait(40);
+        key(letter); await wait(60);
+      }
+    }
+    if (!message()) throw new Error('typing letters did nothing');`,
+};
+
+// How each played puzzle should be rated, given how PLAYS plays it.
+const EXPECTED = {
+  'number-line': 'easy',   // every answer right the first time
+  'mystery-word': 'hard',  // never found: the word is shown
+  'end-marks': 'hard',     // two rounds are shown after 3 misses
+};
+
 // ---------- The checks ----------
 
 const problems = [];
 let checked = 0;
 
-async function checkScreen(label, address, { ready, fits, play }) {
+async function checkScreen(label, address, { ready, fits, play, poke }) {
   checked++;
   const ok = await open(address, ready);
   await sleep(150); // let anything late (fonts, a first draw) settle
@@ -255,8 +277,21 @@ async function checkScreen(label, address, { ready, fits, play }) {
       await sleep(900); // the celebration card comes up a moment after the last answer
       if (await evaluate('document.getElementById("done").hidden')) found.push('was played to the end, but the celebration card did not appear');
       else if (await evaluate('document.getElementById("gift").hidden')) found.push('finished, but there was no gift');
+      else {
+        // How it went (easy, ok, or hard) should be saved for the grown-up page and levels.
+        const saved = await evaluate(`JSON.parse(localStorage.getItem('kids-puzzles.progress')).results?.['${play}']?.[0]?.score || ''`);
+        if (!['easy', 'ok', 'hard'].includes(saved)) found.push('finished, but how it went was not saved');
+        else if (EXPECTED[play] && saved !== EXPECTED[play]) found.push(`was saved as "${saved}", but the way it was played should be "${EXPECTED[play]}"`);
+      }
     } catch (error) {
       found.push(`could not be played: ${String(error.message).split('\n')[0]}`);
+    }
+  }
+  if (ok && POKES[poke]) {
+    try {
+      await evaluate(`(async () => { const G = document.getElementById('game-${poke}'); ${HELPERS} ${POKES[poke]} })()`);
+    } catch (error) {
+      found.push(`broke when poked: ${String(error.message).split('\n')[0]}`);
     }
   }
   for (const error of errors) found.push(`logged an error: ${String(error).split('\n')[0]}`);
@@ -275,7 +310,7 @@ try {
       const label = `${game}${day ? ' (yesterday)' : ''}`;
       // Drawn means: the "Getting today's puzzle" line is gone and something replaced it.
       const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
-      await checkScreen(label, `${day}#${game}`, { ready, fits: true, play: !day && PLAYS[game] ? game : null });
+      await checkScreen(label, `${day}#${game}`, { ready, fits: true, play: !day && PLAYS[game] ? game : null, poke: day ? null : game });
     }
   }
   await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-sticker").length > 100' });

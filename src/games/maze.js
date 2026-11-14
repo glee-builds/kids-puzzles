@@ -193,7 +193,11 @@ export function verify(puzzle) {
 // The screen: the maze grid, a message line, and a Hint button.
 // ---------------------------------------------------------------------------
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is always 0 (tracing has no wrong answers)
+ * and helped is how many times Hint was pressed.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let hint = [];
@@ -245,7 +249,7 @@ export function render(container, puzzle, onDone) {
       message.textContent = 'You made it to the star!';
       draw();
       container.classList.add('finished');
-      onDone({ status: state.status });
+      onDone({ status: state.status, misses: 0, helped: state.hints });
       return;
     }
     if (offRoute(state) && !wrongTurnSaid && neighbors(puzzle, square).length === 1) {

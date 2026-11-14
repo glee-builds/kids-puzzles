@@ -148,7 +148,10 @@ export function windowFor(from, to) {
 
 const CHEERS = ['Hop! Yes!', 'Great counting!', 'You got it!', 'Nice jump!', 'Correct!'];
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: how many wrong answers, and how many answers were shown.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let typed = '';
@@ -261,7 +264,9 @@ export function render(container, puzzle, onDone) {
       message.textContent = 'The frog finished all its hops!';
       stopKeys();
       container.classList.add('finished');
-      onDone({ status: state.status });
+      // Every wrong answer is in state.tries; every answer shown is in state.revealed.
+      const misses = Object.values(state.tries).reduce((sum, n) => sum + n, 0);
+      onDone({ status: state.status, misses, helped: state.revealed.length });
     }
   }
 

@@ -134,9 +134,14 @@ export function verify(puzzle) {
 const CHEERS = ['You spelled it!', 'Yes!', 'Great reading!', 'You got it!'];
 const PAUSE = 900; // ms to show a spelled word before the next one
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is how many wrong answers were given, and
+ * helped is how many times the Hint button gave a letter.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
+  let misses = 0;   // wrong spellings in the whole puzzle
   let boxes = [];   // tray index in each box, or null
   let busy = false; // true while a spelling is being judged
   let cheerCount = 0;
@@ -272,7 +277,7 @@ export function render(container, puzzle, onDone) {
           message.textContent = 'You unscrambled every word!';
           container.classList.add('finished');
           draw(true);
-          onDone({ status: state.status });
+          onDone({ status: state.status, misses, helped: state.hints });
           return;
         }
         message.textContent = 'Next word! Drag the letters into the boxes.';
@@ -282,6 +287,7 @@ export function render(container, puzzle, onDone) {
     }
 
     // Wrong: letters in the right box lock; the rest go back to the tray.
+    misses += 1;
     const placed = state.locked.filter(Boolean).length;
     message.textContent = placed > 0
       ? 'Not yet! The green letters are in the right place.'

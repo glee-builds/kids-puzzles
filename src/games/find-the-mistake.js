@@ -221,11 +221,16 @@ export function hint(state) {
 
 const CHEERS = ['You fixed it!', 'Great checking!', 'Nice work!', 'You got it!'];
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: how many wrong answers, and how many answers were shown.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let typed = '';
   let cheerCount = 0;
+  let misses = 0; // wrong answers in the whole puzzle
+  let helped = 0; // answers the game showed after too many tries
 
   container.replaceChildren();
   container.classList.add('fm');
@@ -254,6 +259,7 @@ export function render(container, puzzle, onDone) {
     if (state.last.correct) {
       message.textContent = 'You found it! ✗ That step is wrong. Type the right number.';
     } else {
+      misses++;
       message.textContent = hint(state);
     }
     draw();
@@ -278,6 +284,8 @@ export function render(container, puzzle, onDone) {
     }
     state = check(state, { fix: Number(typed) });
     typed = '';
+    if (!state.last.correct) misses++;
+    if (state.last.revealed) helped++;
     if (state.last.correct) {
       message.textContent = `${CHEERS[cheerCount++ % CHEERS.length]} Now the answer is right too.`;
     } else if (state.last.revealed) {
@@ -297,7 +305,7 @@ export function render(container, puzzle, onDone) {
       nextButton.hidden = true;
       pad.hidden = true;
       stopKeys();
-      onDone({ status: state.status });
+      onDone({ status: state.status, misses, helped });
       return;
     }
     message.textContent = hint(state);

@@ -223,11 +223,16 @@ export function hint(state) {
 
 const CHEERS = ['You thought it through!', 'Great thinking!', 'You got it!', 'Nice work!'];
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: how many wrong answers, and how many answers were shown.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
   let typed = '';
   let cheerCount = 0;
+  let misses = 0; // wrong answers in the whole puzzle
+  let helped = 0; // answers the game showed after too many tries
 
   container.replaceChildren();
   container.classList.add('wp');
@@ -247,6 +252,8 @@ export function render(container, puzzle, onDone) {
   function pick(slot) {
     if (state.phase !== 'pick' || state.tapped.includes(slot)) return;
     state = check(state, { pick: slot });
+    if (!state.last.correct) misses++;
+    if (state.last.shown) helped++;
     if (state.last.correct) message.textContent = 'Yes! That number doesn\'t matter here.';
     else if (state.last.shown) message.textContent = 'We need that one too. Here\'s the number that doesn\'t matter.';
     else message.textContent = hint(state);
@@ -272,6 +279,8 @@ export function render(container, puzzle, onDone) {
     }
     state = check(state, { answer: Number(typed) });
     typed = '';
+    if (!state.last.correct) misses++;
+    if (state.last.revealed) helped++;
     if (state.last.correct) message.textContent = CHEERS[cheerCount++ % CHEERS.length];
     else if (state.last.revealed) message.textContent = `It's ${answerFor(current(state))}. Next time you'll get it!`;
     else message.textContent = `Not quite. ${hint(state)}`;
@@ -284,7 +293,7 @@ export function render(container, puzzle, onDone) {
       message.textContent = 'You thought them all through!';
       nextButton.hidden = true;
       stopKeys();
-      onDone({ status: state.status });
+      onDone({ status: state.status, misses, helped });
       return;
     }
     message.textContent = '';

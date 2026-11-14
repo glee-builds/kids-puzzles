@@ -10,7 +10,7 @@ import {
 } from '../src/games/bug-groups.js';
 
 const seedForDay = (key) => seedFor(key, 'bug-groups');
-const sample = generate(seedForDay('2026-11-13'), 0);
+const sample = generate(seedForDay('2026-11-13'), 1);
 const rightPicture = (round) => round.pictures.findIndex((pads) => shows(pads, round.groups, round.size));
 const rightAnswers = (puzzle) => [
   rightPicture(puzzle.rounds[0]),
@@ -20,12 +20,12 @@ const rightAnswers = (puzzle) => [
 
 // --- times.js ---
 
-test('stages move on after 7 and 14 days of play', () => {
-  assert.equal(stageFor(0), 0);
-  assert.equal(stageFor(6), 0);
-  assert.equal(stageFor(7), 1);
-  assert.equal(stageFor(14), 2);
-  assert.equal(stageFor(500), 2);
+test('levels 1 to 3 pick stages 0 to 2, and anything else is kept in range', () => {
+  assert.equal(stageFor(1), 0);
+  assert.equal(stageFor(2), 1);
+  assert.equal(stageFor(3), 2);
+  assert.equal(stageFor(9), 2);
+  assert.equal(stageFor(), 0);
 });
 
 test('every size from 2 to 10 is practiced at some stage', () => {
@@ -40,19 +40,19 @@ test('choicesFor gives 3 different answers in order, one right', () => {
 
 // --- making puzzles ---
 
-test('every day for two years, at every stage, makes valid rounds', () => {
-  for (const plays of [0, 7, 14]) {
+test('every day for two years, at every level, makes valid rounds', () => {
+  for (const level of [1, 2, 3]) {
     everyDay((key) => {
-      const puzzle = generate(seedForDay(key), plays);
+      const puzzle = generate(seedForDay(key), level);
       const result = verify(puzzle);
-      assert.ok(result.ok, `${key}, ${plays} plays: ${result.problems.join('; ')}`);
-      assert.equal(puzzle.stage, stageFor(plays));
+      assert.ok(result.ok, `${key}, level ${level}: ${result.problems.join('; ')}`);
+      assert.equal(puzzle.stage, stageFor(level));
     });
   }
 });
 
 test('the same day and stage always make the same rounds', () => {
-  assert.deepEqual(generate(seedForDay('2026-11-13'), 0), sample);
+  assert.deepEqual(generate(seedForDay('2026-11-13'), 1), sample);
 });
 
 test('verify catches two right pictures and groups the same as the size', () => {

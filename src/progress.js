@@ -12,6 +12,11 @@
 //   - Finishing counts whether the word was found or shown: no penalties.
 //   - totalDays counts every day with a finished puzzle, ever. It never goes
 //     down, so the frog on the lily pads never hops backward.
+//   - results keeps how the last 10 days of each puzzle went: easy (no
+//     misses, no help), ok, or hard (needed help, or 4 or more misses).
+//   - levels holds each leveled puzzle's level. It goes up after 3 easy
+//     days in a row and down after 2 hard days in a row, starting the next
+//     day, so a puzzle never changes partway through a day.
 //   - stickers lists the stickers collected, oldest first (src/stickers.js).
 //   - plays counts how many days each game has been finished, ever (for
 //     the grown-up page). The day-by-day history keeps the last 4 weeks.
@@ -22,7 +27,7 @@ export const KEEP_DAYS = 28; // how many days of "finished" history to keep (4 w
 export function emptyProgress() {
   // previous: the last day and streak before lastDay, so a caught-up day
   // can join the two runs back together.
-  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [] };
+  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [], results: {}, levels: {} };
 }
 
 /** Whole days from one "YYYY-MM-DD" to another (b minus a). */
@@ -73,6 +78,64 @@ export function currentStreak(progress, today) {
   if (!progress.lastDay) return 0;
   const gap = daysBetween(progress.lastDay, today);
   return gap === 0 || gap === 1 ? progress.streak : 0;
+}
+
+export const RESULTS_KEPT = 10;
+export const EASY_DAYS_TO_GO_UP = 3;
+export const HARD_DAYS_TO_GO_DOWN = 2;
+
+/** How a puzzle went: 'easy', 'ok', or 'hard'. */
+export function rate({ misses = 0, helped = 0 } = {}) {
+  if (helped > 0 || misses >= 4) return 'hard';
+  return misses === 0 ? 'easy' : 'ok';
+}
+
+/**
+ * A puzzle's level on `day`. A level that changed on `day` itself doesn't
+ * count until the next day. `startLevel` is used until the puzzle has a
+ * saved level.
+ */
+export function levelOf(progress, game, day, startLevel = 1) {
+  const saved = progress.levels?.[game];
+  if (!saved) return startLevel;
+  return saved.since === day ? saved.was : saved.now;
+}
+
+/**
+ * Save how `game` went on `day` ({ misses, helped }), and move its level
+ * if it has more than one (`maxLevel`). Returns new progress.
+ */
+export function recordResult(progress, day, game, result, { maxLevel = 1, startLevel = 1 } = {}) {
+  const level = progress.levels?.[game]?.now ?? startLevel;
+  const history = [...(progress.results?.[game] || []), { day, score: rate(result), level }].slice(-RESULTS_KEPT);
+  const results = { ...progress.results, [game]: history };
+
+  // The days in a row at this level, newest last.
+  const here = [];
+  for (let i = history.length - 1; i >= 0 && history[i].level === level; i--) here.unshift(history[i].score);
+  const lastAre = (count, score) => here.length >= count && here.slice(-count).every((s) => s === score);
+  let now = level;
+  if (lastAre(EASY_DAYS_TO_GO_UP, 'easy') && level < maxLevel) now = level + 1;
+  else if (lastAre(HARD_DAYS_TO_GO_DOWN, 'hard') && level > 1) now = level - 1;
+
+  const levels = now === level && progress.levels?.[game]
+    ? progress.levels
+    : { ...progress.levels, [game]: now === level ? { now, was: level, since: null } : { now, was: level, since: day } };
+  return { ...progress, results, levels };
+}
+
+/**
+ * How a puzzle has gone lately, from its last 3 days: 'well' (no hard
+ * days, and at least 2 easy), 'practice' (2 or more hard days), or null
+ * (in between, or fewer than 2 days played).
+ */
+export function trend(progress, game) {
+  const recent = (progress.results?.[game] || []).slice(-3).map((r) => r.score);
+  if (recent.length < 2) return null;
+  const count = (score) => recent.filter((s) => s === score).length;
+  if (count('hard') >= 2) return 'practice';
+  if (count('hard') === 0 && count('easy') >= 2) return 'well';
+  return null;
 }
 
 /** Add a sticker (by id) to the collection. Returns new progress. */

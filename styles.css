@@ -3469,3 +3469,19 @@ button.gr-row {
 .all-puzzles > summary::-webkit-details-marker { display: none; }
 .all-puzzles > summary::after { content: "▾"; }
 .all-puzzles[open] > summary::after { content: "▴"; }
+
+/* Grown-up page: a puzzle's level and how it's going, under its name. */
+.gu-about {
+  display: flex;
+  flex-direction: column;
+}
+
+.gu-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.gu-note-practice {
+  color: var(--numbers-ink);
+  font-weight: 700;
+}

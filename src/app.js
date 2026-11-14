@@ -140,11 +140,14 @@ function updateHome() {
   }
 }
 
-function finishGame(game) {
+/** A puzzle was finished. `result` is how it went: { misses, helped }. */
+function finishGame(game, result) {
   const before = progress.totalDays || 0;
-  // A puzzle gives a gift the first time it's finished each day.
+  // A puzzle gives a gift, and counts toward its level, the first time
+  // it's finished each day.
   const firstTime = !progressStore.isFinished(progress, playDay, game);
   progress = progressStore.recordFinish(progress, playDay, game);
+  if (firstTime) progress = progressStore.recordResult(progress, playDay, game, result, { maxLevel: GAMES[game].levels || 1 });
   progressStore.save(progress);
   const hopped = (progress.totalDays || 0) > before;
   updateHome();
@@ -271,27 +274,20 @@ async function words(...names) {
 /** One part of a data file, e.g. part('stories', 'stories'). */
 const part = async (name, key) => (await loadJson(`data/${name}.json`))[key];
 
-// Number Pyramid, Magic Square, and the Maze get harder as the pond grows:
-// level 2 after 30 puzzle days, level 3 after 60. Today doesn't count yet,
-// so the level can't change partway through a day.
-const DAYS_PER_LEVEL = 30;
-const daysBeforeToday = (progress.totalDays || 0) - (progress.lastDay === today ? 1 : 0);
-const LEVEL = Math.min(3, 1 + Math.floor(daysBeforeToday / DAYS_PER_LEVEL));
+// Some puzzles have levels (`levels` in GAMES). Each one's level goes up
+// after 3 easy days in a row and down after 2 hard ones (src/progress.js),
+// starting the next day, so a puzzle never changes partway through a day.
+const levelFor = (game) => progressStore.levelOf(progress, game, playDay);
 
 // Stories, themes, words, and sentences are dealt from a deck counted from
 // this date, so none repeats until the whole deck has been used.
 const DAY = progressStore.daysBetween('2026-01-01', playDay);
 
-// The multiplication puzzles grow with how many days each has been played
-// (see src/times.js). Today doesn't count yet, so a puzzle never changes
-// partway through a day.
-const playsBefore = (game) =>
-  (progress.plays?.[game] || 0) - (progressStore.isFinished(progress, playDay, game) ? 1 : 0);
-
 // Every game, by the name used in its address (#maze) and in saved
 // progress, in the order of the cards on the home screen. Each has:
 //   title, legend  shown at the top of its screen
 //   kind           'words' or 'numbers': which group its card is in
+//   levels         how many levels it has, if more than one
 //   art            the little picture on its card (styled in styles.css)
 //   file           its file in src/games/, if not the same as the name
 //                  (also the name its daily seed uses)
@@ -336,11 +332,11 @@ const GAMES = {
     art: '<span class="marks-art"><span>.</span><span>?</span><span>!</span></span>',
   },
   'number-pyramid': {
-    title: 'Number Pyramid', kind: 'numbers', legend: 'Each brick = the two bricks under it, added', data: () => [LEVEL],
+    title: 'Number Pyramid', kind: 'numbers', legend: 'Each brick = the two bricks under it, added', levels: 3, data: () => [levelFor('number-pyramid')],
     art: '<span class="bricks"><span class="brick-row"><span>9</span></span><span class="brick-row"><span>4</span><span>5</span></span></span>',
   },
   'magic-square': {
-    title: 'Magic Square', kind: 'numbers', legend: 'Rows, columns, and diagonals all add up the same', data: () => [LEVEL],
+    title: 'Magic Square', kind: 'numbers', legend: 'Rows, columns, and diagonals all add up the same', levels: 3, data: () => [levelFor('magic-square')],
     art: '<span class="square-art"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>',
   },
   'number-line': {
@@ -360,15 +356,15 @@ const GAMES = {
     art: '<span class="think-art"><span>12</span><span class="think-q">?</span><span>7</span></span>',
   },
   'bug-groups': {
-    title: 'Bug Groups', kind: 'numbers', legend: 'Equal groups make times facts', data: () => [playsBefore('bug-groups')],
+    title: 'Bug Groups', kind: 'numbers', legend: 'Equal groups make times facts', levels: 3, data: () => [levelFor('bug-groups')],
     art: '<span class="bugs-art"><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span></span>',
   },
   'garden-rows': {
-    title: 'Garden Rows', kind: 'numbers', legend: 'Rows of seeds make times facts', data: () => [playsBefore('garden-rows')],
+    title: 'Garden Rows', kind: 'numbers', legend: 'Rows of seeds make times facts', levels: 3, data: () => [levelFor('garden-rows')],
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
   maze: {
-    title: 'Maze', kind: 'numbers', legend: 'Trace from the green dot to the star', data: () => [LEVEL],
+    title: 'Maze', kind: 'numbers', legend: 'Trace from the green dot to the star', levels: 3, data: () => [levelFor('maze')],
     art: '<span class="maze-art"></span>',
   },
 };
@@ -401,7 +397,7 @@ async function startGame(name) {
   try {
     const [game, extras] = await Promise.all([import(`./games/${file}.js`), Promise.all(data())]);
     const puzzle = game.generate(seedFor(playDay, file), ...extras);
-    game.render(area, puzzle, () => finishGame(name));
+    game.render(area, puzzle, (result) => finishGame(name, result));
   } catch (error) {
     area.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
     console.error(error);
@@ -445,9 +441,8 @@ function drawGrownUps() {
   const days = progressStore.currentStreak(progress, today);
   area.append(make('p', 'gu-summary',
     `${progress.totalDays || 0} puzzle days in all · ${days} day${days === 1 ? '' : 's'} in a row now`));
-  const next = LEVEL < 3 ? ` Level ${LEVEL + 1} starts after ${LEVEL * DAYS_PER_LEVEL} puzzle days.` : '';
   area.append(make('p', 'gu-level',
-    `Number Pyramid, Magic Square, and the Maze are on level ${LEVEL} of 3.${next}`));
+    'Puzzles with levels move up after 3 easy days in a row, and down after 2 hard ones.'));
 
   // The last 4 weeks, oldest first, with today in the last square.
   area.append(make('h2', 'gu-heading', 'Last 4 weeks'));
@@ -472,11 +467,20 @@ function drawGrownUps() {
   area.append(make('h2', 'gu-heading', 'Puzzles played'));
   const list = make('ul', 'gu-games');
   const rows = Object.entries(GAMES)
-    .map(([name, { title }]) => [title, progress.plays?.[name] || 0])
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  for (const [title, times] of rows) {
+    .map(([name, { title, levels }]) => ({ name, title, levels, times: progress.plays?.[name] || 0 }))
+    .sort((a, b) => b.times - a.times || a.title.localeCompare(b.title));
+  for (const { name, title, levels, times } of rows) {
     const row = make('li', 'gu-game');
-    row.append(make('span', '', title), make('span', 'gu-times', times ? `${times} day${times === 1 ? '' : 's'}` : 'not yet'));
+    const about = make('span', 'gu-about');
+    about.append(make('span', '', title));
+    // How the last few days went, and the level for puzzles that have levels.
+    const trend = progressStore.trend(progress, name);
+    const notes = [
+      levels ? `Level ${progressStore.levelOf(progress, name, today)} of ${levels}` : '',
+      trend === 'well' ? '★ Going well' : trend === 'practice' ? '● Needs practice' : '',
+    ].filter(Boolean).join(' · ');
+    if (notes) about.append(make('span', `gu-note${trend === 'practice' ? ' gu-note-practice' : ''}`, notes));
+    row.append(about, make('span', 'gu-times', times ? `${times} day${times === 1 ? '' : 's'}` : 'not yet'));
     list.append(row);
   }
   area.append(list);

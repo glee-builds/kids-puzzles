@@ -146,9 +146,14 @@ export function verify(puzzle) {
 // The screen
 // ---------------------------------------------------------------------------
 
-/** Draw the game inside `container`. Calls onDone({ status }) once when finished. */
+/**
+ * Draw the game inside `container`. Calls onDone({ status, misses, helped })
+ * once when finished: misses is how many wrong answers were given, and
+ * helped is how many rounds had their answer shown.
+ */
 export function render(container, puzzle, onDone) {
   let state = start(puzzle);
+  let misses = 0; // wrong answers in the whole puzzle (state.tries starts over each round)
   container.replaceChildren();
   container.classList.add('em');
 
@@ -164,11 +169,12 @@ export function render(container, puzzle, onDone) {
 
   const roundNumber = (round) => puzzle.rounds.indexOf(round);
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status }));
+  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status, misses, helped: state.shown.length }));
 
   function answer(round, value, node) {
     if (state.round !== roundNumber(round)) return null;
     state = check(state, value);
+    if (!state.last.correct) misses += 1;
     if (!state.last.correct && !state.last.shown) {
       message.textContent = `Not quite. ${hint(round, value)}`;
       if (node) wiggle(node);

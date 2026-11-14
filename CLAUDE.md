@@ -18,9 +18,9 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Hosting:** GitHub Pages, deployed from the root of `main`.
 - **Repo:** public, named `kids-puzzles`. Nothing sensitive goes in it.
 - **Daily puzzles:** generated in the browser using today's date as a seed (`src/seed.js`). Same date, same puzzles. No server, no database.
-- **Levels:** Number Pyramid, Magic Square, and the Maze get harder as the pond grows: level 2 after 30 puzzle days, level 3 after 60 (`LEVEL` in `src/app.js`; each game's `LEVELS`). Same date and same level, same puzzle. The Maze is 10x10, then 12x12, then 14x14 (made harder 2026-11-13).
+- **Levels:** puzzles with `levels` in `GAMES` (Number Pyramid, Magic Square, Maze, Bug Groups, Garden Rows) each keep their own level in saved progress: up after 3 easy days in a row, down after 2 hard ones, starting the next day (`recordResult` and `levelOf` in `src/progress.js`). Same date and same level, same puzzle. Every game's `render` calls `onDone({ status, misses, helped })`; that is how a day is rated easy, ok, or hard.
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
-- **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js`, growing with how many days that puzzle has been played (`playsBefore` in `src/app.js`). Orange text means how many groups; teal (`--size-ink`) means how many in each.
+- **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js` by level. Orange text means how many groups; teal (`--size-ink`) means how many in each.
 - **Spoken words:** Spell It's "Hear it" uses the phone's built-in voice (`speechSynthesis`), approved 2026-11-13. It makes no network request. Don't add other speech or audio services.
 - **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins the rotation through its `kind` in `GAMES`.
 - **Sticker gifts:** the first finish of each puzzle each day gives a gift with a new sticker (`src/stickers.js`; never a repeat). The sticker book is the `#stickers` screen. Stickers are emoji from 2019 or earlier; no image files.
@@ -30,7 +30,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
   - `generate(seed, words)`: build a puzzle (word games get their word list passed in)
   - `check(state, answer)`: judge a move or answer
   - `verify(puzzle)`: confirm a puzzle is valid and solvable
-  - `render(container, puzzle, onDone)`: draw it and call `onDone` when finished
+  - `render(container, puzzle, onDone)`: draw it and call `onDone({ status, misses, helped })` when finished
 
   Adding a game means adding its file and one entry in the `GAMES` list in `src/app.js` (title, kind, legend, the data it needs, and the picture for its card). The game's card and screen are built from that entry. Add any new file (game, data, image) to `FILES` in `sw.js` too, so it works offline; `tests/offline.test.js` fails if one is missing.
 - **Testing:** Node's built-in test runner (`node --test`), no test libraries. One test file per game in `tests/`, plus seed tests. GitHub Actions runs the tests on every pull request and after each merge (`.github/workflows/tests.yml`); check that the pull request shows a green check before merging. `node tests/screens.mjs` (also run on GitHub) opens every screen in headless Chrome at phone size on a fixed date and fails if one doesn't draw, logs an error, or (for a puzzle) is taller than 667px; add `--days=30` to check more days, and `--only=maze` for one puzzle.
