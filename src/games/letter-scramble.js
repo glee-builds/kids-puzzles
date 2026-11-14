@@ -143,9 +143,16 @@ const PAUSE = 900; // ms to show a spelled word before the next one
  * once when finished: misses is how many wrong answers were given, and
  * helped is how many times the Hint button gave a letter.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let misses = 0;   // wrong spellings in the whole puzzle
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    const { index, solved, locked, hints } = session.saved;
+    state = { ...state, index, solved, locked, hints };
+    misses = session.saved.misses;
+  }
+  const keep = () => session.save?.({ index: state.index, solved: state.solved, locked: state.locked, hints: state.hints, misses });
   let boxes = [];   // tray index in each box, or null
   let busy = false; // true while a spelling is being judged
   let cheerCount = 0;
@@ -158,6 +165,11 @@ export function render(container, puzzle, onDone) {
     const slot = make('span', 'ls-found-word', '·'.repeat(word.length));
     found.append(slot);
     return slot;
+  });
+  // Words spelled before the puzzle was left show as found.
+  state.solved.forEach((spelled, n) => {
+    foundNodes[n].textContent = spelled;
+    foundNodes[n].classList.add('ls-found-done');
   });
 
   const boxRow = make('div', 'ls-boxes');
@@ -201,6 +213,10 @@ export function render(container, puzzle, onDone) {
       });
       tray.append(tile);
       return tile;
+    });
+    // A half-done word: its locked boxes get their letters back.
+    state.locked.forEach((isLocked, k) => {
+      if (isLocked) boxes[k] = freeTileWith(current(state).word[k], boxes);
     });
     draw();
   }
@@ -256,6 +272,8 @@ export function render(container, puzzle, onDone) {
     if (boxes.every((b) => b !== null)) {
       busy = true;
       setTimeout(submit, 250);
+    } else {
+      keep();
     }
   }
 
@@ -266,6 +284,7 @@ export function render(container, puzzle, onDone) {
     const { result } = state.last;
 
     if (result === 'right') {
+      if (state.status === 'playing') keep(); // (a finished puzzle has nothing to pick up)
       const { word } = puzzle.items[indexBefore];
       message.textContent = spelled === word
         ? CHEERS[cheerCount++ % CHEERS.length]
@@ -292,6 +311,7 @@ export function render(container, puzzle, onDone) {
 
     // Wrong: letters in the right box lock; the rest go back to the tray.
     misses += 1;
+    keep();
     const placed = state.locked.filter(Boolean).length;
     message.textContent = placed > 0
       ? 'Not yet! The green letters are in the right place.'

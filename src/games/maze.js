@@ -198,10 +198,24 @@ export function verify(puzzle) {
  * once when finished: misses is always 0 (tracing has no wrong answers)
  * and helped is how many times Hint was pressed.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let hint = [];
   let wrongTurnSaid = false;
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js):
+  // walk the saved path again, one square at a time, and use it only if every step is allowed.
+  const saved = session.saved;
+  const savedPath = Array.isArray(session.saved?.path) ? session.saved.path : [];
+  if (savedPath.length > 0 && savedPath.every(Array.isArray) && same(savedPath[0], puzzle.start)) {
+    let walked = state;
+    for (const square of savedPath.slice(1)) walked = step(walked, square);
+    if (walked.path.length === savedPath.length && walked.status === 'playing') {
+      state = { ...walked, hints: Number(session.saved.hints) || 0 };
+    }
+  }
+  const keep = () => {
+    if (state.status === 'playing') session.save?.({ path: state.path, hints: state.hints });
+  };
 
   container.replaceChildren();
   container.classList.add('mz');
@@ -235,6 +249,7 @@ export function render(container, puzzle, onDone) {
     message.textContent = offRoute(state)
       ? 'Trace back to where the glow starts, then follow it.'
       : 'Follow the glowing squares.';
+    keep();
     draw();
   });
 
@@ -309,6 +324,7 @@ export function render(container, puzzle, onDone) {
       return true;
     },
     onMove: follow,
+    onEnd: keep, // the finger lifted: save the path so far
   });
 
   function draw() {
@@ -324,5 +340,6 @@ export function render(container, puzzle, onDone) {
     }
   }
 
+  if (state.path.length > 1) message.textContent = 'Start from the end of your path.';
   draw();
 }

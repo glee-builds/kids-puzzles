@@ -225,12 +225,24 @@ const CHEERS = ['You fixed it!', 'Great checking!', 'Nice work!', 'You got it!']
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
  * once when finished: how many wrong answers, and how many answers were shown.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let typed = '';
   let cheerCount = 0;
   let misses = 0; // wrong answers in the whole puzzle
   let helped = 0; // answers the game showed after too many tries
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  const saved = session.saved;
+  if (saved) {
+    state = { ...state, ...saved.state };
+    misses = saved.misses;
+    helped = saved.helped;
+  }
+  // Save where we are: which problem, how far into it, and the running counts.
+  const keep = () => {
+    const { index, phase, checked, findMisses, fixMisses, revealed } = state;
+    session.save?.({ state: { index, phase, checked, findMisses, fixMisses, revealed }, misses, helped });
+  };
 
   container.replaceChildren();
   container.classList.add('fm');
@@ -262,6 +274,7 @@ export function render(container, puzzle, onDone) {
       misses++;
       message.textContent = hint(state);
     }
+    keep();
     draw();
   }
 
@@ -294,6 +307,7 @@ export function render(container, puzzle, onDone) {
     } else {
       message.textContent = `Not quite. ${hint(state)}`;
     }
+    keep();
     draw();
   }
 
@@ -309,6 +323,7 @@ export function render(container, puzzle, onDone) {
       return;
     }
     message.textContent = hint(state);
+    keep();
     draw();
   }
 
@@ -376,7 +391,7 @@ export function render(container, puzzle, onDone) {
     nextButton.textContent = state.index === puzzle.problems.length - 1 ? 'Finish ✓' : 'Next problem →';
   }
 
-
-  message.textContent = 'Tap the step that is wrong.';
+  if (!saved) message.textContent = 'Tap the step that is wrong.';
+  else if (state.phase !== 'fixed') message.textContent = hint(state);
   draw();
 }

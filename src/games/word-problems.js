@@ -227,12 +227,24 @@ const CHEERS = ['You thought it through!', 'Great thinking!', 'You got it!', 'Ni
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
  * once when finished: how many wrong answers, and how many answers were shown.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let typed = '';
   let cheerCount = 0;
   let misses = 0; // wrong answers in the whole puzzle
   let helped = 0; // answers the game showed after too many tries
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  const saved = session.saved;
+  if (saved) {
+    state = { ...state, ...saved.state };
+    misses = saved.misses;
+    helped = saved.helped;
+  }
+  // Save where we are: which problem, how far into it, and the running counts.
+  const keep = () => {
+    const { index, phase, tapped, pickMisses, revealed } = state;
+    session.save?.({ state: { index, phase, tapped, pickMisses, misses: state.misses, revealed }, misses, helped });
+  };
 
   container.replaceChildren();
   container.classList.add('wp');
@@ -257,6 +269,7 @@ export function render(container, puzzle, onDone) {
     if (state.last.correct) message.textContent = 'Yes! That number doesn\'t matter here.';
     else if (state.last.shown) message.textContent = 'We need that one too. Here\'s the number that doesn\'t matter.';
     else message.textContent = hint(state);
+    keep();
     draw();
   }
 
@@ -284,6 +297,7 @@ export function render(container, puzzle, onDone) {
     if (state.last.correct) message.textContent = CHEERS[cheerCount++ % CHEERS.length];
     else if (state.last.revealed) message.textContent = `It's ${answerFor(current(state))}. Next time you'll get it!`;
     else message.textContent = `Not quite. ${hint(state)}`;
+    keep();
     draw();
   }
 
@@ -297,6 +311,7 @@ export function render(container, puzzle, onDone) {
       return;
     }
     message.textContent = '';
+    keep();
     draw();
   }
 

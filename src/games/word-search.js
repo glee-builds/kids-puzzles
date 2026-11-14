@@ -235,8 +235,14 @@ export function hint(state) {
  * once when finished: misses is always 0 (a trace that isn't a word is
  * not a wrong answer) and helped is how many times Hint was pressed.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
+  // Pick up a half-done puzzle: the words already found, and the hints used.
+  if (session.saved) {
+    const found = (session.saved.found || []).filter((word) => puzzle.words.includes(word));
+    if (found.length < puzzle.words.length) state = { ...state, found, hints: session.saved.hints || 0 };
+  }
+  const keep = () => session.save?.({ found: state.found, hints: state.hints });
   let anchor = null;   // the square the trace started on
   let picked = [];     // squares in the current trace
   let glow = [];       // squares lit by a hint
@@ -268,6 +274,7 @@ export function render(container, puzzle, onDone) {
     const result = hint(state);
     if (!result.word) return;
     state = result.state;
+    keep();
     glow = result.cells;
     message.textContent = result.cells.length === 1
       ? `Look for ${result.word.toUpperCase()}. It starts at the glowing letter.`
@@ -297,6 +304,7 @@ export function render(container, puzzle, onDone) {
     picked = [];
     if (traced.length > 1) {
       state = check(state, traced);
+      keep();
       const { result } = state.last;
       if (result === 'found') {
         if (!state.hinted) glow = []; // the hinted word was found

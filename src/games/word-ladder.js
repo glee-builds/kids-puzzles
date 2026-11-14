@@ -227,12 +227,24 @@ const changedAt = (before, after) => [...after].findIndex((ch, i) => ch !== befo
  * (not a word, or a word already on the ladder) and helped is how many
  * times Hint was pressed.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let selected = null;  // which letter of the current word is picked
   let reading = false;  // showing a finished ladder before the next one
   let shownIndex = 0;
   let misses = 0; // words turned away, counted across both ladders
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    const { index, chain, solved, hints } = session.saved;
+    state = { ...state, index, chain, solved, hints };
+    misses = session.saved.misses;
+    reading = session.saved.reading;
+    shownIndex = reading ? index - 1 : index; // while reading, the ladder just finished is on screen
+  }
+  const keep = () => {
+    if (state.status !== 'playing') return; // a finished puzzle has nothing to pick up
+    session.save?.({ index: state.index, chain: state.chain, solved: state.solved, hints: state.hints, misses, reading });
+  };
 
   container.replaceChildren();
   container.classList.add('wl');
@@ -249,6 +261,7 @@ export function render(container, puzzle, onDone) {
     state = back(state);
     selected = null;
     message.textContent = 'Back one step.';
+    keep();
     draw();
   });
   const hintButton = button('lw-button', 'Hint', giveHint);
@@ -257,6 +270,7 @@ export function render(container, puzzle, onDone) {
     shownIndex = state.index;
     selected = null;
     message.textContent = intro();
+    keep();
     draw();
   });
   buttons.append(backButton, hintButton, nextButton);
@@ -300,6 +314,7 @@ export function render(container, puzzle, onDone) {
       message.textContent = `${big(word)} is already on the ladder. Try another letter.`;
       wiggle(rungs);
     }
+    keep();
     draw();
     if (state.status === 'won') {
       container.classList.add('finished');
@@ -326,6 +341,7 @@ export function render(container, puzzle, onDone) {
         message.textContent = `${big(current(before))} becomes ${big(result.word)}.`;
       }
     }
+    keep();
     draw();
     if (state.status === 'won') {
       container.classList.add('finished');
@@ -378,6 +394,6 @@ export function render(container, puzzle, onDone) {
     nextButton.hidden = !(reading && state.status === 'playing');
   }
 
-  message.textContent = intro();
+  message.textContent = reading ? `You made ${big(puzzle.ladders[shownIndex].end)}!` : intro();
   draw();
 }

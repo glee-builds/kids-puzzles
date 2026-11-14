@@ -214,9 +214,15 @@ export function verify(puzzle) {
  * once when finished: misses is how many wrong answers were given, and
  * helped is how many rounds had their answer shown.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let misses = 0; // wrong answers in the whole puzzle (state.tries starts over each round)
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    state = { ...state, round: session.saved.round, shown: session.saved.shown || [] };
+    misses = session.saved.misses;
+  }
+  const keep = () => session.save?.({ round: state.round, misses, shown: state.shown });
   container.replaceChildren();
   container.classList.add('em');
 
@@ -232,7 +238,10 @@ export function render(container, puzzle, onDone) {
 
   const roundNumber = (round) => puzzle.rounds.indexOf(round);
 
-  const finishRound = (text) => frame.finish(text, state.round, () => onDone({ status: state.status, misses, helped: state.shown.length }));
+  const finishRound = (text) => {
+    keep();
+    frame.finish(text, state.round, () => onDone({ status: state.status, misses, helped: state.shown.length }));
+  };
 
   function answer(round, value, node) {
     if (state.round !== roundNumber(round)) return null;
@@ -431,5 +440,5 @@ export function render(container, puzzle, onDone) {
     stage.append(...lines, checkButton);
   }
 
-  frame.begin(0);
+  frame.begin(state.round);
 }

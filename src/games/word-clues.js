@@ -149,10 +149,17 @@ function markWord(text, word) {
  * once when finished: misses is how many wrong choices were picked.
  * helped is always 0: there is no Hint button and no answer is shown.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
   let cheerCount = 0;
   let misses = 0; // wrong choices, counted across every step
+  // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
+  if (session.saved) {
+    const { index, tried, done } = session.saved;
+    state = { ...state, index, tried, done };
+    misses = session.saved.misses;
+  }
+  const keep = () => session.save?.({ index: state.index, tried: state.tried, done: state.done, misses });
 
   container.replaceChildren();
   container.classList.add('wc');
@@ -170,6 +177,7 @@ export function render(container, puzzle, onDone) {
     if (state.done) return;
     state = check(state, choice);
     if (!state.last.correct) misses += 1;
+    keep();
     message.textContent = state.last.correct ? `✓ ${CHEERS[cheerCount++ % CHEERS.length]}` : `↺ Not that one. ${hint(state)}`;
     draw();
   }
@@ -182,6 +190,7 @@ export function render(container, puzzle, onDone) {
       onDone({ status: state.status, misses, helped: 0 });
       return;
     }
+    keep();
     message.textContent = '';
     draw();
   }

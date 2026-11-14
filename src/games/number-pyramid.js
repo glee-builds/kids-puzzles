@@ -240,8 +240,11 @@ const CHEERS = ['Yes!', 'Great adding!', 'You got it!', 'Nice work!', 'Correct!'
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
  * once when finished: how many wrong answers, and how many answers were shown.
  */
-export function render(container, puzzle, onDone) {
+export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
+  // Picking up a half-done puzzle: put back the numbers found and the misses so far.
+  if (session.saved) state = { ...state, ...session.saved };
+  const keep = () => session.save?.({ entries: state.entries, tries: state.tries, revealed: state.revealed });
   let selected = null;
   let typed = '';
   let cheerCount = 0;
@@ -313,6 +316,7 @@ export function render(container, puzzle, onDone) {
     const cell = selected;
     state = check(state, { cell, value: Number(typed) });
     typed = '';
+    if (state.status === 'playing') keep();
 
     if (state.last.correct) {
       message.textContent = CHEERS[cheerCount++ % CHEERS.length];
