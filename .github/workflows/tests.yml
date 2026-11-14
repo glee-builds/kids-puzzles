@@ -3,7 +3,8 @@
 # a red X, so a broken change is caught before "Merge".
 #
 # Nothing to install: GitHub starts a fresh computer, gets this repo, sets
-# up Node, and runs the same command as on the Mac: node --test
+# up Node, and runs the same commands as on the Mac: node --test, then
+# node tests/screens.mjs
 
 name: Tests
 
@@ -30,3 +31,8 @@ jobs:
 
       - name: Run the tests
         run: node --test
+
+      # Opens the home screen and every puzzle in a real browser (Chrome is
+      # already on GitHub's computers) and checks each one draws and fits.
+      - name: Check every screen in a real browser
+        run: node tests/screens.mjs
