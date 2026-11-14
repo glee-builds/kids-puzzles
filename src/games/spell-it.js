@@ -10,7 +10,7 @@
 // with the phone's own built-in voice (no internet needed).
 
 import { createRandom, dealForDay } from '../seed.js';
-import { make, button, liveMessage, wiggle, progressDots } from '../ui.js';
+import { make, button, liveMessage, wiggle, progressDots, letterKeyboard } from '../ui.js';
 
 export const WORDS_PER_DAY = 3;
 export const MAX_TRIES = 3; // tries to spell the whole word before it's shown
@@ -119,8 +119,6 @@ export function verify(puzzle) {
 // The screen
 // ---------------------------------------------------------------------------
 
-const KEY_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
-
 /** Say `text` with the phone's built-in voice, if it has one. */
 function say(text) {
   try {
@@ -155,7 +153,6 @@ export function render(container, puzzle, onDone) {
   const nextButton = button('button next-button', 'Next', () => drawRound());
   nextButton.hidden = true;
   container.append(dots.node, question, stage, message, nextButton);
-  let onKey = null; // the spell round's typing, for a computer keyboard
 
   function hearButton(round) {
     if (!canSpeak()) return make('span');
@@ -167,7 +164,6 @@ export function render(container, puzzle, onDone) {
 
   function finishRound(text) {
     message.textContent = text;
-    onKey = null;
     dots.update((i) => i < state.round, state.round);
     if (state.status === 'won') {
       container.classList.add('finished');
@@ -243,7 +239,6 @@ export function render(container, puzzle, onDone) {
       cell.classList.toggle('sp-box-right', Boolean(marks?.[i]));
     });
 
-    const keyboard = make('div', 'wg-keyboard sp-keyboard');
     const type = (letter) => {
       if (typed.length >= round.word.length) return;
       typed += letter;
@@ -263,6 +258,7 @@ export function render(container, puzzle, onDone) {
         typed = round.word;
         drawBoxes(round.word.split('').map(() => correct));
         keyboard.remove();
+        stopKeys();
         sentence.replaceWith(sentenceLine(round.sentence, round.word));
         finishRound(correct ? `✓ You spelled ${round.word}!` : `The word is ${round.word}. ${round.why}`);
         return;
@@ -277,31 +273,9 @@ export function render(container, puzzle, onDone) {
         ? 'The green letters are right. Type the rest again!'
         : `Not quite. Listen again, and say it slowly. ${state.tries === MAX_TRIES - 1 ? round.why : ''}`.trim();
     };
-    KEY_ROWS.forEach((letters, index) => {
-      const row = make('div', 'wg-key-row' + (index === 1 ? ' wg-key-row-middle' : ''));
-      if (index === 2) row.append(button('wg-key wg-key-wide wg-key-go', 'Go', submit));
-      for (const letter of letters) row.append(button('wg-key', letter, () => type(letter)));
-      if (index === 2) {
-        const back = button('wg-key wg-key-wide', '⌫', erase);
-        back.setAttribute('aria-label', 'Erase a letter');
-        row.append(back);
-      }
-      keyboard.append(row);
-    });
-    onKey = (event) => {
-      if (/^[a-z]$/i.test(event.key)) type(event.key.toLowerCase());
-      else if (event.key === 'Backspace') erase();
-      else if (event.key === 'Enter') submit();
-    };
+    const { node: keyboard, stop: stopKeys } = letterKeyboard(container, { onLetter: type, onErase: erase, onGo: submit }, 'sp-keyboard');
     stage.append(sentence, hearButton(round), boxes, keyboard);
   }
-
-  // A computer keyboard works too, which helps when testing on a laptop.
-  document.addEventListener('keydown', (event) => {
-    if (event.metaKey || event.ctrlKey || event.altKey) return;
-    if (!onKey || container.closest('[hidden]')) return;
-    onKey(event);
-  });
 
   drawRound();
 }

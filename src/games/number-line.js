@@ -6,7 +6,7 @@
 // stays between 0 and 100.
 
 import { createRandom } from '../seed.js';
-import { make, button, liveMessage } from '../ui.js';
+import { make, button, liveMessage, numberPad } from '../ui.js';
 
 export const HOPS = 5;
 export const MIN = 0;
@@ -176,20 +176,7 @@ export function render(container, puzzle, onDone) {
   const card = make('div', 'nl-card');
   const message = liveMessage('nl-message', 'Where will the frog land?');
 
-  const pad = make('div', 'np-pad');
-  for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
-    const key = button('np-key', label);
-    if (label === 'Check') {
-      key.classList.add('np-key-check');
-      key.addEventListener('click', submit);
-    } else if (label === '⌫') {
-      key.setAttribute('aria-label', 'Erase a digit');
-      key.addEventListener('click', erase);
-    } else {
-      key.addEventListener('click', () => typeDigit(label));
-    }
-    pad.append(key);
-  }
+  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit });
 
   container.append(dots, line, card, message, pad);
 
@@ -272,21 +259,12 @@ export function render(container, puzzle, onDone) {
         dot.className = 'nl-dot ' + (state.revealed.includes(i) ? 'nl-dot-shown' : 'nl-dot-done');
       });
       message.textContent = 'The frog finished all its hops!';
-      document.removeEventListener('keydown', onKeydown);
+      stopKeys();
       container.classList.add('finished');
       onDone({ status: state.status });
     }
   }
 
-  // A computer keyboard works too, which helps when testing on a laptop.
-  function onKeydown(event) {
-    if (event.metaKey || event.ctrlKey || event.altKey) return;
-    if (container.closest('[hidden]')) return; // only while this game is on screen
-    if (/^[0-9]$/.test(event.key)) typeDigit(event.key);
-    else if (event.key === 'Backspace') erase();
-    else if (event.key === 'Enter') submit();
-  }
-  document.addEventListener('keydown', onKeydown);
 
   drawLine();
   drawCard();

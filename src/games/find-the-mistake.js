@@ -9,7 +9,7 @@
 // forward, so only that one step is wrong.
 
 import { createRandom } from '../seed.js';
-import { make, button, liveMessage } from '../ui.js';
+import { make, button, liveMessage, numberPad } from '../ui.js';
 
 export const PROBLEMS = 4;
 export const MAX_TRIES = 3; // after this many misses the fix fills itself in
@@ -242,20 +242,7 @@ export function render(container, puzzle, onDone) {
   const list = make('ol', 'fm-steps');
   const message = liveMessage('fm-message');
 
-  const pad = make('div', 'np-pad fm-pad');
-  for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
-    const key = button('np-key', label);
-    if (label === 'Check') {
-      key.classList.add('np-key-check');
-      key.addEventListener('click', submit);
-    } else if (label === '⌫') {
-      key.setAttribute('aria-label', 'Erase a digit');
-      key.addEventListener('click', erase);
-    } else {
-      key.addEventListener('click', () => typeDigit(label));
-    }
-    pad.append(key);
-  }
+  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit }, 'fm-pad');
 
   const nextButton = button('button next-button', '', goNext);
 
@@ -309,7 +296,7 @@ export function render(container, puzzle, onDone) {
       bubble.textContent = 'Thank you for fixing my mistakes!';
       nextButton.hidden = true;
       pad.hidden = true;
-      document.removeEventListener('keydown', onKeydown);
+      stopKeys();
       onDone({ status: state.status });
       return;
     }
@@ -381,15 +368,6 @@ export function render(container, puzzle, onDone) {
     nextButton.textContent = state.index === puzzle.problems.length - 1 ? 'Finish ✓' : 'Next problem →';
   }
 
-  // A computer keyboard works too, which helps when testing on a laptop.
-  function onKeydown(event) {
-    if (event.metaKey || event.ctrlKey || event.altKey) return;
-    if (container.closest('[hidden]')) return; // only while this game is on screen
-    if (/^[0-9]$/.test(event.key)) typeDigit(event.key);
-    else if (event.key === 'Backspace') erase();
-    else if (event.key === 'Enter') submit();
-  }
-  document.addEventListener('keydown', onKeydown);
 
   message.textContent = 'Tap the step that is wrong.';
   draw();

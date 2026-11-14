@@ -10,7 +10,7 @@
 // "3-0" is the top brick.
 
 import { createRandom, combinations } from '../seed.js';
-import { make, button, liveMessage, wiggle } from '../ui.js';
+import { make, button, liveMessage, wiggle, numberPad } from '../ui.js';
 
 export const LEVEL_SIZES = [4, 3, 2, 1];
 // Harder as the player goes on (the app picks the level; see src/app.js).
@@ -262,21 +262,7 @@ export function render(container, puzzle, onDone) {
 
   const message = liveMessage('np-message', 'Tap a ? brick and type its number.');
 
-  // Number pad.
-  const pad = make('div', 'np-pad');
-  for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
-    const key = button('np-key', label);
-    if (label === 'Check') {
-      key.classList.add('np-key-check');
-      key.addEventListener('click', submit);
-    } else if (label === '⌫') {
-      key.setAttribute('aria-label', 'Erase a digit');
-      key.addEventListener('click', erase);
-    } else {
-      key.addEventListener('click', () => typeDigit(label));
-    }
-    pad.append(key);
-  }
+  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit });
 
   container.append(pyramid, message, pad);
 
@@ -339,7 +325,7 @@ export function render(container, puzzle, onDone) {
 
     if (state.status === 'won') {
       message.textContent = 'You built the pyramid!';
-      document.removeEventListener('keydown', onKeydown);
+      stopKeys();
       container.classList.add('finished');
       onDone({ status: state.status });
     }
@@ -376,15 +362,6 @@ export function render(container, puzzle, onDone) {
     }
   }
 
-  // A computer keyboard works too, which helps when testing on a laptop.
-  function onKeydown(event) {
-    if (event.metaKey || event.ctrlKey || event.altKey) return;
-    if (container.closest('[hidden]')) return; // only while this game is on screen
-    if (/^[0-9]$/.test(event.key)) typeDigit(event.key);
-    else if (event.key === 'Backspace') erase();
-    else if (event.key === 'Enter') submit();
-  }
-  document.addEventListener('keydown', onKeydown);
 
   selectNext();
   draw();
