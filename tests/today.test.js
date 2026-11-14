@@ -2,34 +2,43 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { todaysSet, SET_SIZE } from '../src/today.js';
+import { todaysSet, SET_SIZE, FUN_EVERY } from '../src/today.js';
 
-const WORDS = ['w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7', 'w8', 'w9'];
-const NUMBERS = ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7', 'n8', 'n9'];
+const GROUPS = {
+  spelling: ['s1', 's2', 's3', 's4', 's5'],
+  reading: ['r1', 'r2', 'r3', 'r4'],
+  numbers: ['n1', 'n2', 'n3', 'n4', 'n5', 'n6', 'n7'],
+  everyday: ['e1', 'e2', 'e3'],
+  fun: ['f1'],
+};
+const ALL = Object.values(GROUPS).flat();
+const kinds = (set) => set.map((name) => name[0]).join('');
 
-test('every day has 5 different puzzles, 2 or 3 of each kind', () => {
+test('every day has 5 different puzzles: one from each group, and a second number puzzle or the fun one', () => {
   for (let day = 0; day < 400; day++) {
-    const set = todaysSet(WORDS, NUMBERS, day);
+    const set = todaysSet(GROUPS, day);
     assert.equal(set.length, SET_SIZE);
     assert.equal(new Set(set).size, SET_SIZE, `day ${day}: ${set}`);
-    const words = set.filter((name) => WORDS.includes(name)).length;
-    assert.ok(words === 2 || words === 3, `day ${day}: ${words} word puzzles`);
+    assert.equal(kinds(set), day % FUN_EVERY === FUN_EVERY - 1 ? 'snref' : 'snren', `day ${day}`);
   }
 });
 
-test('the kinds take turns, and swap which has 3 each day', () => {
-  const kind = (name) => name[0];
-  assert.equal(todaysSet(WORDS, NUMBERS, 10).map(kind).join(''), 'nwnwn');
-  assert.equal(todaysSet(WORDS, NUMBERS, 11).map(kind).join(''), 'wnwnw');
-});
-
-test('every puzzle comes around within 4 days', () => {
+test('every puzzle comes around within 5 days', () => {
   for (let day = 0; day < 100; day++) {
-    const seen = new Set([0, 1, 2, 3].flatMap((k) => todaysSet(WORDS, NUMBERS, day + k)));
-    assert.equal(seen.size, WORDS.length + NUMBERS.length, `from day ${day}`);
+    const seen = new Set([0, 1, 2, 3, 4].flatMap((k) => todaysSet(GROUPS, day + k)));
+    assert.equal(seen.size, ALL.length, `from day ${day}`);
   }
+});
+
+test('number puzzles take turns evenly', () => {
+  const counts = {};
+  for (let day = 0; day < 210; day++) {
+    for (const name of todaysSet(GROUPS, day)) counts[name] = (counts[name] || 0) + 1;
+  }
+  const numbers = GROUPS.numbers.map((name) => counts[name]);
+  assert.ok(Math.max(...numbers) - Math.min(...numbers) <= 1, String(numbers));
 });
 
 test('the same day always gives the same set', () => {
-  assert.deepEqual(todaysSet(WORDS, NUMBERS, 317), todaysSet(WORDS, NUMBERS, 317));
+  assert.deepEqual(todaysSet(GROUPS, 317), todaysSet(GROUPS, 317));
 });

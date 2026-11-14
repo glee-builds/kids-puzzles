@@ -22,7 +22,8 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
 - **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js` by level. Orange text means how many groups; teal (`--size-ink`) means how many in each.
 - **Spoken words:** Spell It's "Hear it" uses the phone's built-in voice (`speechSynthesis`), approved 2026-11-13. It makes no network request. Don't add other speech or audio services.
-- **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins the rotation through its `kind` in `GAMES`.
+- **Groups:** puzzles are in five groups (`GROUPS` in `src/app.js`): Spelling, Reading, Numbers, Everyday Math, and Just for Fun. Each has a color and a shape (`.kind-...` in `styles.css`).
+- **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins a group and the rotation through its `kind` in `GAMES`.
 - **Sticker gifts:** the first finish of each puzzle each day gives a gift with a new sticker (`src/stickers.js`; never a repeat). The sticker book is the `#stickers` screen. Stickers are emoji from 2019 or earlier; no image files.
 - **Yesterday's puzzles:** after a missed day, the home screen links to `?day=yesterday`, which plays that day's puzzles; finishing one fills in the missed day (`playDay` in `src/app.js`, catching up in `src/progress.js`). Only yesterday.
 - **Difficulty:** lives in data, not code. Hand-curated word lists by level in `data/words/` (JSON).

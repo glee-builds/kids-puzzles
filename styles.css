@@ -19,6 +19,8 @@
   --words-ink: #5644c4;  /* darker, for text on white */
   --numbers: #ff8a5c;    /* orange for numbers */
   --numbers-ink: #b8481a;
+  --everyday-ink: #855600; /* Everyday Math: dark gold text */
+  --fun-ink: #2a7038;      /* Just for Fun: dark green text */
   --size-ink: #12705f;   /* teal text: "how many in each group" (times puzzles) */
   --water: #cdeef5;      /* the pond on the home screen */
   --pad: #4cb062;
@@ -43,6 +45,8 @@
     --none: #67617f;
     --words-ink: #b4a8ff;
     --numbers-ink: #ffa47f;
+    --everyday-ink: #ffcf6b;
+    --fun-ink: #7ed492;
     --size-ink: #5fd6bd;
     --water: #22405a;
     --bank: #6b5b45;
@@ -469,7 +473,15 @@ button {
   padding: 0 0 16px;
 }
 
-/* Words and Numbers sections, each with its own color. */
+/* The five groups. Each sets its own color (--kind), text color on cream
+   (--kind-ink), and text color on the color itself (--kind-on). A group
+   also has its own shape beside its title, so it isn't color alone. */
+.kind-spelling { --kind: var(--words); --kind-ink: var(--words-ink); --kind-on: var(--white); }
+.kind-reading { --kind: var(--here); --kind-ink: var(--size-ink); --kind-on: var(--on-go); }
+.kind-numbers { --kind: var(--numbers); --kind-ink: var(--numbers-ink); --kind-on: var(--on-go); }
+.kind-everyday { --kind: var(--star); --kind-ink: var(--everyday-ink); --kind-on: var(--on-go); }
+.kind-fun { --kind: var(--pad); --kind-ink: var(--fun-ink); --kind-on: var(--on-go); }
+
 .group-title {
   display: flex;
   align-items: center;
@@ -485,10 +497,18 @@ button {
   border-radius: 4px;
 }
 
-.group-words .group-title { color: var(--words-ink); }
-.group-words .group-title::before { background: var(--words); }
-.group-numbers .group-title { color: var(--numbers-ink); }
-.group-numbers .group-title::before { background: var(--numbers); border-radius: 50%; }
+.group .group-title { color: var(--kind-ink); }
+.group .group-title::before { background: var(--kind); }
+/* Spelling: a square. Reading: a diamond. Numbers: a circle. Everyday Math: a triangle. Just for Fun: a star. */
+.kind-reading .group-title::before { transform: rotate(45deg); border-radius: 3px; }
+.kind-numbers .group-title::before { border-radius: 50%; }
+.kind-everyday .group-title::before { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.kind-fun .group-title::before {
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  clip-path: polygon(50% 0, 62% 36%, 100% 38%, 70% 60%, 80% 100%, 50% 76%, 20% 100%, 30% 60%, 0 38%, 38% 36%);
+}
 
 .card {
   display: flex;
@@ -533,12 +553,9 @@ button {
   color: var(--here);
 }
 
-.card-words { border-color: var(--words); box-shadow: 0 4px 0 var(--words); }
-.card-words:active { box-shadow: 0 1px 0 var(--words); }
-.card-words .card-status { color: var(--words-ink); }
-.card-numbers { border-color: var(--numbers); box-shadow: 0 4px 0 var(--numbers); }
-.card-numbers:active { box-shadow: 0 1px 0 var(--numbers); }
-.card-numbers .card-status { color: var(--numbers-ink); }
+.card-play { border-color: var(--kind); box-shadow: 0 4px 0 var(--kind); }
+.card-play:active { box-shadow: 0 1px 0 var(--kind); }
+.card-play .card-status { color: var(--kind-ink); }
 
 /* Small drawings on each card, made from shapes (no image files). */
 .card-art {
@@ -3415,7 +3432,7 @@ button.gr-row {
   text-decoration: none;
 }
 
-/* The number in a circle: purple for words, orange for numbers. */
+/* The number in a circle, in its group's color. */
 .today-number {
   flex: none;
   width: 32px;
@@ -3423,13 +3440,8 @@ button.gr-row {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--words);
-  color: var(--white);
-}
-
-.today-numbers .today-number {
-  background: var(--numbers);
-  color: var(--on-go);
+  background: var(--kind);
+  color: var(--kind-on);
 }
 
 .today-name { flex: 1; font-size: 1.1rem; }

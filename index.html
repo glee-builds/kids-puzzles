@@ -57,17 +57,8 @@
       <details class="all-puzzles">
       <summary>All puzzles</summary>
 
-      <section class="group group-words" aria-labelledby="group-words">
-        <h2 class="group-title" id="group-words">Words</h2>
-        <!-- The cards are built by src/app.js from its GAMES list. -->
-        <nav class="cards" id="cards-words" aria-label="Words puzzles"></nav>
-      </section>
-
-      <section class="group group-numbers" aria-labelledby="group-numbers">
-        <h2 class="group-title" id="group-numbers">Numbers</h2>
-        <!-- The cards are built by src/app.js from its GAMES list. -->
-        <nav class="cards" id="cards-numbers" aria-label="Numbers puzzles"></nav>
-      </section>
+      <!-- One section per group, with its cards, built by src/app.js from GROUPS and GAMES. -->
+      <div id="groups"></div>
 
       </details>
 
