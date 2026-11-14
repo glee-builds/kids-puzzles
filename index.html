@@ -32,6 +32,8 @@
         <p class="pond-caption" id="pond-caption"></p>
         <!-- Links to yesterday's puzzles after a missed day. Filled in by app.js. -->
         <a class="catch-up" id="catch-up" hidden></a>
+        <!-- Opens the sticker book. The count is filled in by app.js. -->
+        <a class="sticker-link" id="sticker-link" href="#stickers"></a>
         <p class="subtitle" id="subtitle">Pick a puzzle!</p>
       </header>
 
@@ -197,7 +199,12 @@
       <img class="done-star" src="assets/frog.svg" alt="">
       <p class="done-title" id="done-title">You did it!</p>
       <p class="done-streak" id="done-streak"></p>
-      <p class="done-note">Come back tomorrow for new puzzles.</p>
+      <!-- The gift: tap to open it and get a sticker. Filled in by app.js. -->
+      <button class="gift" type="button" id="gift" hidden>
+        <span class="gift-box" aria-hidden="true">🎁</span>
+        <span class="gift-label">Tap to open your gift!</span>
+      </button>
+      <p class="gift-sticker" id="gift-sticker" hidden></p>
       <a class="button" href="#">Pick another puzzle</a>
       <button class="link-button" type="button" id="done-close">See my puzzle</button>
     </div>

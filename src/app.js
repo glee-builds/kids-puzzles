@@ -9,6 +9,7 @@ import { dateKey, seedFor } from './seed.js';
 import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
 import { make, button } from './ui.js';
+import { PAGES, STICKERS, nextSticker } from './stickers.js';
 
 const today = dateKey();
 let progress = progressStore.load();
@@ -79,6 +80,7 @@ function drawPond() {
     captionNode.append(inARow);
   }
   drawCatchUp();
+  drawStickerLink();
 }
 
 /** The link between today's and yesterday's puzzles, when it's needed. */
@@ -107,6 +109,8 @@ function updateHome() {
 
 function finishGame(game) {
   const before = progress.totalDays || 0;
+  // A puzzle gives a gift the first time it's finished each day.
+  const firstTime = !progressStore.isFinished(progress, playDay, game);
   progress = progressStore.recordFinish(progress, playDay, game);
   progressStore.save(progress);
   const hopped = (progress.totalDays || 0) > before;
@@ -118,7 +122,58 @@ function finishGame(game) {
     ? `The frog hopped to lily pad ${progress.totalDays}!`
     : days >= 2 ? `★ Puzzles ${days} days in a row!` : `The frog is on lily pad ${progress.totalDays}!`;
   document.getElementById('done').hidden = false;
-  celebrate();
+  const sticker = firstTime ? nextSticker(progress.stickers) : null;
+  showGift(sticker);
+  if (!sticker) celebrate(); // with a gift, the stars fall when it's opened
+}
+
+// ---------- Gifts and the sticker book ----------
+
+/** Show a wrapped gift on the celebration card, or no gift (a replay, or a full book). */
+function showGift(sticker) {
+  const gift = document.getElementById('gift');
+  const shown = document.getElementById('gift-sticker');
+  gift.hidden = !sticker;
+  shown.hidden = true;
+  if (!sticker) return;
+  gift.onclick = () => {
+    progress = progressStore.addSticker(progress, sticker.id);
+    progressStore.save(progress);
+    gift.hidden = true;
+    shown.replaceChildren(make('span', 'gift-picture', sticker.picture), make('span', 'gift-name', `A new sticker: ${sticker.name}!`));
+    shown.hidden = false;
+    drawStickerLink();
+    celebrate();
+  };
+}
+
+function drawStickerLink() {
+  const count = (progress.stickers || []).length;
+  document.getElementById('sticker-link').textContent = count ? `My stickers (${count}) →` : 'My sticker book →';
+}
+
+function drawStickers() {
+  const area = document.getElementById('game-stickers');
+  area.replaceChildren();
+  const owned = progress.stickers || [];
+  const newest = owned[owned.length - 1];
+  area.append(make('p', 'sb-count', owned.length === STICKERS.length
+    ? 'Your sticker book is full. Wow!'
+    : `${owned.length} of ${STICKERS.length} stickers. Finish a puzzle to open a gift!`));
+  PAGES.forEach((page, p) => {
+    const mine = STICKERS.filter((s) => s.page === p);
+    const have = mine.filter((s) => owned.includes(s.id)).length;
+    area.append(make('h2', 'sb-page', `${page.name} · ${have} of ${mine.length}`));
+    const grid = make('div', 'sb-grid');
+    for (const sticker of mine) {
+      const got = owned.includes(sticker.id);
+      const spot = make('span', 'sb-sticker' + (got ? '' : ' sb-empty') + (sticker.id === newest ? ' sb-new' : ''), got ? sticker.picture : '?');
+      spot.setAttribute('role', 'img');
+      spot.setAttribute('aria-label', got ? sticker.name : 'A sticker you don\'t have yet');
+      grid.append(spot);
+    }
+    area.append(grid);
+  });
 }
 
 // ---------- Celebration: falling stars ----------
@@ -217,7 +272,7 @@ function makeScreen(name, { title, legend }) {
   back.setAttribute('aria-label', 'Back to puzzles');
   top.append(back, make('h1', '', title));
   if (legend) top.append(make('p', 'legend', legend));
-  if (playingYesterday && name !== 'grown-ups') top.append(make('p', 'yesterday-tag', 'Yesterday\'s puzzle'));
+  if (playingYesterday && name in GAMES) top.append(make('p', 'yesterday-tag', 'Yesterday\'s puzzle'));
   const area = make('main', 'game');
   area.id = `game-${name}`;
   area.append(make('p', 'loading', 'Getting today\'s puzzle…'));
@@ -245,6 +300,9 @@ const VIEWS = { '': document.getElementById('home') };
 for (const [name, game] of Object.entries(GAMES)) {
   VIEWS[name] = document.querySelector('.app').appendChild(makeScreen(name, game));
 }
+
+VIEWS.stickers = document.querySelector('.app').appendChild(
+  makeScreen('stickers', { title: 'My Stickers', legend: 'Every puzzle you finish has a gift.' }));
 
 // ---------- For grown-ups ----------
 
@@ -299,7 +357,7 @@ function drawGrownUps() {
   const ask = make('div', 'gu-confirm');
   ask.hidden = true;
   ask.append(
-    make('p', '', 'This clears the lily pads, the streak, and this page on this phone. It can\'t be undone.'),
+    make('p', '', 'This clears the lily pads, the streak, the stickers, and this page on this phone. It can\'t be undone.'),
     button('lw-button', 'Cancel', () => { ask.hidden = true; startOver.hidden = false; }),
     button('lw-button gu-reset', 'Yes, start over', () => {
       progressStore.save(progressStore.emptyProgress());
@@ -326,6 +384,7 @@ function show() {
 
   if (current === '') drawPond();
   if (current === 'grown-ups') drawGrownUps();
+  if (current === 'stickers') drawStickers();
 
   if (current in GAMES && !started.has(current)) {
     started.add(current);
