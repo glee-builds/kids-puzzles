@@ -122,3 +122,40 @@ test('prompt: adding facts first, then take-away, then nothing once won', () => 
   }
   assert.equal(prompt(state), '');
 });
+
+// --- levels: times families ---
+
+test('a times family makes two times facts and two divide facts', () => {
+  assert.deepEqual(factsFor({ a: 3, b: 4, c: 12, times: true }), ['3×4=12', '4×3=12', '12÷3=4', '12÷4=3']);
+});
+
+test('level 1 is the same as before; levels 2 and 3 end with 1 and 2 times houses', () => {
+  everyDay((key) => {
+    assert.deepEqual(generate(seedForDay(key), 1), generate(seedForDay(key)));
+    for (const [level, timesHouses] of [[1, 0], [2, 1], [3, 2]]) {
+      const puzzle = generate(seedForDay(key), level);
+      const result = verify(puzzle);
+      assert.ok(result.ok, `level ${level}, ${key}: ${result.problems.join('; ')}`);
+      assert.equal(puzzle.houses.filter((h) => h.times).length, timesHouses);
+      assert.ok(!puzzle.houses[0].times);
+    }
+  });
+});
+
+test('a times house is played with times and divide facts', () => {
+  const puzzle = { houses: [{ a: 3, b: 5, c: 8 }, { a: 20, b: 30, c: 50 }, { a: 3, b: 4, c: 12, times: true }] };
+  let state = start(puzzle);
+  for (const fact of [[3, 5, 8], [5, 3, 8], [8, 3, 5], [8, 5, 3], [20, 30, 50], [30, 20, 50], [50, 20, 30], [50, 30, 20]]) state = check(state, fact);
+  assert.equal(state.house, 2);
+  assert.match(prompt(state), /times fact/);
+  state = check(state, [3, 4, 12]);
+  assert.equal(state.last.result, 'lit');
+  state = check(state, [4, 3, 12]);
+  assert.match(prompt(state), /divide fact/);
+  state = check(state, [3, 12, 4]); // not a true divide fact
+  assert.equal(state.last.result, 'wrong');
+  assert.match(hint(state), /divide fact, start with the biggest/);
+  state = check(state, [12, 3, 4]);
+  state = check(state, [12, 4, 3]);
+  assert.equal(state.status, 'won');
+});
