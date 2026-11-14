@@ -426,8 +426,8 @@ const GAMES = {
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
   'math-mix-ups': {
-    title: 'Math Mix-Ups', kind: 'everyday', legend: 'Puzzles that take some thinking', levels: 2, data: () => [levelFor('math-mix-ups'), DAY],
-    how: ["These take some thinking! Each shape stands for a number.", "Use what you know to work out what you don't."],
+    title: 'Math Mix-Ups', kind: 'everyday', legend: 'Puzzles that take some thinking', levels: 2, data: () => [DAY],
+    how: ["These take some thinking! Use what you know to work out what you don't.", 'Pick Mild or Spicy at the top. You can switch any time.'],
     art: '<span class="mix-art"><i></i><b></b><u></u></span>',
   },
   'graph-it': {
@@ -521,7 +521,11 @@ function writeHalfDone(name, entry) {
   try { localStorage.setItem(HALF_DONE_KEY, JSON.stringify(stored)); } catch { /* storage is off: nothing is kept */ }
 }
 
-/** What a game gets for saving and restoring: { saved, save(snapshot) }. */
+/**
+ * What a game gets for saving and restoring: { saved, save(snapshot) }.
+ * A puzzle where the player picks the level (Math Mix-Ups) also uses
+ * `level` (the level to start at) and `setLevel(level)` (the player's pick).
+ */
 function sessionFor(name, puzzle) {
   // A fingerprint of the puzzle: a snapshot of a different puzzle (a new level, new words) is ignored.
   const fingerprint = hashString(JSON.stringify(puzzle));
@@ -529,6 +533,11 @@ function sessionFor(name, puzzle) {
   return {
     saved: entry && entry.fingerprint === fingerprint ? entry.snapshot : undefined,
     save: (snapshot) => writeHalfDone(name, { fingerprint, snapshot }),
+    level: levelFor(name),
+    setLevel(level) {
+      progress = progressStore.setLevel(progress, name, level);
+      progressStore.save(progress);
+    },
   };
 }
 

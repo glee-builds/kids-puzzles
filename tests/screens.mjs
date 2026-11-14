@@ -303,7 +303,7 @@ const RESUMES = {
     check: `doneDots(1) && Boolean(G.querySelector('.gr-turn'))`,
   },
   'spell-it': { play: `await tapUntilRight('.sp-choice'); await next();`, check: `doneDots(1)` },
-  'math-mix-ups': { play: `await tapUntilRight('.mm-choice'); await next();`, check: `doneDots(1) && Boolean(G.querySelector('.mm-heat'))` },
+  'math-mix-ups': { play: `G.querySelector('.mm-heat-2').click(); await wait(); await tapUntilRight('.mm-choice'); await next();`, check: `doneDots(1) && G.querySelector('.mm-heat-on').textContent.includes('Spicy')` },
   'graph-it': { play: `await tapUntilRight('.gi-choice'); await next();`, check: `doneDots(1) && Boolean(G.querySelector('.gi-check'))` },
   'end-marks': { play: `await tapUntilRight('.em-mark'); await next(); await tapUntilRight('.em-mark'); await next();`, check: `doneDots(2)` },
   'clock-time': {

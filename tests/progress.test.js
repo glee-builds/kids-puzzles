@@ -305,3 +305,12 @@ test('itemsThisWeek adds up the words or facts practiced in the last 7 days', ()
   assert.equal(itemsThisWeek(p, '2026-11-09', ['bug-groups', 'garden-rows']), 3);
   assert.equal(itemsThisWeek(p, '2026-11-09', ['maze']), 0);
 });
+
+test('setLevel: a level picked by hand starts right away, and other puzzles keep theirs', async () => {
+  const { setLevel: pick } = await import('../src/progress.js');
+  const before = { levels: { 'graph-it': { now: 3, was: 2, since: '2026-11-14' } } };
+  const after = pick(before, 'math-mix-ups', 2);
+  assert.deepEqual(after.levels['math-mix-ups'], { now: 2, was: 2, since: null });
+  assert.deepEqual(after.levels['graph-it'], before.levels['graph-it']);
+  assert.equal(before.levels['math-mix-ups'], undefined);
+});

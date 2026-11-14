@@ -130,6 +130,11 @@ export function recordResult(progress, day, game, result, { maxLevel = 1, startL
   return { ...progress, results, levels };
 }
 
+/** Set a puzzle's level by hand (the player picked it), starting now. Returns new progress. */
+export function setLevel(progress, game, level) {
+  return { ...progress, levels: { ...progress.levels, [game]: { now: level, was: level, since: null } } };
+}
+
 export const REVIEW_GAPS = [2, 7]; // days until a missed item comes back, then comes back again
 export const REVIEW_KEPT = 20;     // the most items one puzzle keeps for review
 
