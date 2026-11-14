@@ -104,7 +104,7 @@ function drawCatchUp() {
 /** The 5 puzzles picked for the day being played (see src/today.js). */
 function todaysPuzzles() {
   const names = (kind) => Object.keys(GAMES).filter((name) => GAMES[name].kind === kind);
-  return todaysSet(names('words'), names('numbers'), DAY);
+  return todaysSet(Object.fromEntries(GROUPS.map(({ kind }) => [kind, names(kind)])), DAY);
 }
 
 const isDone = (game) => progressStore.isFinished(progress, playDay, game);
@@ -120,7 +120,7 @@ function drawToday() {
   const list = document.getElementById('today-list');
   list.replaceChildren();
   set.forEach((game, i) => {
-    const row = make('a', `today-row today-${GAMES[game].kind}` + (isDone(game) ? ' today-done' : game === next ? ' today-next' : ''));
+    const row = make('a', `today-row kind-${GAMES[game].kind}` + (isDone(game) ? ' today-done' : game === next ? ' today-next' : ''));
     row.href = `#${game}`;
     row.append(
       make('span', 'today-number', isDone(game) ? '✓' : String(i + 1)),
@@ -302,7 +302,7 @@ const DAY = progressStore.daysBetween('2026-01-01', playDay);
 // Every game, by the name used in its address (#maze) and in saved
 // progress, in the order of the cards on the home screen. Each has:
 //   title, legend  shown at the top of its screen
-//   kind           'words' or 'numbers': which group its card is in
+//   kind           which group it's in (see GROUPS)
 //   levels         how many levels it has, if more than one
 //   how            how to play, shown the first time the puzzle is opened
 //   art            the little picture on its card (styled in styles.css)
@@ -311,49 +311,61 @@ const DAY = progressStore.daysBetween('2026-01-01', playDay);
 //   data           what its generate() needs after the seed, if anything
 // Adding a game: add its file in src/games/ and one entry here. Its card
 // and its screen are built from the entry.
+// The groups on the home screen, in order. Each has its own color and
+// shape (styles.css, .kind-...). Today's 5 takes one puzzle from each of
+// the first, second, and fourth, two from Numbers, and sometimes the fun
+// one (src/today.js).
+const GROUPS = [
+  { kind: 'spelling', title: 'Spelling' },
+  { kind: 'reading', title: 'Reading' },
+  { kind: 'numbers', title: 'Numbers' },
+  { kind: 'everyday', title: 'Everyday Math' },
+  { kind: 'fun', title: 'Just for Fun' },
+];
+
 const GAMES = {
   'mystery-word': {
-    title: 'Mystery Word', kind: 'words', file: 'word-guess', data: () => [words('level-3'), DAY, part('spelling', 'words')],
+    title: 'Mystery Word', kind: 'spelling', file: 'word-guess', data: () => [words('level-3'), DAY, part('spelling', 'words')],
     how: ["Guess the hidden 5-letter word. You get 6 tries.", "Green letters are in the right spot. Purple letters are in the word, but somewhere else."],
     art: '<span class="mini mini-a">A</span><span class="mini mini-q">?</span>',
   },
   'letter-scramble': {
-    title: 'Letter Scramble', kind: 'words', legend: 'Put the letters back in order', levels: 3, data: () => [words('level-1', 'level-2', 'level-3'), levelFor('letter-scramble')],
+    title: 'Letter Scramble', kind: 'spelling', legend: 'Put the letters back in order', levels: 3, data: () => [words('level-1', 'level-2', 'level-3'), levelFor('letter-scramble')],
     how: ["The letters are mixed up.", "Drag or tap them into the boxes to spell a word."],
     art: '<span class="scramble-art"><span>t</span><span>a</span><span>c</span></span>',
   },
   'story-order': {
-    title: 'Story Order', kind: 'words', legend: 'Put the story in order', data: () => [part('stories', 'stories'), DAY],
+    title: 'Story Order', kind: 'reading', legend: 'Put the story in order', data: () => [part('stories', 'stories'), DAY],
     how: ["The story is out of order.", "Put the sentences back: what happens first, next, and last?"],
     art: '<span class="story-art"><span>1</span><span>2</span><span>3</span></span>',
   },
   'word-search': {
-    title: 'Word Search', kind: 'words', legend: 'Find the hidden words', levels: 3, data: () => [part('search-themes', 'themes'), DAY, levelFor('word-search')],
+    title: 'Word Search', kind: 'spelling', legend: 'Find the hidden words', levels: 3, data: () => [part('search-themes', 'themes'), DAY, levelFor('word-search')],
     how: ["Words are hiding in the letters.", "Slide your finger along a word to find it."],
     art: '<span class="search-art"><span>c</span><span class="search-art-hit">a</span><span>x</span><span>q</span><span class="search-art-hit">n</span><span>o</span><span>e</span><span class="search-art-hit">t</span><span>p</span></span>',
   },
   'word-ladder': {
-    title: 'Word Ladder', kind: 'words', legend: 'Change one letter at a time', data: () => [words('ladder'), words('level-1', 'level-2')],
+    title: 'Word Ladder', kind: 'spelling', legend: 'Change one letter at a time', data: () => [words('ladder'), words('level-1', 'level-2')],
     how: ["Turn the top word into the bottom word.", "Tap one letter, then tap a new letter. Every step must be a real word."],
     art: '<span class="ladder-art"><span>c<b>a</b>t</span><span>c<b>o</b>t</span><span>c<b>o</b>g</span></span>',
   },
   'word-clues': {
-    title: 'Word Clues', kind: 'words', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY],
+    title: 'Word Clues', kind: 'reading', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY],
     how: ["Read the short story.", "Use its clues to work out what the new word means."],
     art: '<span class="clue-art"><span class="clue-glass"></span><span class="clue-word">wow</span></span>',
   },
   'fix-sentence': {
-    title: 'Fix the Sentence', kind: 'words', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY],
+    title: 'Fix the Sentence', kind: 'reading', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY],
     how: ["One word in the sentence is wrong.", "Tap it, then pick the word that fixes it."],
     art: '<span class="fix-art"><span class="fix-art-old">run</span><span class="fix-art-new">ran</span></span>',
   },
   'spell-it': {
-    title: 'Spell It', kind: 'words', legend: 'Listen, look, and spell', levels: 3, data: () => [part('spelling', 'words'), DAY, reviewFor('spell-it'), levelFor('spell-it')],
+    title: 'Spell It', kind: 'spelling', legend: 'Listen, look, and spell', levels: 3, data: () => [part('spelling', 'words'), DAY, reviewFor('spell-it'), levelFor('spell-it')],
     how: ["Read the sentence and find the missing word. Tap Hear it to listen.", "Pick it, sound it out, then spell it."],
     art: '<span class="spell-art"><span>s</span><span>p</span><span class="spell-art-blank">_</span><span>l</span><span>l</span></span>',
   },
   'end-marks': {
-    title: 'End Marks', kind: 'words', legend: 'Telling, asking, or a strong feeling?', levels: 3, data: () => [loadJson('data/end-marks.json'), DAY, levelFor('end-marks')],
+    title: 'End Marks', kind: 'reading', legend: 'Telling, asking, or a strong feeling?', levels: 3, data: () => [loadJson('data/end-marks.json'), DAY, levelFor('end-marks')],
     how: ["Every sentence needs an end mark.", "A period tells. A question mark asks. An exclamation mark shows a strong feeling."],
     art: '<span class="marks-art"><span>.</span><span>?</span><span>!</span></span>',
   },
@@ -383,7 +395,7 @@ const GAMES = {
     art: '<span class="oops-art"><span>3+4=8</span><span class="oops-mark">✗</span></span>',
   },
   'word-problems': {
-    title: 'Think It Through', kind: 'numbers', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')],
+    title: 'Think It Through', kind: 'everyday', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')],
     how: ["Read the story problem carefully.", "One number doesn't help. Tap it, then solve the problem."],
     art: '<span class="think-art"><span>12</span><span class="think-q">?</span><span>7</span></span>',
   },
@@ -398,17 +410,17 @@ const GAMES = {
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
   'clock-time': {
-    title: 'Clock Time', kind: 'numbers', legend: 'Read the hands to tell the time', levels: 3, data: () => [levelFor('clock-time')],
+    title: 'Clock Time', kind: 'everyday', legend: 'Read the hands to tell the time', levels: 3, data: () => [levelFor('clock-time')],
     how: ["The short hand points to the hour. The long hand points to the minutes.", "Pick the time the clock shows."],
     art: '<span class="clock-art"><i></i><b></b></span>',
   },
   'coin-count': {
-    title: 'Coin Count', kind: 'numbers', legend: 'Count the coins', levels: 3, data: () => [levelFor('coin-count')],
+    title: 'Coin Count', kind: 'everyday', legend: 'Count the coins', levels: 3, data: () => [levelFor('coin-count')],
     how: ["Count the coins. Start with the biggest one and count on.", "Type how many cents, then press Check."],
     art: '<span class="coins-art"><i>10¢</i><i>5¢</i><i>1¢</i></span>',
   },
   maze: {
-    title: 'Maze', kind: 'numbers', legend: 'Trace from the green dot to the star', levels: 3, data: () => [levelFor('maze')],
+    title: 'Maze', kind: 'fun', legend: 'Trace from the green dot to the star', levels: 3, data: () => [levelFor('maze')],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
     art: '<span class="maze-art"></span>',
   },
@@ -471,7 +483,7 @@ async function startGame(name) {
 
 /** A game's card on the home screen: its picture, its name, and "Play" or "Done". */
 function makeCard(name, { title, kind, art }) {
-  const card = make('a', `card card-play card-${kind}`);
+  const card = make('a', `card card-play kind-${kind}`);
   card.href = `#${name}`;
   const picture = make('span', 'card-art');
   picture.setAttribute('aria-hidden', 'true');
@@ -480,6 +492,19 @@ function makeCard(name, { title, kind, art }) {
   status.id = `status-${name}`;
   card.append(picture, make('span', 'card-name', title), status);
   return card;
+}
+
+// Build a section for each group, under "All puzzles" on the home screen.
+for (const { kind, title } of GROUPS) {
+  const section = make('section', `group kind-${kind}`);
+  const heading = make('h2', 'group-title', title);
+  heading.id = `group-${kind}`;
+  section.setAttribute('aria-labelledby', heading.id);
+  const cards = make('nav', 'cards');
+  cards.id = `cards-${kind}`;
+  cards.setAttribute('aria-label', `${title} puzzles`);
+  section.append(heading, cards);
+  document.getElementById('groups').append(section);
 }
 
 // Build every game's card and screen, and list the screens that exist.
@@ -508,6 +533,21 @@ function drawGrownUps() {
     `${progress.totalDays || 0} puzzle days in all · ${days} day${days === 1 ? '' : 's'} in a row now`));
   area.append(make('p', 'gu-level',
     'Puzzles with levels move up after 3 easy days in a row, and down after 2 hard ones.'));
+
+  // How each group is going: its puzzles that are going well or need practice.
+  const groupLines = GROUPS.map(({ kind, title }) => {
+    const trends = Object.keys(GAMES).filter((name) => GAMES[name].kind === kind).map((name) => progressStore.trend(progress, name));
+    const well = trends.filter((t) => t === 'well').length;
+    const practice = trends.filter((t) => t === 'practice').length;
+    const parts = [well ? `${well} going well` : '', practice ? `${practice} need${practice === 1 ? 's' : ''} practice` : ''].filter(Boolean);
+    return parts.length ? `${title}: ${parts.join(', ')}` : '';
+  }).filter(Boolean);
+  if (groupLines.length) {
+    area.append(make('h2', 'gu-heading', 'By group'));
+    const groups = make('ul', 'gu-games');
+    for (const text of groupLines) groups.append(make('li', 'gu-game', text));
+    area.append(groups);
+  }
 
   // The last 4 weeks, oldest first, with today in the last square.
   area.append(make('h2', 'gu-heading', 'Last 4 weeks'));
