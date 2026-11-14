@@ -1,7 +1,7 @@
 // letter-scramble.js: put mixed-up letters back in order to spell a word.
 //
-// Each day has 4 words from the word lists: two 3-letter words, then two
-// 4-letter words. The letters are shuffled so they never already spell a
+// Each day has 4 words from the word lists: at level 1, two 3-letter words
+// then two 4-letter words; levels 2 and 3 bring in 5-letter words. The letters are shuffled so they never already spell a
 // word. The player drags (or taps) the letters into the boxes. Letters in
 // the right box stay and turn green with a check; the others go back to
 // try again. If the letters spell a different real word from the lists
@@ -10,7 +10,10 @@
 import { createRandom } from '../seed.js';
 import { make, button, liveMessage, wiggle, dragOrTap } from '../ui.js';
 
-export const PLAN = [3, 3, 4, 4]; // word lengths, in order
+// Word lengths, in order, at each level. Level 1 is two 3-letter words and
+// two 4-letter words; higher levels bring in 5-letter words.
+export const PLANS = [[3, 3, 4, 4], [3, 4, 4, 5], [4, 4, 5, 5]];
+export const PLAN = PLANS[0];
 const SORTED = (word) => [...word].sort().join('');
 
 /** Every word in the lists that uses exactly the letters of `word`. */
@@ -30,10 +33,11 @@ function scramble(random, word, words) {
 }
 
 /** Make today's 4 words from a seed and the word lists. */
-export function generate(seed, words) {
+export function generate(seed, words, level = 1) {
   const random = createRandom(seed);
+  const plan = PLANS[Math.min(Math.max(level, 1), PLANS.length) - 1];
   const items = [];
-  for (const length of PLAN) {
+  for (const length of plan) {
     const choices = random.shuffle(words.filter((w) => w.length === length));
     for (const word of choices) {
       if (items.some((item) => SORTED(item.word) === SORTED(word))) continue;
@@ -44,7 +48,7 @@ export function generate(seed, words) {
       }
     }
   }
-  return { items, words };
+  return { items, words, plan };
 }
 
 /** The starting state: the first word, nothing placed. */
@@ -108,13 +112,13 @@ export function hint(state) {
 /** Confirm a day's words are valid. Returns { ok, problems }. */
 export function verify(puzzle) {
   const problems = [];
-  const { items, words } = puzzle;
-  if (items.length !== PLAN.length) {
-    return { ok: false, problems: [`there must be ${PLAN.length} words`] };
+  const { items, words, plan = PLAN } = puzzle;
+  if (items.length !== plan.length) {
+    return { ok: false, problems: [`there must be ${plan.length} words`] };
   }
   items.forEach(({ word, mixed }, i) => {
     if (!words.includes(word)) problems.push(`${word} is not in the word lists`);
-    if (word.length !== PLAN[i]) problems.push(`word ${i + 1} should have ${PLAN[i]} letters`);
+    if (word.length !== plan[i]) problems.push(`word ${i + 1} should have ${plan[i]} letters`);
     if (SORTED(mixed) !== SORTED(word)) problems.push(`${mixed} is not a mix of ${word}`);
     if (words.includes(mixed)) problems.push(`${mixed} is already a word`);
   });

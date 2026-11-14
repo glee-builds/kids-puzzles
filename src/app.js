@@ -309,7 +309,7 @@ const GAMES = {
     art: '<span class="mini mini-a">A</span><span class="mini mini-q">?</span>',
   },
   'letter-scramble': {
-    title: 'Letter Scramble', kind: 'words', legend: 'Put the letters back in order', data: () => [words('level-1', 'level-2')],
+    title: 'Letter Scramble', kind: 'words', legend: 'Put the letters back in order', levels: 3, data: () => [words('level-1', 'level-2', 'level-3'), levelFor('letter-scramble')],
     how: ["The letters are mixed up.", "Drag or tap them into the boxes to spell a word."],
     art: '<span class="scramble-art"><span>t</span><span>a</span><span>c</span></span>',
   },
