@@ -753,7 +753,7 @@ button {
 .ls-box,
 .ls-tile,
 .ls-ghost {
-  width: 64px;
+  width: min(64px, calc((100vw - 72px) / 5)); /* 5 letters still fit a small phone */
   height: 72px;
   border-radius: 12px;
   font: inherit;
