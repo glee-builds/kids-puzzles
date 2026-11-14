@@ -94,6 +94,17 @@ body {
   margin: 0;
 }
 
+/* A quick double tap is two taps, not "zoom in". */
+html {
+  touch-action: manipulation;
+}
+
+/* While a maze is showing, two fingers (or a finger and a resting hand)
+   don't pinch the page bigger. Scrolling up and down still works. */
+html.tracing {
+  touch-action: pan-y;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -865,11 +876,12 @@ button {
   margin: 4px 0 8px;
 }
 
-/* The maze fills the screen: nearly edge to edge, and as tall as the room
-   left under the title, message, and Hint button (about 250px). It can be
-   wider than the app's column. `mazeRoom` in src/app.js uses the same numbers. */
+/* The maze fills most of the screen: space is left at the sides (a tenth of
+   the screen, at least 40px) and under the title, message, and Hint button
+   (about 270px). It can be wider than the app's column. `mazeRoom` in
+   src/app.js uses the same numbers. */
 .mz-grid {
-  --cell: min(calc((100vw - 12px) / var(--cols)), calc((100dvh - 250px) / var(--rows)), 56px);
+  --cell: min(calc((100vw - max(40px, 10vw)) / var(--cols)), calc((100dvh - 270px) / var(--rows)), 56px);
   --wall: max(1.5px, calc(var(--cell) * 0.12)); /* thin walls for small squares */
   display: grid;
   grid-template-columns: repeat(var(--cols), var(--cell));
@@ -3866,7 +3878,7 @@ button.gr-row {
 
   /* The mazes: sizes inside the zoomed app are divided by 1.3. */
   .mz-grid {
-    --cell: min(calc((100vw / 1.3 - 12px) / var(--cols)), calc((100dvh / 1.3 - 250px) / var(--rows)), 56px);
+    --cell: min(calc((100vw / 1.3 - max(40px, 10vw / 1.3)) / var(--cols)), calc((100dvh / 1.3 - 270px) / var(--rows)), 56px);
   }
 }
 

@@ -309,7 +309,10 @@ const part = async (name, key) => (await loadJson(`data/${name}.json`))[key];
  */
 function mazeRoom() {
   const zoom = matchMedia('(min-width: 700px) and (min-height: 900px)').matches ? 1.3 : 1;
-  return { width: Math.round(innerWidth / zoom) - 12, height: Math.round(innerHeight / zoom) - 250 };
+  const width = Math.round(innerWidth / zoom);
+  // Space is left at the sides (a tenth of the screen, at least 40px) for a
+  // hand to rest on, and for the edge of the screen's own swipes.
+  return { width: width - Math.max(40, Math.round(width / 10)), height: Math.round(innerHeight / zoom) - 270 };
 }
 
 // Some puzzles have levels (`levels` in GAMES). Each one's level goes up
@@ -724,6 +727,8 @@ function show() {
   document.getElementById('done').hidden = true;
   if (waitingGift) keepSticker(waitingGift); // left without opening the gift: keep the sticker anyway
   window.scrollTo(0, 0);
+  // On a maze, a resting hand or a second finger must not zoom the page (see `.tracing` in styles.css).
+  document.documentElement.classList.toggle('tracing', GAMES[current]?.file === 'maze' || current === 'maze');
 
   if (current === '') drawPond();
   if (current === 'grown-ups') drawGrownUps();
@@ -738,6 +743,11 @@ function show() {
 // "See my puzzle" closes the celebration card to look at the finished board.
 document.getElementById('done-close').addEventListener('click', () => {
   document.getElementById('done').hidden = true;
+});
+
+// Safari's own pinch: stop it while a maze is showing. (Other browsers follow `touch-action`.)
+document.addEventListener('gesturestart', (event) => {
+  if (document.documentElement.classList.contains('tracing')) event.preventDefault();
 });
 
 window.addEventListener('hashchange', show);
