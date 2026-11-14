@@ -23,12 +23,15 @@ test('every word in the list is complete and checks out', () => {
 });
 
 test('the words come from the 5-letter list and none repeats', () => {
-  for (const { word } of WORDS) assert.ok(LEVEL3.includes(word), word);
+  for (const { word, ending } of WORDS) {
+    if (ending) assert.ok(word.length >= 5 && word.length <= 8, word); // words with endings are their own list
+    else assert.ok(LEVEL3.includes(word), word);
+  }
   assert.equal(new Set(WORDS.map((w) => w.word)).size, WORDS.length);
 });
 
 test('no word repeats until the whole list has been used', () => {
-  const days = Math.floor(WORDS.length / WORDS_PER_DAY);
+  const days = Math.floor(WORDS.filter((w) => !w.ending).length / WORDS_PER_DAY);
   const seen = Array.from({ length: days }, (_, day) => wordsForDay(WORDS, day)).flat().map((w) => w.word);
   assert.equal(new Set(seen).size, seen.length);
 });
@@ -52,6 +55,7 @@ test('most days have a sound round in the middle', () => {
   everyDay((key, day) => { if (generate(seedForDay(key), WORDS, day).rounds[1].kind === 'sound') withSound++; });
   assert.ok(withSound > 700, `${withSound} of 730 days`);
   assert.ok(WORDS.filter(hasSound).length > WORDS.length * 0.9);
+  assert.ok(generate(seedForDay('2026-11-13'), WORDS, 0).rounds.every((r) => !WORDS.find((w) => w.word === r.word).ending)); // level 1: no endings
 });
 
 // --- playing ---
@@ -98,4 +102,30 @@ test('a missed word comes back, as the word to spell', () => {
   assert.equal(puzzle.rounds[2].kind, 'spell');
   // A word that isn't in the list is ignored.
   assert.deepEqual(generate(seedForDay('2026-11-13'), WORDS, 0, ['zzzzz']), usual);
+});
+
+// --- words with endings (levels 2 and 3) ---
+
+const isEnding = (word) => Boolean(WORDS.find((w) => w.word === word).ending);
+
+test('level 2 asks which ending is right; level 3 has that word spelled in full', () => {
+  everyDay((key, day) => {
+    const two = generate(seedForDay(key), WORDS, day, [], 2);
+    assert.ok(verify(two).ok, `${key}: ${verify(two).problems.join('; ')}`);
+    assert.equal(two.rounds[1].kind, 'sound');
+    assert.ok(isEnding(two.rounds[1].word) && two.rounds[1].shape.endsWith('+ ?'));
+    assert.equal(two.rounds.filter((r) => isEnding(r.word)).length, 1);
+
+    const three = generate(seedForDay(key), WORDS, day, [], 3);
+    assert.ok(verify(three).ok, `${key}: ${verify(three).problems.join('; ')}`);
+    assert.equal(three.rounds[2].kind, 'spell');
+    assert.ok(isEnding(three.rounds[2].word));
+  }, 365);
+});
+
+test('every ending word comes around, and the list has all four rules', () => {
+  const endings = WORDS.filter((w) => w.ending);
+  const seen = new Set(Array.from({ length: endings.length }, (_, day) => generate(seedForDay('x'), WORDS, day, [], 2).rounds[1].word));
+  assert.equal(seen.size, endings.length);
+  assert.deepEqual([...new Set(endings.map((w) => w.pattern))].sort(), ['double', 'drop-e', 'just-add', 'y-to-i']);
 });

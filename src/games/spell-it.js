@@ -6,6 +6,9 @@
 //   2. Sound it: which letters make the sound? (tr _ _ n: ai, ay, or a_e)
 //   3. Spell it: type the whole word on the letter keyboard. Letters in the
 //      right place turn green; after 3 tries the word is shown.
+// From level 2, one of the day's words has an ending (hopping, smiled,
+// cried): at level 2 it is the middle round ("hop + ?": ping, ing, or eing),
+// and at level 3 it is the word to spell in full.
 // Every round has a sentence with a blank, and "Hear it" says the word
 // with the phone's own built-in voice (no internet needed).
 
@@ -16,7 +19,12 @@ export const WORDS_PER_DAY = 3;
 export const MAX_TRIES = 3; // tries to spell the whole word before it's shown
 
 /** The words for a day number (days since a fixed start date). */
-export const wordsForDay = (words, dayNumber) => dealForDay(words, WORDS_PER_DAY, dayNumber, 'spell-it');
+export const wordsForDay = (words, dayNumber) =>
+  dealForDay(words.filter((entry) => !entry.ending), WORDS_PER_DAY, dayNumber, 'spell-it');
+
+/** The word with an ending for a day number (used from level 2). */
+export const endingForDay = (words, dayNumber) =>
+  dealForDay(words.filter((entry) => entry.ending), 1, dayNumber, 'spell-it-endings')[0];
 
 /** True if an entry has a sound step (some patterns have no good choices). */
 export const hasSound = (entry) => Array.isArray(entry.options);
@@ -52,16 +60,24 @@ export function entryProblems(entry) {
  * `review` is a list of words to bring back (see recordReview in
  * src/progress.js).
  */
-export function generate(seed, words, dayNumber, review = []) {
+export function generate(seed, words, dayNumber, review = [], level = 1) {
   const random = createRandom(seed);
   let today = wordsForDay(words, dayNumber);
+  // From level 2, a word with an ending takes the middle word's place.
+  const ending = level >= 2 ? endingForDay(words, dayNumber) : null;
+  if (ending) today = [today[0], ending, today[2]];
   // Words missed a few days ago (`review`) come back in place of today's
   // last words, up to 2 of them.
   const back = review.map((word) => words.find((entry) => entry.word === word))
     .filter((entry) => entry && !today.includes(entry)).slice(0, 2);
   today = [...today.slice(0, today.length - back.length), ...back];
-  const soundWord = today.find(hasSound);
+  // The middle round is about a sound (or an ending). At level 2 that's
+  // the word with an ending; at level 3 that word is spelled in full.
+  const spellEnding = level >= 3 && ending && today.includes(ending);
+  const soundWord = (level === 2 && today.includes(ending) ? ending : null)
+    || today.find((w) => hasSound(w) && !(spellEnding && w === ending));
   const others = today.filter((w) => w !== soundWord);
+  if (spellEnding) others.sort((a, b) => (a === ending) - (b === ending)); // the ending word last: it's the one to spell
   const plan = soundWord
     ? [['pick', others[0]], ['sound', soundWord], ['spell', others[1]]]
     : [['pick', today[0]], ['spell', today[1]], ['spell', today[2]]];
@@ -72,7 +88,7 @@ export function generate(seed, words, dayNumber, review = []) {
       sentence: entry.sentence,
       why: entry.why,
       ...(kind === 'pick' && { choices: random.shuffle([entry.word, ...entry.misspellings]) }),
-      ...(kind === 'sound' && { blanked: entry.blanked, options: random.shuffle(entry.options), correct: entry.correct }),
+      ...(kind === 'sound' && { blanked: entry.blanked, shape: entry.shape, options: random.shuffle(entry.options), correct: entry.correct }),
     })),
   };
 }
@@ -217,8 +233,8 @@ export function render(container, puzzle, onDone) {
 
   // 2. Which letters make the sound?
   function drawSound(round) {
-    question.textContent = 'Which letters make the missing sound?';
-    const shape = make('p', 'sp-shape', round.blanked.replace(/_/g, ' _ ').replace(/ {2}/g, ' ').trim());
+    question.textContent = round.shape ? 'Which ending is right?' : 'Which letters make the missing sound?';
+    const shape = make('p', 'sp-shape', round.shape || round.blanked.replace(/_/g, ' _ ').replace(/ {2}/g, ' ').trim());
     const sentence = sentenceLine(round.sentence);
     const label = (option) => option.replace('_', '…'); // a_e shows as a…e
     stage.append(sentence, shape, hearButton(round), choiceRow(round, round.options, label, () => {
@@ -226,7 +242,9 @@ export function render(container, puzzle, onDone) {
       shape.classList.add('sp-shape-done');
       sentence.replaceWith(sentenceLine(round.sentence, round.word));
       finishRound(`✓ ${round.why}`);
-    }, (option) => `${label(option)} makes that sound in other words, but not in this one.`));
+    }, (option) => (round.shape
+      ? `Try it: ${round.blanked.replace(/_+/, option)}. Does that look right?`
+      : `${label(option)} makes that sound in other words, but not in this one.`)));
   }
 
   // 3. Spell the whole word.
@@ -235,6 +253,7 @@ export function render(container, puzzle, onDone) {
     let typed = '';
     const sentence = sentenceLine(round.sentence);
     const boxes = make('div', 'sp-boxes');
+    boxes.style.setProperty('--letters', round.word.length); // longer words get narrower boxes
     const cells = [...round.word].map(() => boxes.appendChild(make('span', 'sp-box')));
     const drawBoxes = (marks) => cells.forEach((cell, i) => {
       cell.textContent = typed[i] || '';

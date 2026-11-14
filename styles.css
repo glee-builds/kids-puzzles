@@ -3057,7 +3057,7 @@ button.gr-row {
 }
 
 .sp-box {
-  width: 46px;
+  width: min(46px, calc((100vw - 74px) / var(--letters, 5)));
   height: 52px;
   display: grid;
   place-items: center;
