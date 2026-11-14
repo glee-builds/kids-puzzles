@@ -4,6 +4,8 @@
 // starts the app, opens the home screen and every puzzle at phone size
 // (today's and yesterday's), and fails if a screen doesn't draw, shows the
 // "Oops" message, logs an error, or (for a puzzle) doesn't fit the screen.
+// At the end it turns its web server off and opens every screen again, to
+// prove the app works with no internet.
 // Some puzzles (see PLAYS below) are also played all the way to the end.
 //
 // The check always plays the same date (2026-11-13), so it gives the same
@@ -279,6 +281,7 @@ const EXPECTED = {
 
 const problems = [];
 let checked = 0;
+let serverIsOff = false;
 
 async function checkScreen(label, address, { ready, fits, play, poke, tip }) {
   checked++;
@@ -362,7 +365,32 @@ try {
     localStorage.setItem('kids-puzzles.progress', JSON.stringify({ ...progress, levels: {} }));
   })()`);
 
+  // Offline: wait until the service worker has saved every file, turn the
+  // web server off, and open every screen again. Nothing can come from the
+  // network now, so each screen has to come from what was saved.
+  await open('', 'true');
+  const saved = await evaluate(`(async () => {
+    await navigator.serviceWorker.ready;
+    for (let tries = 0; tries < 100; tries++) {
+      const names = await caches.keys();
+      const count = names.length ? (await (await caches.open(names[0])).keys()).length : 0;
+      if (count >= 40) return count;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    return 0;
+  })()`);
+  if (!saved) problems.push('Offline: the service worker did not save the app\'s files');
+  await new Promise((resolve) => { server.close(resolve); server.closeAllConnections(); });
+  serverIsOff = true;
+  await checkScreen('Home (offline)', '', { ready: 'document.querySelectorAll("#today-list a").length === 5' });
+  for (const game of games) {
+    const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
+    await checkScreen(`${game} (offline)`, `#${game}`, { ready });
+  }
+  await checkScreen('Sticker book (offline)', '#stickers', { ready: 'document.querySelectorAll(".sb-sticker").length > 100' });
+
   // More days, if asked for: does each puzzle still fit the screen?
+  // (They are served from what the service worker saved, since the server is off.)
   for (let offset = 1; offset < DAYS; offset++) {
     await setDay(offset);
     for (const game of games) {
@@ -374,7 +402,7 @@ try {
 } finally {
   socket.close();
   chrome.kill();
-  server.close();
+  if (!serverIsOff) server.close();
   await sleep(300);
   try { rmSync(profile, { recursive: true, force: true }); } catch { /* Chrome may still hold a file; the folder is temporary */ }
 }
