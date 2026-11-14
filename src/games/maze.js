@@ -1,8 +1,9 @@
 // maze.js: trace a path through a maze with your finger.
 //
-// The maze is drawn on a 30 by 30 grid, but it isn't always a square: each
-// day it has a different outline (a round pond, a lily pad, a diamond...).
-// Squares outside the outline aren't part of the maze.
+// There are two mazes a day: the Maze on a 20 by 20 grid, and the Big Maze
+// on a 30 by 30 grid (the same code; the app passes the size). A maze isn't
+// always a square: each day it has a different outline (a round pond, a
+// lily pad, a diamond...). Squares outside the outline aren't part of it.
 //
 // It is a "perfect" maze: every square can be reached, and there is exactly
 // one route between any two squares. The star is put on the square that is
@@ -15,7 +16,8 @@
 import { createRandom } from '../seed.js';
 import { make, button, liveMessage, trace } from '../ui.js';
 
-export const SIZE = 30;
+export const SIZE = 30;      // the Big Maze
+export const SMALL_SIZE = 20; // the Maze
 export const N = 1;
 export const E = 2;
 export const S = 4;
@@ -24,8 +26,9 @@ const ALL_WALLS = N | E | S | W;
 const HINT_STEPS = 8;
 
 // The outlines. Each says whether a square is inside, given how far it is
-// from the middle of the grid: dr rows down and dc columns across (from
-// about -15 to 15), so the same rule works at any size.
+// from the middle of the grid: dr rows down and dc columns across, both
+// counted as if the grid were 30 wide (about -15 to 15), so the same rule
+// works at any size.
 export const SHAPES = {
   square: () => true,
   pond: (dr, dc) => Math.hypot(dr, dc) <= 15.2,
@@ -71,15 +74,16 @@ function distances(puzzle, from) {
  * Make today's maze. It picks an outline, then starts with every wall up
  * and wanders from the start, knocking down walls into squares it hasn't
  * visited yet, and backs up when stuck. This always makes a perfect maze.
- * `shape` picks the outline by name; left out, the seed picks one.
+ * `size` is how many squares across (30 if left out). `shape` picks the
+ * outline by name; left out, the seed picks one.
  */
-export function generate(seed, shape) {
-  const size = SIZE;
-  const random = createRandom(seed);
+export function generate(seed, size = SIZE, shape) {
+  // A different size gets different random numbers, so the day's two mazes don't match.
+  const random = createRandom(seed + (size - SIZE));
   const name = SHAPES[shape] ? shape : random.pick(Object.keys(SHAPES));
   const middle = (size - 1) / 2;
   const walls = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) =>
-    (SHAPES[name](r - middle, c - middle) ? ALL_WALLS : null)));
+    (SHAPES[name]((r - middle) * (SIZE / size), (c - middle) * (SIZE / size)) ? ALL_WALLS : null)));
 
   // Start at the first square of the top row of the outline.
   const top = walls.findIndex((row) => row.some((w) => w != null));

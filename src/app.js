@@ -436,9 +436,14 @@ const GAMES = {
     art: '<span class="coins-art"><i>10¢</i><i>5¢</i><i>1¢</i></span>',
   },
   maze: {
-    title: 'Maze', kind: 'fun', legend: 'Trace from the green dot to the star',
+    title: 'Maze', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
     art: '<span class="maze-art"></span>',
+  },
+  'big-maze': {
+    title: 'Big Maze', kind: 'fun', file: 'maze', legend: 'A really big one. Take your time!', data: () => [30],
+    how: ["This maze is huge, and the star is far away.", "Put your finger on the green dot and trace the path."],
+    art: '<span class="maze-art maze-art-big"></span>',
   },
 };
 

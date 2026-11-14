@@ -25,7 +25,7 @@ export default {
   // Trace the first 5 steps of the way through, then lift the finger.
   maze: {
     play: `const game = await import('/src/games/maze.js');
-      const route = game.solution(game.generate(seed.seedFor(today, 'maze'))).slice(0, 6);
+      const route = game.solution(game.generate(seed.seedFor(today, 'maze'), 20)).slice(0, 6);
       const grid = G.querySelector('.mz-grid');
       const finger = (kind, [r, c]) => {
         const box = grid.querySelector('[data-r="' + r + '"][data-c="' + c + '"]').getBoundingClientRect();

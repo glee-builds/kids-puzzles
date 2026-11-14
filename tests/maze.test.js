@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
 import { everyDay, dayKey } from './helpers.js';
 import {
-  generate, verify, solution, canMove, start, step, hintSquares, offRoute, SIZE, SHAPES, N, E, S, W,
+  generate, verify, solution, canMove, start, step, hintSquares, offRoute, SIZE, SMALL_SIZE, SHAPES, N, E, S, W,
 } from '../src/games/maze.js';
 
 const seedForDay = (key) => seedFor(key, 'maze');
@@ -52,7 +52,7 @@ test('the star is far away: every route is at least 150 squares long', () => {
 
 test('every outline makes a perfect maze, and all of them come up', () => {
   for (const shape of Object.keys(SHAPES)) {
-    const puzzle = generate(seedForDay('2026-11-14'), shape);
+    const puzzle = generate(seedForDay('2026-11-14'), SIZE, shape);
     assert.equal(puzzle.shape, shape);
     assert.ok(verify(puzzle).ok, `${shape}: ${verify(puzzle).problems.join('; ')}`);
   }
@@ -62,7 +62,7 @@ test('every outline makes a perfect maze, and all of them come up', () => {
 });
 
 test('squares outside the outline are not part of the maze', () => {
-  const puzzle = generate(seedForDay('2026-11-14'), 'diamond');
+  const puzzle = generate(seedForDay('2026-11-14'), SIZE, 'diamond');
   assert.equal(puzzle.walls[0][0], null); // a corner of the grid is outside a diamond
   assert.equal(canMove(puzzle, [0, 0], [0, 1]), false);
   const inside = puzzle.walls.flat().filter((w) => w != null).length;
@@ -130,4 +130,33 @@ test('after a wrong turn, the hint starts where the path left the route', () => 
   assert.equal(offRoute(lost), true);
   assert.deepEqual(hintSquares(lost), [[0, 1], [1, 1]]);
   assert.equal(offRoute(start(tiny)), false);
+});
+
+// --- two sizes ---
+
+test('the 20 by 20 maze is perfect every day for two years, in every outline', () => {
+  everyDay((key) => {
+    const puzzle = generate(seedForDay(key), SMALL_SIZE);
+    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assert.equal(puzzle.size, SMALL_SIZE);
+    assert.ok(solution(puzzle).length >= 60, `${puzzle.shape}: route of ${solution(puzzle).length}`);
+  });
+  for (const shape of Object.keys(SHAPES)) {
+    assert.ok(verify(generate(seedForDay('2026-11-14'), SMALL_SIZE, shape)).ok, shape);
+  }
+});
+
+test('the day\'s two mazes are different mazes, and often different outlines', () => {
+  let differentOutline = 0;
+  everyDay((key) => {
+    const small = generate(seedForDay(key), SMALL_SIZE);
+    const big = generate(seedForDay(key), SIZE);
+    assert.notDeepEqual(small.walls, big.walls);
+    if (small.shape !== big.shape) differentOutline++;
+  }, 100);
+  assert.ok(differentOutline > 60, `${differentOutline} of 100 days`);
+});
+
+test('leaving the size out makes the big maze', () => {
+  assert.deepEqual(generate(seedForDay('2026-11-14')), generate(seedForDay('2026-11-14'), SIZE));
 });
