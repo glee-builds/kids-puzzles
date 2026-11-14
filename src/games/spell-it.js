@@ -10,10 +10,11 @@
 // cried): at level 2 it is the middle round ("hop + ?": ping, ing, or eing),
 // and at level 3 it is the word to spell in full.
 // Every round has a sentence with a blank, and "Hear it" says the word
-// with the phone's own built-in voice (no internet needed).
+// with the phone's own built-in voice (no internet needed; see src/voice.js).
 
 import { createRandom, dealForDay } from '../seed.js';
 import { make, button, liveMessage, wiggle, letterKeyboard, roundFrame } from '../ui.js';
+import { say, canSpeak } from '../voice.js';
 
 export const WORDS_PER_DAY = 3;
 export const MAX_TRIES = 3; // tries to spell the whole word before it's shown
@@ -142,17 +143,10 @@ export function verify(puzzle) {
 // The screen
 // ---------------------------------------------------------------------------
 
-/** Say `text` with the phone's built-in voice, if it has one. */
-function say(text) {
-  try {
-    window.speechSynthesis.cancel();
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = 'en-US';
-    speech.rate = 0.8;
-    window.speechSynthesis.speak(speech);
-  } catch { /* no voice on this phone: the sentence still helps */ }
-}
-const canSpeak = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
+// How fast "Hear it" reads: 1 is normal speed. The word is said slowly on
+// its own, then the sentence a little faster, then the word again.
+const WORD_RATE = 0.6;
+const SENTENCE_RATE = 0.75;
 
 /** A sentence with its blank shown as a line (or filled with `word`). */
 function sentenceLine(sentence, word) {
@@ -197,7 +191,11 @@ export function render(container, puzzle, onDone, session = {}) {
     // The word, the sentence with the word in it, then the word again, like
     // a spelling test.
     const full = round.sentence.replace('___', round.word);
-    return button('lw-button sp-hear', '🔊 Hear it', () => say(`${round.word}. ${full} ${round.word}.`));
+    return button('lw-button sp-hear', '🔊 Hear it', () => say([
+      { text: round.word, rate: WORD_RATE },
+      { text: full, rate: SENTENCE_RATE },
+      { text: round.word, rate: WORD_RATE },
+    ]));
   }
 
   const finishRound = (text) => {
