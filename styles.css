@@ -23,6 +23,14 @@
   --water: #cdeef5;      /* the pond on the home screen */
   --pad: #4cb062;
   --bank: #d9c7a3;
+
+  /* Colors that are the same in light and dark mode. */
+  --white: #ffffff;        /* text and marks on a strong color */
+  --outline-dark: #1d3b34; /* the dark edge of bugs and seeds */
+  --blush: #ff9aa2;        /* the pink flower on a lily pad */
+  --night: #3b3355;        /* Fact Families: a house before its lights are on */
+  --night-line: #d9d2f5;
+  --night-text: #b7aecb;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -43,6 +51,13 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* Keyboard focus: a clear ring on whatever is focused, for anyone using a
+   keyboard or a switch instead of a finger. (A tap doesn't show it.) */
+:focus-visible {
+  outline: 3px solid var(--words-ink);
+  outline-offset: 2px;
 }
 
 /* Anything hidden stays hidden, even if its own rule sets display. */
@@ -373,8 +388,8 @@ button {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #ff9aa2;
-  box-shadow: 0 0 0 2px #ffffff;
+  background: var(--blush);
+  box-shadow: 0 0 0 2px var(--white);
 }
 
 /* The next pad: a dashed ring, "hop here today". */
@@ -540,7 +555,7 @@ button {
   border-radius: 10px;
   display: grid;
   place-items: center;
-  color: #ffffff;
+  color: var(--white);
   font-size: 1.5rem;
   font-weight: 800;
 }
@@ -561,7 +576,7 @@ button {
   padding-left: 4px;
   border-radius: 4px;
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
   font-size: 0.65rem;
   font-weight: 800;
   line-height: 14px;
@@ -590,7 +605,7 @@ button {
 
 .search-art .search-art-hit {
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .ladder-art {
@@ -632,7 +647,7 @@ button {
   display: grid;
   place-items: center;
   background: var(--go);
-  color: #ffffff;
+  color: var(--white);
   font-weight: 800;
 }
 
@@ -681,7 +696,7 @@ button {
   place-items: center;
   border-radius: 5px;
   background: var(--elsewhere);
-  color: #ffffff;
+  color: var(--white);
   font-size: 0.95rem;
   font-weight: 800;
 }
@@ -717,7 +732,7 @@ button {
 .ls-found-done {
   border-color: var(--here);
   background: var(--here);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .ls-boxes,
@@ -765,7 +780,7 @@ button {
 .ls-box-locked {
   border-color: var(--here);
   background: var(--here);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .ls-box-locked::after {
@@ -779,7 +794,7 @@ button {
 .ls-tile {
   border: none;
   background: var(--elsewhere);
-  color: #ffffff;
+  color: var(--white);
   touch-action: none; /* dragging a letter must not scroll the page */
   cursor: grab;
 }
@@ -799,7 +814,7 @@ button {
 
 .ls-ghost {
   background: var(--elsewhere);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .ls-message {
@@ -869,7 +884,7 @@ button {
 }
 
 .mz-start.mz-path::after {
-  color: #ffffff;
+  color: var(--white);
 }
 
 .mz-goal::after {
@@ -879,7 +894,7 @@ button {
 
 .mz-head:not(.mz-start)::before {
   content: "●";
-  color: #ffffff;
+  color: var(--white);
   font-size: calc(var(--cell) * 0.45);
 }
 
@@ -943,7 +958,7 @@ button {
 
 .ws-pick {
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
   border-radius: 4px;
 }
 
@@ -1041,7 +1056,7 @@ button {
 .wl-rung-start .wl-tile {
   background: var(--words);
   border-color: var(--words);
-  color: #ffffff;
+  color: var(--white);
 }
 
 /* The end word wears a star in the tile border color. */
@@ -1080,7 +1095,7 @@ button {
 .wl-tile-picked {
   background: var(--words);
   border-color: var(--words);
-  color: #ffffff;
+  color: var(--white);
   box-shadow: 0 0 0 3px var(--text);
 }
 
@@ -1304,7 +1319,7 @@ button {
 .nl-hop {
   padding: 4px 12px;
   border-radius: 12px;
-  color: #ffffff;
+  color: var(--white);
 }
 
 .nl-hop-plus { background: var(--here); }
@@ -1451,7 +1466,7 @@ button {
   width: 30px;
   height: 20px;
   border-radius: 5px;
-  background: #3b3355;
+  background: var(--night);
 }
 
 .ff-light-lit,
@@ -1471,7 +1486,7 @@ button {
 }
 
 .ff-op {
-  color: #ffffff;
+  color: var(--white);
   font-size: 1.7rem;
   font-weight: 800;
   min-width: 18px;
@@ -1481,9 +1496,9 @@ button {
 .ff-box {
   width: 64px;
   height: 56px;
-  border: 3px dashed #d9d2f5;
+  border: 3px dashed var(--night-line);
   border-radius: 12px;
-  background: #3b3355;
+  background: var(--night);
   color: var(--text);
   font: inherit;
   font-size: 1.5rem;
@@ -1502,7 +1517,7 @@ button {
 .ff-fact-shown .ff-box {
   border-color: var(--star);
   background: var(--star);
-  color: #2b2440;
+  color: var(--on-go);
 }
 
 .ff-fact-shown .ff-box {
@@ -1533,8 +1548,8 @@ button {
   justify-content: center;
   gap: 3px;
   border-radius: 8px;
-  background: #3b3355;
-  color: #b7aecb;
+  background: var(--night);
+  color: var(--night-text);
   font-size: 0.98rem;
   font-weight: 800;
   white-space: nowrap;
@@ -1544,7 +1559,7 @@ button {
 .ff-window-lit,
 .ff-window-shown {
   background: var(--star);
-  color: #2b2440;
+  color: var(--on-go);
 }
 
 .ff-window-lit::after {
@@ -1653,7 +1668,7 @@ button {
   place-items: center;
   border-radius: 50%;
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
   font-weight: 800;
 }
 
@@ -1689,7 +1704,7 @@ button {
 .so-slot-locked {
   border-color: var(--here);
   background: var(--here);
-  color: #ffffff;
+  color: var(--white);
   padding-right: 28px;
   cursor: default;
 }
@@ -1837,7 +1852,7 @@ button {
   position: relative;
   background: var(--here);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--white);
 }
 
 .np-found::after {
@@ -1851,7 +1866,7 @@ button {
 .np-shown {
   background: var(--elsewhere);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--white);
 }
 
 .np-wiggle {
@@ -2187,7 +2202,7 @@ button {
   height: 26px;
   border-radius: 50%;
   background: var(--go);
-  color: #ffffff;
+  color: var(--white);
   font-size: 0.9rem;
 }
 
@@ -2279,7 +2294,7 @@ button {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  color: #ffffff;
+  color: var(--white);
   font-size: 0.9rem;
 }
 
@@ -2362,7 +2377,7 @@ button {
 
 .think-art .think-q {
   background: var(--numbers);
-  color: #ffffff;
+  color: var(--white);
 }
 
 /* The story, in a card. Numbers stand out so they're easy to find. */
@@ -2469,7 +2484,7 @@ button.wp-number {
   padding: 2px 8px;
   border-radius: 6px;
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
   font-weight: 800;
 }
 
@@ -2559,7 +2574,7 @@ button.wp-number {
 .wc-right {
   border-color: transparent;
   background: var(--here);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .wc-tried {
@@ -2594,7 +2609,7 @@ button.wp-number {
   padding: 0 6px;
   border-radius: 6px;
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
 }
 
 /* The sentence: one tile per word, wrapping like text. */
@@ -2744,7 +2759,7 @@ button.grp-pad { cursor: pointer; }
   height: 14px;
   border-radius: 50%;
   background: var(--here);
-  border: 2px solid #1d3b34;
+  border: 2px solid var(--outline-dark);
 }
 
 .grp-pad-small {
@@ -2802,7 +2817,7 @@ button.grp-pad { cursor: pointer; }
   height: 24px;
   border-radius: 50%;
   background: var(--here);
-  color: #ffffff;
+  color: var(--white);
   font-size: 0.9rem;
   line-height: 24px;
   text-align: center;
@@ -2877,7 +2892,7 @@ button.grp-pad { cursor: pointer; }
   height: 8px;
   border-radius: 50%;
   background: var(--here);
-  border: 1px solid #1d3b34;
+  border: 1px solid var(--outline-dark);
 }
 
 /* ---------- Garden Rows ---------- */
@@ -2931,7 +2946,7 @@ button.gr-row {
   height: 16px;
   border-radius: 50%;
   background: var(--here);
-  border: 2px solid #1d3b34;
+  border: 2px solid var(--outline-dark);
 }
 
 .gr-box { transition: transform 600ms ease-in-out; }
@@ -2969,7 +2984,7 @@ button.gr-row {
   height: 10px;
   border-radius: 50%;
   background: var(--here);
-  border: 1px solid #1d3b34;
+  border: 1px solid var(--outline-dark);
 }
 
 /* ---------- Spell It ---------- */
@@ -3058,7 +3073,7 @@ button.gr-row {
   position: relative;
   border-color: var(--here);
   background: var(--here);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .sp-box-right::after {
@@ -3084,7 +3099,7 @@ button.gr-row {
   place-items: center;
   border-radius: 4px;
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
   font-weight: 800;
   font-size: 0.9rem;
 }
@@ -3247,7 +3262,7 @@ button.gr-row {
   place-items: center;
   border-radius: 6px;
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
   font-weight: 800;
   font-size: 1.1rem;
 }
@@ -3409,7 +3424,7 @@ button.gr-row {
   place-items: center;
   border-radius: 50%;
   background: var(--words);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .today-numbers .today-number {
@@ -3432,7 +3447,7 @@ button.gr-row {
 /* A finished puzzle: a teal check in the circle, and "Done". */
 .today-done .today-number {
   background: var(--here);
-  color: #ffffff;
+  color: var(--white);
 }
 
 .today-done .today-name { color: var(--muted); }
