@@ -3485,3 +3485,35 @@ button.gr-row {
   color: var(--numbers-ink);
   font-weight: 700;
 }
+
+/* ---------- How to play (the first time a puzzle is opened) ---------- */
+
+.how-to {
+  margin: auto 0;
+  padding: 18px 16px;
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.how-title {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+
+.how-line {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+.how-ok {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  border: none;
+  font: inherit;
+  font-size: 1.15rem;
+  cursor: pointer;
+}

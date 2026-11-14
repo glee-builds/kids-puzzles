@@ -258,12 +258,20 @@ const EXPECTED = {
 const problems = [];
 let checked = 0;
 
-async function checkScreen(label, address, { ready, fits, play, poke }) {
+async function checkScreen(label, address, { ready, fits, play, poke, tip }) {
   checked++;
   const ok = await open(address, ready);
   await sleep(150); // let anything late (fonts, a first draw) settle
   const found = [];
   if (!ok) found.push('did not finish drawing in 10 seconds');
+  // A puzzle opened for the first time shows "How to play" first.
+  if (ok && tip) {
+    const lines = await evaluate('document.querySelectorAll(".view:not([hidden]) .how-line").length');
+    if (lines < 2) found.push('did not show its "How to play" card');
+    await evaluate('document.querySelector(".view:not([hidden]) .how-ok")?.click()');
+    await sleep(100);
+    if (await evaluate('Boolean(document.querySelector(".view:not([hidden]) .how-to"))')) found.push('"Got it!" did not close the card');
+  }
   const text = await evaluate('document.querySelector(".view:not([hidden])")?.innerText || ""');
   if (text.includes('Oops, the puzzle could not load')) found.push('shows the "Oops, the puzzle could not load" message');
   if (text.trim().length < 10) found.push('is nearly empty');
@@ -310,7 +318,7 @@ try {
       const label = `${game}${day ? ' (yesterday)' : ''}`;
       // Drawn means: the "Getting today's puzzle" line is gone and something replaced it.
       const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
-      await checkScreen(label, `${day}#${game}`, { ready, fits: true, play: !day && PLAYS[game] ? game : null, poke: day ? null : game });
+      await checkScreen(label, `${day}#${game}`, { ready, fits: true, play: !day && PLAYS[game] ? game : null, poke: day ? null : game, tip: !day });
     }
   }
   await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-sticker").length > 100' });
@@ -323,7 +331,7 @@ try {
     for (const game of games) {
       if (ONLY && game !== ONLY) continue;
       const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
-      await checkScreen(`${game} (day +${offset})`, `#${game}`, { ready, fits: true });
+      await checkScreen(`${game} (day +${offset})`, `#${game}`, { ready, fits: true, tip: false });
     }
   }
 } finally {

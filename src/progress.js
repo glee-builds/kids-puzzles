@@ -20,6 +20,7 @@
 //   - review lists things that were missed (a spelling word, a times
 //     fact) so they come back: 2 days later, then 7 days after that if it
 //     goes well. Miss it again and it starts over.
+//   - seen lists the puzzles whose "How to play" card has been read.
 //   - stickers lists the stickers collected, oldest first (src/stickers.js).
 //   - plays counts how many days each game has been finished, ever (for
 //     the grown-up page). The day-by-day history keeps the last 4 weeks.
@@ -30,7 +31,7 @@ export const KEEP_DAYS = 28; // how many days of "finished" history to keep (4 w
 export function emptyProgress() {
   // previous: the last day and streak before lastDay, so a caught-up day
   // can join the two runs back together.
-  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [], results: {}, levels: {}, review: {} };
+  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [], results: {}, levels: {}, review: {}, seen: [] };
 }
 
 /** Whole days from one "YYYY-MM-DD" to another (b minus a). */
@@ -166,6 +167,12 @@ export function trend(progress, game) {
   if (count('hard') >= 2) return 'practice';
   if (count('hard') === 0 && count('easy') >= 2) return 'well';
   return null;
+}
+
+/** Remember that a puzzle's "How to play" card was read. Returns new progress. */
+export function markSeen(progress, game) {
+  const seen = progress.seen || [];
+  return seen.includes(game) ? progress : { ...progress, seen: [...seen, game] };
 }
 
 /** Add a sticker (by id) to the collection. Returns new progress. */
