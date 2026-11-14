@@ -22,7 +22,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Progress:** stored in the browser's `localStorage`. One player, no accounts.
 - **Times puzzles:** Bug Groups and Garden Rows pick group sizes from `src/times.js`, growing with how many days that puzzle has been played (`playsBefore` in `src/app.js`). Orange text means how many groups; teal (`--size-ink`) means how many in each.
 - **Spoken words:** Spell It's "Hear it" uses the phone's built-in voice (`speechSynthesis`), approved 2026-11-13. It makes no network request. Don't add other speech or audio services.
-- **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins the rotation by having a card with class `card-words` or `card-numbers`.
+- **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins the rotation through its `kind` in `GAMES`.
 - **Sticker gifts:** the first finish of each puzzle each day gives a gift with a new sticker (`src/stickers.js`; never a repeat). The sticker book is the `#stickers` screen. Stickers are emoji from 2019 or earlier; no image files.
 - **Yesterday's puzzles:** after a missed day, the home screen links to `?day=yesterday`, which plays that day's puzzles; finishing one fills in the missed day (`playDay` in `src/app.js`, catching up in `src/progress.js`). Only yesterday.
 - **Difficulty:** lives in data, not code. Hand-curated word lists by level in `data/words/` (JSON).
@@ -32,7 +32,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
   - `verify(puzzle)`: confirm a puzzle is valid and solvable
   - `render(container, puzzle, onDone)`: draw it and call `onDone` when finished
 
-  Adding a game means adding its file, its card on the home screen in `index.html`, and one line in the `GAMES` list in `src/app.js` (title, legend, and the data it needs). The game's screen is built from that line. Add any new file (game, data, image) to `FILES` in `sw.js` too, so it works offline; `tests/offline.test.js` fails if one is missing.
+  Adding a game means adding its file and one entry in the `GAMES` list in `src/app.js` (title, kind, legend, the data it needs, and the picture for its card). The game's card and screen are built from that entry. Add any new file (game, data, image) to `FILES` in `sw.js` too, so it works offline; `tests/offline.test.js` fails if one is missing.
 - **Testing:** Node's built-in test runner (`node --test`), no test libraries. One test file per game in `tests/`, plus seed tests. GitHub Actions runs the tests on every pull request and after each merge (`.github/workflows/tests.yml`); check that the pull request shows a green check before merging. `node tests/screens.mjs` (also run on GitHub) opens every screen in headless Chrome at phone size on a fixed date and fails if one doesn't draw, logs an error, or (for a puzzle) is taller than 667px; add `--days=30` to check more days, and `--only=maze` for one puzzle.
 
 ## Phone-first design rules
@@ -55,7 +55,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 ## Repo layout
 
 ```
-index.html          home screen: the game cards, streak
+index.html          home screen: the pond, Today's 5, and room for the cards
 styles.css
 src/app.js          the GAMES list, game screens, streak, navigation
 src/seed.js         date -> repeatable random numbers

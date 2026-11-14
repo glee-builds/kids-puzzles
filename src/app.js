@@ -102,7 +102,7 @@ function drawCatchUp() {
 
 /** The 5 puzzles picked for the day being played (see src/today.js). */
 function todaysPuzzles() {
-  const names = (kind) => [...document.querySelectorAll(`.card-${kind}`)].map((card) => card.getAttribute('href').slice(1));
+  const names = (kind) => Object.keys(GAMES).filter((name) => GAMES[name].kind === kind);
   return todaysSet(names('words'), names('numbers'), DAY);
 }
 
@@ -119,8 +119,7 @@ function drawToday() {
   const list = document.getElementById('today-list');
   list.replaceChildren();
   set.forEach((game, i) => {
-    const kind = document.querySelector(`.card[href="#${game}"]`).classList.contains('card-words') ? 'words' : 'numbers';
-    const row = make('a', `today-row today-${kind}` + (isDone(game) ? ' today-done' : game === next ? ' today-next' : ''));
+    const row = make('a', `today-row today-${GAMES[game].kind}` + (isDone(game) ? ' today-done' : game === next ? ' today-next' : ''));
     row.href = `#${game}`;
     row.append(
       make('span', 'today-number', isDone(game) ? '✓' : String(i + 1)),
@@ -290,32 +289,88 @@ const playsBefore = (game) =>
   (progress.plays?.[game] || 0) - (progressStore.isFinished(progress, playDay, game) ? 1 : 0);
 
 // Every game, by the name used in its address (#maze) and in saved
-// progress. Each has:
+// progress, in the order of the cards on the home screen. Each has:
 //   title, legend  shown at the top of its screen
+//   kind           'words' or 'numbers': which group its card is in
+//   art            the little picture on its card (styled in styles.css)
 //   file           its file in src/games/, if not the same as the name
 //                  (also the name its daily seed uses)
 //   data           what its generate() needs after the seed, if anything
-// Adding a game: add its file in src/games/, its card in index.html, and
-// one line here.
+// Adding a game: add its file in src/games/ and one entry here. Its card
+// and its screen are built from the entry.
 const GAMES = {
-  'mystery-word': { title: 'Mystery Word', file: 'word-guess', data: () => [words('level-3'), DAY] },
-  'letter-scramble': { title: 'Letter Scramble', legend: 'Put the letters back in order', data: () => [words('level-1', 'level-2')] },
-  'story-order': { title: 'Story Order', legend: 'Put the story in order', data: () => [part('stories', 'stories'), DAY] },
-  'word-search': { title: 'Word Search', legend: 'Find the hidden words', data: () => [part('search-themes', 'themes'), DAY] },
-  'word-ladder': { title: 'Word Ladder', legend: 'Change one letter at a time', data: () => [words('ladder'), words('level-1', 'level-2')] },
-  'word-clues': { title: 'Word Clues', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY] },
-  'spell-it': { title: 'Spell It', legend: 'Listen, look, and spell', data: () => [part('spelling', 'words'), DAY] },
-  'fix-sentence': { title: 'Fix the Sentence', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY] },
-  'end-marks': { title: 'End Marks', legend: 'Telling, asking, or a strong feeling?', data: () => [loadJson('data/end-marks.json'), DAY] },
-  'number-pyramid': { title: 'Number Pyramid', legend: 'Each brick = the two bricks under it, added', data: () => [LEVEL] },
-  'magic-square': { title: 'Magic Square', legend: 'Rows, columns, and diagonals all add up the same', data: () => [LEVEL] },
-  'number-line': { title: 'Number Line Hop', legend: 'Where will the frog land?' },
-  'fact-families': { title: 'Fact Families', legend: 'Three numbers make four facts. Drag them in!' },
-  'bug-groups': { title: 'Bug Groups', legend: 'Equal groups make times facts', data: () => [playsBefore('bug-groups')] },
-  'garden-rows': { title: 'Garden Rows', legend: 'Rows of seeds make times facts', data: () => [playsBefore('garden-rows')] },
-  'find-the-mistake': { title: 'Find the Mistake', legend: 'The frog got one step wrong. Find it and fix it!' },
-  'word-problems': { title: 'Think It Through', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')] },
-  maze: { title: 'Maze', legend: 'Trace from the green dot to the star', data: () => [LEVEL] },
+  'mystery-word': {
+    title: 'Mystery Word', kind: 'words', file: 'word-guess', data: () => [words('level-3'), DAY],
+    art: '<span class="mini mini-a">A</span><span class="mini mini-q">?</span>',
+  },
+  'letter-scramble': {
+    title: 'Letter Scramble', kind: 'words', legend: 'Put the letters back in order', data: () => [words('level-1', 'level-2')],
+    art: '<span class="scramble-art"><span>t</span><span>a</span><span>c</span></span>',
+  },
+  'story-order': {
+    title: 'Story Order', kind: 'words', legend: 'Put the story in order', data: () => [part('stories', 'stories'), DAY],
+    art: '<span class="story-art"><span>1</span><span>2</span><span>3</span></span>',
+  },
+  'word-search': {
+    title: 'Word Search', kind: 'words', legend: 'Find the hidden words', data: () => [part('search-themes', 'themes'), DAY],
+    art: '<span class="search-art"><span>c</span><span class="search-art-hit">a</span><span>x</span><span>q</span><span class="search-art-hit">n</span><span>o</span><span>e</span><span class="search-art-hit">t</span><span>p</span></span>',
+  },
+  'word-ladder': {
+    title: 'Word Ladder', kind: 'words', legend: 'Change one letter at a time', data: () => [words('ladder'), words('level-1', 'level-2')],
+    art: '<span class="ladder-art"><span>c<b>a</b>t</span><span>c<b>o</b>t</span><span>c<b>o</b>g</span></span>',
+  },
+  'word-clues': {
+    title: 'Word Clues', kind: 'words', legend: "Use the story's clues to learn a new word", data: () => [part('rich-words', 'words'), DAY],
+    art: '<span class="clue-art"><span class="clue-glass"></span><span class="clue-word">wow</span></span>',
+  },
+  'fix-sentence': {
+    title: 'Fix the Sentence', kind: 'words', legend: 'One word is wrong. Find it and fix it!', data: () => [part('fix-sentences', 'sentences'), DAY],
+    art: '<span class="fix-art"><span class="fix-art-old">run</span><span class="fix-art-new">ran</span></span>',
+  },
+  'spell-it': {
+    title: 'Spell It', kind: 'words', legend: 'Listen, look, and spell', data: () => [part('spelling', 'words'), DAY],
+    art: '<span class="spell-art"><span>s</span><span>p</span><span class="spell-art-blank">_</span><span>l</span><span>l</span></span>',
+  },
+  'end-marks': {
+    title: 'End Marks', kind: 'words', legend: 'Telling, asking, or a strong feeling?', data: () => [loadJson('data/end-marks.json'), DAY],
+    art: '<span class="marks-art"><span>.</span><span>?</span><span>!</span></span>',
+  },
+  'number-pyramid': {
+    title: 'Number Pyramid', kind: 'numbers', legend: 'Each brick = the two bricks under it, added', data: () => [LEVEL],
+    art: '<span class="bricks"><span class="brick-row"><span>9</span></span><span class="brick-row"><span>4</span><span>5</span></span></span>',
+  },
+  'magic-square': {
+    title: 'Magic Square', kind: 'numbers', legend: 'Rows, columns, and diagonals all add up the same', data: () => [LEVEL],
+    art: '<span class="square-art"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span>',
+  },
+  'number-line': {
+    title: 'Number Line Hop', kind: 'numbers', legend: 'Where will the frog land?',
+    art: '<span class="hop-art"><img class="hop-frog" src="assets/frog.svg" alt=""></span>',
+  },
+  'fact-families': {
+    title: 'Fact Families', kind: 'numbers', legend: 'Three numbers make four facts. Drag them in!',
+    art: '<span class="house-art"><span class="house-art-roof"></span><span class="house-art-body"><span></span><span></span></span></span>',
+  },
+  'find-the-mistake': {
+    title: 'Find the Mistake', kind: 'numbers', legend: 'The frog got one step wrong. Find it and fix it!',
+    art: '<span class="oops-art"><span>3+4=8</span><span class="oops-mark">✗</span></span>',
+  },
+  'word-problems': {
+    title: 'Think It Through', kind: 'numbers', legend: 'Read carefully. Not every number helps!', data: () => [part('word-problems', 'problems')],
+    art: '<span class="think-art"><span>12</span><span class="think-q">?</span><span>7</span></span>',
+  },
+  'bug-groups': {
+    title: 'Bug Groups', kind: 'numbers', legend: 'Equal groups make times facts', data: () => [playsBefore('bug-groups')],
+    art: '<span class="bugs-art"><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span></span>',
+  },
+  'garden-rows': {
+    title: 'Garden Rows', kind: 'numbers', legend: 'Rows of seeds make times facts', data: () => [playsBefore('garden-rows')],
+    art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
+  },
+  maze: {
+    title: 'Maze', kind: 'numbers', legend: 'Trace from the green dot to the star', data: () => [LEVEL],
+    art: '<span class="maze-art"></span>',
+  },
 };
 
 /** A game's screen: a back button, its title and legend, and room for the game. */
@@ -353,10 +408,24 @@ async function startGame(name) {
   }
 }
 
-// Build every game's screen, and list the screens that exist. Anything
-// else in the address shows the home screen.
+/** A game's card on the home screen: its picture, its name, and "Play" or "Done". */
+function makeCard(name, { title, kind, art }) {
+  const card = make('a', `card card-play card-${kind}`);
+  card.href = `#${name}`;
+  const picture = make('span', 'card-art');
+  picture.setAttribute('aria-hidden', 'true');
+  picture.innerHTML = art;
+  const status = make('span', 'card-status', 'Play');
+  status.id = `status-${name}`;
+  card.append(picture, make('span', 'card-name', title), status);
+  return card;
+}
+
+// Build every game's card and screen, and list the screens that exist.
+// Anything else in the address shows the home screen.
 const VIEWS = { '': document.getElementById('home') };
 for (const [name, game] of Object.entries(GAMES)) {
+  document.getElementById(`cards-${game.kind}`).append(makeCard(name, game));
   VIEWS[name] = document.querySelector('.app').appendChild(makeScreen(name, game));
 }
 
