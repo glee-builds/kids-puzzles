@@ -3527,3 +3527,10 @@ button.gr-row {
   font-weight: 700;
   color: var(--words-ink);
 }
+
+/* Home screen: "This week: 12 puzzles on 4 days." */
+.week-note {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-weight: 700;
+}
