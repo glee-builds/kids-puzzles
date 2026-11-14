@@ -348,7 +348,7 @@ const GAMES = {
     art: '<span class="fix-art"><span class="fix-art-old">run</span><span class="fix-art-new">ran</span></span>',
   },
   'spell-it': {
-    title: 'Spell It', kind: 'words', legend: 'Listen, look, and spell', data: () => [part('spelling', 'words'), DAY, reviewFor('spell-it')],
+    title: 'Spell It', kind: 'words', legend: 'Listen, look, and spell', levels: 3, data: () => [part('spelling', 'words'), DAY, reviewFor('spell-it'), levelFor('spell-it')],
     how: ["Read the sentence and find the missing word. Tap Hear it to listen.", "Pick it, sound it out, then spell it."],
     art: '<span class="spell-art"><span>s</span><span>p</span><span class="spell-art-blank">_</span><span>l</span><span>l</span></span>',
   },
