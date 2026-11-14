@@ -397,6 +397,16 @@ const GAMES = {
     how: ["Seeds grow in rows. Each row is a group.", "Add the rows, turn the garden, and split the big ones."],
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
+  'clock-time': {
+    title: 'Clock Time', kind: 'numbers', legend: 'Read the hands to tell the time', levels: 3, data: () => [levelFor('clock-time')],
+    how: ["The short hand points to the hour. The long hand points to the minutes.", "Pick the time the clock shows."],
+    art: '<span class="clock-art"><i></i><b></b></span>',
+  },
+  'coin-count': {
+    title: 'Coin Count', kind: 'numbers', legend: 'Count the coins', levels: 3, data: () => [levelFor('coin-count')],
+    how: ["Count the coins. Start with the biggest one and count on.", "Type how many cents, then press Check."],
+    art: '<span class="coins-art"><i>10¢</i><i>5¢</i><i>1¢</i></span>',
+  },
   maze: {
     title: 'Maze', kind: 'numbers', legend: 'Trace from the green dot to the star', levels: 3, data: () => [levelFor('maze')],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],

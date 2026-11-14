@@ -201,6 +201,13 @@ const PLAYS = {
         if (document.documentElement.scrollHeight > innerHeight) throw new Error('the clue sentence makes the screen ' + (document.documentElement.scrollHeight - innerHeight) + 'px too tall');
       }
     }`,
+  'clock-time': `
+    for (let clock = 0; clock < 5; clock++) { await tapUntilRight('.ct-choice'); await next(); }`,
+  'coin-count': `
+    const game = await import('/src/games/coin-count.js');
+    const rounds = game.generate(seed.seedFor(today, 'coin-count')).rounds;
+    await type(99); await type(98);          // two misses on the first handful
+    for (const round of rounds) { await type(round.total); await next(); }`,
   'bug-groups': `
     await tapUntilRight('.grp-picture'); await next();
     for (const pad of G.querySelectorAll('button.grp-pad')) pad.click();
@@ -258,13 +265,14 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows', 'maze'];
+const TOP_LEVELS = ['clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows', 'maze'];
 
 // How each played puzzle should be rated, given how PLAYS plays it.
 const EXPECTED = {
   'number-line': 'easy',   // every answer right the first time
   'mystery-word': 'hard',  // never found: the word is shown
   'end-marks': 'hard',     // two rounds are shown after 3 misses
+  'coin-count': 'ok',      // two misses, no totals shown
 };
 
 // ---------- The checks ----------
