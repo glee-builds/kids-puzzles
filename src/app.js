@@ -10,6 +10,7 @@ import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
 import { make, button } from './ui.js';
 import { PAGES, STICKERS, nextSticker } from './stickers.js';
+import { todaysSet, SET_SIZE } from './today.js';
 
 const today = dateKey();
 let progress = progressStore.load();
@@ -91,15 +92,48 @@ function drawCatchUp() {
   if (playingYesterday) {
     link.textContent = '← Back to today\'s puzzles';
     link.href = './';
-    document.getElementById('subtitle').textContent = 'Yesterday\'s puzzles';
   } else {
     link.textContent = 'Missed yesterday? Play it now →';
     link.href = '?day=yesterday';
   }
 }
 
+// ---------- Today's set ----------
+
+/** The 5 puzzles picked for the day being played (see src/today.js). */
+function todaysPuzzles() {
+  const names = (kind) => [...document.querySelectorAll(`.card-${kind}`)].map((card) => card.getAttribute('href').slice(1));
+  return todaysSet(names('words'), names('numbers'), DAY);
+}
+
+const isDone = (game) => progressStore.isFinished(progress, playDay, game);
+
+function drawToday() {
+  const set = todaysPuzzles();
+  const done = set.filter(isDone).length;
+  const next = set.find((game) => !isDone(game));
+  document.getElementById('today-title').textContent = playingYesterday ? 'Yesterday\'s 5' : 'Today\'s 5';
+  document.getElementById('today-count').textContent = done === SET_SIZE
+    ? `★ All ${SET_SIZE} done! Great work.`
+    : `${done} of ${SET_SIZE} done`;
+  const list = document.getElementById('today-list');
+  list.replaceChildren();
+  set.forEach((game, i) => {
+    const kind = document.querySelector(`.card[href="#${game}"]`).classList.contains('card-words') ? 'words' : 'numbers';
+    const row = make('a', `today-row today-${kind}` + (isDone(game) ? ' today-done' : game === next ? ' today-next' : ''));
+    row.href = `#${game}`;
+    row.append(
+      make('span', 'today-number', isDone(game) ? '✓' : String(i + 1)),
+      make('span', 'today-name', GAMES[game].title),
+      make('span', 'today-status', isDone(game) ? 'Done' : game === next ? 'Play →' : ''),
+    );
+    list.append(row);
+  });
+}
+
 function updateHome() {
   drawPond();
+  drawToday();
   for (const game of Object.keys(GAMES)) {
     if (progressStore.isFinished(progress, playDay, game)) {
       document.getElementById(`status-${game}`).textContent = 'Done ✓';
@@ -122,6 +156,15 @@ function finishGame(game) {
     ? `The frog hopped to lily pad ${progress.totalDays}!`
     : days >= 2 ? `★ Puzzles ${days} days in a row!` : `The frog is on lily pad ${progress.totalDays}!`;
   document.getElementById('done').hidden = false;
+  // After a puzzle from today's set, the big button goes to the next one.
+  const set = todaysPuzzles();
+  const next = set.includes(game) ? set.find((name) => !isDone(name)) : null;
+  const nextButton = document.getElementById('done-next');
+  nextButton.textContent = next ? `Next: ${GAMES[next].title} →` : 'Pick another puzzle';
+  nextButton.href = next ? `#${next}` : '#';
+  document.getElementById('done-title').textContent =
+    firstTime && set.includes(game) && set.every(isDone) ? 'You finished today\'s 5!' : 'You did it!';
+
   const sticker = firstTime ? nextSticker(progress.stickers) : null;
   showGift(sticker);
   if (!sticker) celebrate(); // with a gift, the stars fall when it's opened
@@ -130,15 +173,29 @@ function finishGame(game) {
 // ---------- Gifts and the sticker book ----------
 
 /** Show a wrapped gift on the celebration card, or no gift (a replay, or a full book). */
+// A gift that hasn't been opened yet. If the player leaves the card without
+// opening it, the sticker still goes into the book (see show()).
+let waitingGift = null;
+
+function keepSticker(sticker) {
+  progress = progressStore.addSticker(progress, sticker.id);
+  progressStore.save(progress);
+  waitingGift = null;
+}
+
 function showGift(sticker) {
   const gift = document.getElementById('gift');
   const shown = document.getElementById('gift-sticker');
+  const buttons = [document.getElementById('done-next'), document.getElementById('done-close')];
   gift.hidden = !sticker;
   shown.hidden = true;
+  // The gift comes first: the other buttons appear once it's open.
+  for (const node of buttons) node.hidden = Boolean(sticker);
+  waitingGift = sticker;
   if (!sticker) return;
   gift.onclick = () => {
-    progress = progressStore.addSticker(progress, sticker.id);
-    progressStore.save(progress);
+    keepSticker(sticker);
+    for (const node of buttons) node.hidden = false;
     gift.hidden = true;
     shown.replaceChildren(make('span', 'gift-picture', sticker.picture), make('span', 'gift-name', `A new sticker: ${sticker.name}!`));
     shown.hidden = false;
@@ -380,6 +437,7 @@ function show() {
   }
   // The celebration card belongs to the game that just finished.
   document.getElementById('done').hidden = true;
+  if (waitingGift) keepSticker(waitingGift); // left without opening the gift: keep the sticker anyway
   window.scrollTo(0, 0);
 
   if (current === '') drawPond();
