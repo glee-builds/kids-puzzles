@@ -448,6 +448,22 @@ try {
     console.log(`${problem ? '✗' : '✓'} New day (left open overnight, then brought back)`);
   }
 
+  // The Refresh button: from yesterday's puzzles, it should load the app again on today's home screen.
+  checked++;
+  {
+    await open('?day=yesterday', 'document.getElementById("today-title").textContent.includes("Yesterday")');
+    await evaluate(`(() => { window.leftOpen = true; document.getElementById('refresh').click(); })()`);
+    let problem = 'the Refresh button did not load the app again';
+    for (let tries = 0; tries < 50 && problem; tries++) {
+      await sleep(100);
+      try {
+        if (await evaluate(`Boolean(window.lilyPadStarted) && !window.leftOpen && !location.search && document.getElementById('today-title').textContent === "Today's 5"`)) problem = '';
+      } catch { /* the page is loading */ }
+    }
+    if (problem) problems.push(`Refresh: ${problem}`);
+    console.log(`${problem ? '✗' : '✓'} Refresh button`);
+  }
+
   // Half-done puzzles: play part of one, load the page again, and see that it picked up.
   for (const [game, { play, check, finish }] of Object.entries(RESUMES)) {
     checked++;
