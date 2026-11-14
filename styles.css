@@ -434,8 +434,9 @@ button {
 }
 
 .yesterday-tag {
-  margin: 2px 0 0;
-  font-size: 0.85rem;
+  margin: -6px 0 6px; /* tucked up under the title, like the legend */
+  line-height: 1.2;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--words-ink);
 }
@@ -917,7 +918,7 @@ button {
 
 /* 15 squares across: as wide as the screen allows, up to 34px each. */
 .ws-grid {
-  --cell: min(calc((100vw - 24px) / 15), calc(52dvh / 15), 34px);
+  --cell: min(calc((100vw - 24px) / 15), calc(50dvh / 15), 34px);
   display: grid;
   grid-template-columns: repeat(15, var(--cell));
   grid-auto-rows: var(--cell);
@@ -1624,7 +1625,7 @@ button {
 }
 
 .so-title {
-  margin: 0 0 6px;
+  margin: 0 0 2px;
   text-align: center;
   font-size: 1.3rem;
 }
@@ -1660,7 +1661,7 @@ button {
 .so-card {
   width: 100%;
   min-height: 48px;
-  padding: 8px 12px;
+  padding: 5px 12px; /* tight, so two-line sentences still fit a small phone */
   border-radius: 12px;
   font: inherit;
   font-size: 1rem;
@@ -1706,7 +1707,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 5px;
 }
 
 .so-card {

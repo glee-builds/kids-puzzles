@@ -328,8 +328,10 @@ function makeScreen(name, { title, legend }) {
   back.href = '#';
   back.setAttribute('aria-label', 'Back to puzzles');
   top.append(back, make('h1', '', title));
-  if (legend) top.append(make('p', 'legend', legend));
+  // Yesterday's puzzles show a tag in place of the legend, so the screen
+  // is no taller than usual.
   if (playingYesterday && name in GAMES) top.append(make('p', 'yesterday-tag', 'Yesterday\'s puzzle'));
+  else if (legend) top.append(make('p', 'legend', legend));
   const area = make('main', 'game');
   area.id = `game-${name}`;
   area.append(make('p', 'loading', 'Getting today\'s puzzle…'));
