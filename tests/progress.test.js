@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, recordReview, dueItems, weekSummary, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS,
+  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, recordReview, dueItems, weekSummary, itemsThisWeek, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS,
 } from '../src/progress.js';
 
 // A stand-in for the browser's localStorage, so tests run in Node.
@@ -292,4 +292,16 @@ test('weekSummary counts puzzles and days in the last 7 days only', () => {
   p = recordFinish(p, '2026-11-09', 'maze');                            // today
   assert.deepEqual(weekSummary(p, '2026-11-09'), { puzzles: 3, days: 2 });
   assert.deepEqual(weekSummary(emptyProgress(), '2026-11-09'), { puzzles: 0, days: 0 });
+});
+
+test('itemsThisWeek adds up the words or facts practiced in the last 7 days', () => {
+  const played = (p, day, game, practiced) => recordResult(p, day, game, { misses: 0, practiced });
+  let p = played(emptyProgress(), '2026-11-01', 'spell-it', ['a', 'b', 'c']);   // too old
+  p = played(p, '2026-11-05', 'spell-it', ['d', 'e', 'f']);
+  p = played(p, '2026-11-09', 'spell-it', ['g', 'h', 'i']);
+  p = played(p, '2026-11-09', 'bug-groups', ['4x3', '2x5', '3x10']);
+  p = recordResult(p, '2026-11-09', 'maze', { misses: 0 });                      // no items
+  assert.equal(itemsThisWeek(p, '2026-11-09', ['spell-it']), 6);
+  assert.equal(itemsThisWeek(p, '2026-11-09', ['bug-groups', 'garden-rows']), 3);
+  assert.equal(itemsThisWeek(p, '2026-11-09', ['maze']), 0);
 });

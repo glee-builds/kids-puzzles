@@ -215,7 +215,11 @@ function drawWeek() {
   const { puzzles, days } = progressStore.weekSummary(progress, today);
   const note = document.getElementById('week-note');
   note.hidden = puzzles < 2;
-  note.textContent = `This week: ${puzzles} puzzles on ${days} day${days === 1 ? '' : 's'}. Nice work!`;
+  // Spell It and the times puzzles say how many words and facts they practiced.
+  const words = progressStore.itemsThisWeek(progress, today, ['spell-it']);
+  const facts = progressStore.itemsThisWeek(progress, today, ['bug-groups', 'garden-rows']);
+  const learned = [words ? `${words} words spelled` : '', facts ? `${facts} times facts` : ''].filter(Boolean);
+  note.textContent = `This week: ${[`${puzzles} puzzles on ${days} day${days === 1 ? '' : 's'}`, ...learned].join(' · ')}. Nice work!`;
 }
 
 function drawStickerLink() {
