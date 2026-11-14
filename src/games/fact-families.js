@@ -7,21 +7,33 @@
 // one fact at a time: two adding facts, then two take-away facts. Each true
 // fact lights a window. When all four are lit, the house shows the four
 // facts together. Three houses make a street.
+//
+// At level 2 the last house is a times family instead (3, 4, and 12):
+//   3 × 4 = 12    4 × 3 = 12    12 ÷ 3 = 4    12 ÷ 4 = 3
+// At level 3 the last two houses are, with bigger numbers.
 
 import { createRandom } from '../seed.js';
 import { make, button, liveMessage, wiggle, dragOrTap } from '../ui.js';
 
 export const HOUSES = 3;
 export const WINDOWS = ['+', '+', '-', '-'];
+export const TIMES_WINDOWS = ['×', '×', '÷', '÷'];
+/** The signs of a house's four windows. A times house has `times: true`. */
+export const windowsFor = (house) => (house.times ? TIMES_WINDOWS : WINDOWS);
+// How many houses are times families at each level, and their numbers.
+const TIMES_HOUSES = [0, 1, 2];
+const TIMES_NUMBERS = [[], [2, 3, 4, 5, 10], [3, 4, 6, 7, 8, 9]];
 export const MAX_TRIES = 3; // after this many misses the window fills itself
 export const MAX_WHOLE = 100;
 export const FIRST_HOUSE_MAX = 20;
 
-/** Make today's street of houses from a seed. */
-export function generate(seed) {
+/** Make today's street of houses from a seed and a level (1 to 3). */
+export function generate(seed, level = 1) {
   const random = createRandom(seed);
+  const step = Math.min(Math.max(level, 1), TIMES_HOUSES.length) - 1;
+  const plusHouses = HOUSES - TIMES_HOUSES[step];
   const houses = [];
-  while (houses.length < HOUSES) {
+  while (houses.length < plusHouses) {
     const easy = houses.length === 0;
     const whole = easy ? random.int(8, FIRST_HOUSE_MAX) : random.int(25, 99);
     const part = random.int(easy ? 2 : 11, whole - (easy ? 2 : 11));
@@ -30,14 +42,21 @@ export function generate(seed) {
     if (houses.some((h) => h.c === house.c)) continue;
     houses.push(house);
   }
+  // Times families: two different numbers and what they multiply to.
+  while (houses.length < HOUSES) {
+    const [a, b] = random.shuffle(TIMES_NUMBERS[step]).slice(0, 2).sort((x, y) => x - y);
+    if (houses.some((h) => h.c === a * b)) continue;
+    houses.push({ a, b, c: a * b, times: true });
+  }
   return { houses };
 }
 
 const factKey = (x, op, y, z) => `${x}${op}${y}=${z}`;
 
 /** The four true facts for a house, as strings like "7+8=15". */
-export function factsFor({ a, b, c }) {
-  return [factKey(a, '+', b, c), factKey(b, '+', a, c), factKey(c, '-', a, b), factKey(c, '-', b, a)];
+export function factsFor({ a, b, c, times }) {
+  const [join, split] = times ? ['×', '÷'] : ['+', '-'];
+  return [factKey(a, join, b, c), factKey(b, join, a, c), factKey(c, split, a, b), factKey(c, split, b, a)];
 }
 
 /** The starting state: house 0, window 0, nothing lit. */
@@ -59,7 +78,7 @@ export const currentWindow = (state) => state.lit[state.house].length;
 /** Facts with this window's sign that haven't been made yet in this house. */
 function missingFacts(state) {
   const house = state.puzzle.houses[state.house];
-  const op = WINDOWS[currentWindow(state)];
+  const op = windowsFor(house)[currentWindow(state)];
   return factsFor(house).filter((f) => f.includes(op) && !state.lit[state.house].includes(f));
 }
 
@@ -75,7 +94,7 @@ export function check(state, [x, y, z]) {
   if (state.status !== 'playing') throw new Error('The street is already lit.');
   const house = state.puzzle.houses[state.house];
   const windowIndex = currentWindow(state);
-  const op = WINDOWS[windowIndex];
+  const op = windowsFor(house)[windowIndex];
   const fact = factKey(x, op, y, z);
   const tryKey = `${state.house}-${windowIndex}`;
 
@@ -120,11 +139,18 @@ const PROMPTS = [
   'Now a take-away fact. Start with the biggest number.',
   'One more take-away fact. Switch the order!',
 ];
+const TIMES_PROMPTS = [
+  'Drag the numbers to make a times fact.',
+  'Make another times fact. Switch the order!',
+  'Now a divide fact. Start with the biggest number.',
+  'One more divide fact. Switch the order!',
+];
 
 /** What to make next, in words. Empty once the street is lit. */
 export function prompt(state) {
   if (state.status !== 'playing') return '';
-  return PROMPTS[currentWindow(state)];
+  const house = state.puzzle.houses[state.house];
+  return (house.times ? TIMES_PROMPTS : PROMPTS)[currentWindow(state)];
 }
 
 /**
@@ -134,15 +160,19 @@ export function prompt(state) {
  */
 export function hint(state) {
   const windowIndex = currentWindow(state);
-  const op = WINDOWS[windowIndex];
+  const house = state.puzzle.houses[state.house];
+  const op = windowsFor(house)[windowIndex];
   const misses = state.tries[`${state.house}-${windowIndex}`] || 0;
   if (misses >= 2) {
-    const first = missingFacts(state)[0].split(/[+\-=]/)[0];
+    const first = missingFacts(state)[0].split(/[+\-×÷=]/)[0];
     return `Try starting with ${first}.`;
   }
-  return op === '+'
-    ? 'In an adding fact, the two smaller numbers make the biggest one.'
-    : 'In a take-away fact, start with the biggest number.';
+  return {
+    '+': 'In an adding fact, the two smaller numbers make the biggest one.',
+    '-': 'In a take-away fact, start with the biggest number.',
+    '×': 'In a times fact, the two smaller numbers make the biggest one.',
+    '÷': 'In a divide fact, start with the biggest number.',
+  }[op];
 }
 
 /** Confirm a street is valid. Returns { ok, problems }. */
@@ -152,9 +182,13 @@ export function verify(puzzle) {
   if (!Array.isArray(houses) || houses.length !== HOUSES) {
     return { ok: false, problems: [`there must be ${HOUSES} houses`] };
   }
-  houses.forEach(({ a, b, c }, i) => {
+  houses.forEach(({ a, b, c, times }, i) => {
     if (![a, b, c].every((n) => Number.isInteger(n) && n > 0)) problems.push(`house ${i}: numbers must be whole and above 0`);
-    if (a + b !== c) problems.push(`house ${i}: ${a} + ${b} is not ${c}`);
+    if (times) {
+      if (a * b !== c) problems.push(`house ${i}: ${a} × ${b} is not ${c}`);
+      if (a < 2 || b < 2) problems.push(`house ${i}: a times family needs numbers of 2 or more`);
+      if (i === 0) problems.push('the first house must be an adding family');
+    } else if (a + b !== c) problems.push(`house ${i}: ${a} + ${b} is not ${c}`);
     if (a === b) problems.push(`house ${i}: the two parts must be different`);
     if (c > MAX_WHOLE) problems.push(`house ${i}: ${c} is over ${MAX_WHOLE}`);
   });
@@ -175,7 +209,7 @@ const CHEERS = ['Lights on!', 'True fact!', 'Yes!', 'Bright idea!'];
 const PAUSE = 700; // ms to show a right or wrong fact before clearing it
 
 /** "15-7=8" -> "15 − 7 = 8" */
-const pretty = (fact) => fact.replace(/([+\-=])/g, ' $1 ').replace('-', '−');
+const pretty = (fact) => fact.replace(/([+\-×÷=])/g, ' $1 ').replace('-', '−');
 
 /**
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
@@ -361,7 +395,7 @@ export function render(container, puzzle, onDone) {
 
     if (!done) {
       const w = pendingLit === -1 ? facts.length : pendingLit;
-      op.textContent = WINDOWS[w] === '+' ? '+' : '−';
+      op.textContent = windowsFor(puzzle.houses[h])[w].replace('-', '−');
       boxNodes.forEach((box, k) => {
         const filled = boxes[k] !== null;
         box.textContent = filled ? String(numbers[boxes[k]]) : '';

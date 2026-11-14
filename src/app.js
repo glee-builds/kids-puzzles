@@ -364,7 +364,7 @@ const GAMES = {
     art: '<span class="hop-art"><img class="hop-frog" src="assets/frog.svg" alt=""></span>',
   },
   'fact-families': {
-    title: 'Fact Families', kind: 'numbers', legend: 'Three numbers make four facts. Drag them in!',
+    title: 'Fact Families', kind: 'numbers', legend: 'Three numbers make four facts. Drag them in!', levels: 3, data: () => [levelFor('fact-families')],
     how: ["Three numbers make four facts.", "Drag the numbers into each fact to light up the house."],
     art: '<span class="house-art"><span class="house-art-roof"></span><span class="house-art-body"><span></span><span></span></span></span>',
   },
