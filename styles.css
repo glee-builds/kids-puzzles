@@ -877,7 +877,7 @@ button {
 }
 
 /* The maze fills most of the screen: space is left at the sides (a tenth of
-   the screen, at least 40px) and under the title, message, and Hint button
+   a phone's screen, at least 40px) and under the title, message, and Hint button
    (about 270px). It can be wider than the app's column. `mazeRoom` in
    src/app.js uses the same numbers. */
 .mz-grid {
@@ -891,6 +891,14 @@ button {
   touch-action: none; /* tracing must not scroll the page */
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* A tablet has room to spare, so the maze keeps less of it free: 6% of the
+   width at the sides and 240px above and below. */
+@media (min-width: 700px) {
+  .mz-grid {
+    --cell: min(calc((100vw - max(40px, 6vw)) / var(--cols)), calc((100dvh - 240px) / var(--rows)), 56px);
+  }
 }
 
 .mz-cell {
@@ -3878,7 +3886,7 @@ button.gr-row {
 
   /* The mazes: sizes inside the zoomed app are divided by 1.3. */
   .mz-grid {
-    --cell: min(calc((100vw / 1.3 - max(40px, 10vw / 1.3)) / var(--cols)), calc((100dvh / 1.3 - 270px) / var(--rows)), 56px);
+    --cell: min(calc((100vw / 1.3 - max(40px, 6vw / 1.3)) / var(--cols)), calc((100dvh / 1.3 - 240px) / var(--rows)), 56px);
   }
 }
 
