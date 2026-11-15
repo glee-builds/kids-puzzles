@@ -146,18 +146,19 @@ test('the 20 by 20 maze is perfect every day for two years, in every outline', (
   }
 });
 
-test('the day\'s two mazes are different mazes, and often different outlines', () => {
-  let differentOutline = 0;
+test("the day's two mazes are both the regular size, with different paths and different outlines", () => {
   everyDay((key) => {
-    const small = generate(seedForDay(key), SMALL_SIZE);
-    const big = generate(seedForDay(key), SIZE);
-    assert.notDeepEqual(small.walls, big.walls);
-    if (small.shape !== big.shape) differentOutline++;
+    const first = generate(seedForDay(key), SMALL_SIZE);
+    const second = generate(seedForDay(key), SMALL_SIZE, undefined, undefined, true);
+    assert.equal(second.size, SMALL_SIZE);
+    assert.notEqual(first.shape, second.shape);
+    assert.notDeepEqual(first.walls, second.walls);
+    assert.deepEqual(verify(second), { ok: true, problems: [] });
+    assert.deepEqual(second, generate(seedForDay(key), SMALL_SIZE, undefined, undefined, true)); // same day, same maze
   }, 100);
-  assert.ok(differentOutline > 60, `${differentOutline} of 100 days`);
 });
 
-test('leaving the size out makes the big maze', () => {
+test('leaving the size out makes a 30 by 30 maze', () => {
   assert.deepEqual(generate(seedForDay('2026-11-14')), generate(seedForDay('2026-11-14'), SIZE));
 });
 
