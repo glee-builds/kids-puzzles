@@ -710,17 +710,9 @@ button {
   border: 4px solid var(--text);
 }
 
-/* The Big Maze's card: the same picture with more, thinner walls. */
-.maze-art-big {
-  background:
-    linear-gradient(var(--text), var(--text)) 8px 0 / 2px 26px no-repeat,
-    linear-gradient(var(--text), var(--text)) 16px 14px / 2px 30px no-repeat,
-    linear-gradient(var(--text), var(--text)) 24px 0 / 2px 20px no-repeat,
-    linear-gradient(var(--text), var(--text)) 32px 12px / 2px 32px no-repeat,
-    linear-gradient(var(--text), var(--text)) 16px 12px / 18px 2px no-repeat,
-    linear-gradient(var(--text), var(--text)) 0 30px / 10px 2px no-repeat,
-    var(--surface);
-  border-width: 3px;
+/* Maze 2's card: the same picture, the other way round. */
+.maze-art-2 {
+  transform: scaleX(-1);
 }
 
 /* ---------- Letter Scramble ---------- */
@@ -921,7 +913,7 @@ button {
 }
 
 /* Start: a green dot. Goal: a star. Head of the path: a white dot. Each is
-   big enough to spot in a 30 by 30 maze, even if it spills over its square. */
+   big enough to spot in a maze with small squares, even if it spills over its square. */
 .mz-start::after,
 .mz-head:not(.mz-start)::before {
   content: "";

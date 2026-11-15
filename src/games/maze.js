@@ -1,9 +1,10 @@
 // maze.js: trace a path through a maze with your finger.
 //
-// There are two mazes a day: the Maze on a 20 by 20 grid, and the Big Maze
-// on a 30 by 30 grid (the same code; the app passes the size). A maze isn't
-// always a square: each day it has a different outline (a round pond, a
-// lily pad, a diamond...). Squares outside the outline aren't part of it.
+// There are two mazes a day, Maze 1 and Maze 2, both about 20 by 20 squares
+// (the same code; the app asks for the second one). A maze isn't always a
+// square: each has a different outline (a round pond, a lily pad, a
+// diamond...), and the day's two never share one. Squares outside the
+// outline aren't part of it.
 //
 // The grid is shaped to fit the screen (`gridFor`): tall and narrow on a
 // phone, close to square on an iPad held upright, wide on one held
@@ -21,8 +22,8 @@
 import { createRandom } from '../seed.js';
 import { make, button, liveMessage, trace } from '../ui.js';
 
-export const SIZE = 30;      // the Big Maze
-export const SMALL_SIZE = 20; // the Maze
+export const SIZE = 30;      // the size the outlines are drawn for, and the size when none is given
+export const SMALL_SIZE = 20; // the day's two mazes
 export const N = 1;
 export const E = 2;
 export const S = 4;
@@ -96,11 +97,15 @@ export function gridFor(size, room) {
  * `size` is how many squares across a square one would be (30 if left
  * out). `shape` picks the outline by name; left out, the seed picks one.
  * `room` is the space on the screen ({ width, height }); see gridFor.
+ * `second` makes the day's second maze: other paths, and another outline.
  */
-export function generate(seed, size = SIZE, shape, room) {
-  // A different size gets different random numbers, so the day's two mazes don't match.
-  const random = createRandom(seed + (size - SIZE));
-  const name = SHAPES[shape] ? shape : random.pick(Object.keys(SHAPES));
+export function generate(seed, size = SIZE, shape, room, second = false) {
+  // A different size gets different random numbers.
+  const names = Object.keys(SHAPES);
+  const first = createRandom(seed + (size - SIZE)).pick(names); // the first maze's outline
+  const random = createRandom(seed + (size - SIZE) + (second ? 1 : 0));
+  const picked = random.pick(second ? names.filter((other) => other !== first) : names);
+  const name = SHAPES[shape] ? shape : picked;
   const { cols, rows } = gridFor(size, room);
   const walls = Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) =>
     (SHAPES[name]((r - (rows - 1) / 2) * (SIZE / rows), (c - (cols - 1) / 2) * (SIZE / cols)) ? ALL_WALLS : null)));

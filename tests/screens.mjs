@@ -523,9 +523,9 @@ try {
   {
     checked++;
     let problem = '';
-    const grid = () => evaluate(`(() => { const style = getComputedStyle(document.querySelector('#game-big-maze .mz-grid')); return [Number(style.getPropertyValue('--cols')), Number(style.getPropertyValue('--rows'))]; })()`);
+    const grid = () => evaluate(`(() => { const style = getComputedStyle(document.querySelector('#game-maze-2 .mz-grid')); return [Number(style.getPropertyValue('--cols')), Number(style.getPropertyValue('--rows'))]; })()`);
     try {
-      if (!await open('#big-maze', `Boolean(document.querySelector('#game-big-maze .mz-grid'))`)) problem = 'did not draw';
+      if (!await open('#maze-2', `Boolean(document.querySelector('#game-maze-2 .mz-grid'))`)) problem = 'did not draw';
       else {
         const [cols, rows] = await grid();
         if (!(rows > cols)) problem = `upright, but ${cols} across and ${rows} down`;
@@ -540,8 +540,8 @@ try {
     await page('Emulation.setDeviceMetricsOverride', { ...PHONE, deviceScaleFactor: 2, mobile: true });
     await sleep(800);
     for (const error of errors) problem += `${problem ? '; ' : ''}logged an error: ${String(error).split('\n')[0]}`;
-    if (problem) problems.push(`big-maze (turned): ${problem}`);
-    console.log(`${problem ? '✗' : '✓'} big-maze (turned sideways, made again to fit)`);
+    if (problem) problems.push(`maze-2 (turned): ${problem}`);
+    console.log(`${problem ? '✗' : '✓'} maze-2 (turned sideways, made again to fit)`);
   }
 
   // Offline: wait until the service worker has saved every file, turn the
