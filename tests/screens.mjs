@@ -518,6 +518,32 @@ try {
   }
   await evaluate(`localStorage.removeItem('kids-puzzles.half-done')`);
 
+  // Turning the device: a maze opened on an upright screen is made again,
+  // wide, when the screen turns sideways (and does not sit small in the middle).
+  {
+    checked++;
+    let problem = '';
+    const grid = () => evaluate(`(() => { const style = getComputedStyle(document.querySelector('#game-big-maze .mz-grid')); return [Number(style.getPropertyValue('--cols')), Number(style.getPropertyValue('--rows'))]; })()`);
+    try {
+      if (!await open('#big-maze', `Boolean(document.querySelector('#game-big-maze .mz-grid'))`)) problem = 'did not draw';
+      else {
+        const [cols, rows] = await grid();
+        if (!(rows > cols)) problem = `upright, but ${cols} across and ${rows} down`;
+        await page('Emulation.setDeviceMetricsOverride', { width: PHONE.height, height: PHONE.width, deviceScaleFactor: 2, mobile: true });
+        await sleep(800);
+        const [wide, tall] = await grid();
+        if (!problem && !(wide > tall)) problem = `turned sideways, but still ${wide} across and ${tall} down`;
+      }
+    } catch (error) {
+      problem = `broke: ${String(error.message).split('\n')[0]}`;
+    }
+    await page('Emulation.setDeviceMetricsOverride', { ...PHONE, deviceScaleFactor: 2, mobile: true });
+    await sleep(800);
+    for (const error of errors) problem += `${problem ? '; ' : ''}logged an error: ${String(error).split('\n')[0]}`;
+    if (problem) problems.push(`big-maze (turned): ${problem}`);
+    console.log(`${problem ? '✗' : '✓'} big-maze (turned sideways, made again to fit)`);
+  }
+
   // Offline: wait until the service worker has saved every file, turn the
   // web server off, and open every screen again. Nothing can come from the
   // network now, so each screen has to come from what was saved.

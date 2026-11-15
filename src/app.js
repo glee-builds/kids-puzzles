@@ -310,9 +310,12 @@ const part = async (name, key) => (await loadJson(`data/${name}.json`))[key];
 function mazeRoom() {
   const zoom = matchMedia('(min-width: 700px) and (min-height: 900px)').matches ? 1.3 : 1;
   const width = Math.round(innerWidth / zoom);
-  // Space is left at the sides (a tenth of the screen, at least 40px) for a
-  // hand to rest on, and for the edge of the screen's own swipes.
-  return { width: width - Math.max(40, Math.round(width / 10)), height: Math.round(innerHeight / zoom) - 270 };
+  // Space is left at the sides for a hand to rest on, and for the edge of the
+  // screen's own swipes: a tenth of a phone's width (at least 40px). A tablet
+  // has room to spare, so it keeps less: 6% at the sides, 240px above and below.
+  const tablet = innerWidth >= 700;
+  const sides = Math.max(40, Math.round(width * (tablet ? 0.06 : 0.1)));
+  return { width: width - sides, height: Math.round(innerHeight / zoom) - (tablet ? 240 : 270) };
 }
 
 // Some puzzles have levels (`levels` in GAMES). Each one's level goes up
@@ -498,6 +501,7 @@ function makeScreen(name, { title, legend }) {
 function showHowTo(name, area) {
   const { how } = GAMES[name];
   if (!how || (progress.seen || []).includes(name) || progress.plays?.[name]) return;
+  if (area.previousElementSibling?.classList.contains('how-to')) area.previousElementSibling.remove(); // drawn again: one card
   const card = make('div', 'how-to');
   card.append(make('h2', 'how-title', 'How to play'), ...how.map((line) => make('p', 'how-line', line)));
   card.append(button('button how-ok', 'Got it!', () => {
@@ -566,6 +570,7 @@ async function startGame(name) {
       finishGame(name, result);
     };
     const session = sessionFor(name, puzzle);
+    area.dataset.grid = puzzle.cols ? `${puzzle.cols}x${puzzle.rows}` : ''; // a maze: the shape it was made in
     try {
       game.render(area, puzzle, onDone, session);
       area.dataset.resumed = session.saved === undefined ? '' : 'yes';
@@ -583,6 +588,23 @@ async function startGame(name) {
     area.textContent = 'Oops, the puzzle could not load. Try again in a moment.';
     console.error(error);
   }
+}
+
+/**
+ * A maze is made in the shape of the screen, and a puzzle is kept once it
+ * is opened. So if the screen has changed shape since (the iPad was turned),
+ * the maze would sit small in the middle: make it again to fit. A finished
+ * maze is left as it is.
+ */
+async function refitMaze() {
+  const name = location.hash.slice(1);
+  const area = document.getElementById(`game-${name}`);
+  if (GAMES[name]?.file !== 'maze' && name !== 'maze') return;
+  if (!area?.dataset.grid || area.classList.contains('finished')) return;
+  const { gridFor } = await import('./games/maze.js');
+  const [size, , room] = GAMES[name].data();
+  const { cols, rows } = gridFor(size, room);
+  if (`${cols}x${rows}` !== area.dataset.grid) startGame(name);
 }
 
 /** A game's card on the home screen: its picture, its name, and "Play" or "Done". */
@@ -737,8 +759,17 @@ function show() {
   if (current in GAMES && !started.has(current)) {
     started.add(current);
     startGame(current);
+  } else {
+    refitMaze(); // opened before, perhaps with the screen held the other way
   }
 }
+
+// Turning the device (or resizing the window) while a maze is showing.
+let refitTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(refitTimer);
+  refitTimer = setTimeout(refitMaze, 200);
+});
 
 // "See my puzzle" closes the celebration card to look at the finished board.
 document.getElementById('done-close').addEventListener('click', () => {
