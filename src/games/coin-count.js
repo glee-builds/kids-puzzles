@@ -8,6 +8,7 @@
 // After 2 misses the hint counts on from the biggest coin; after 3 the
 // total is shown.
 
+import { nextRound } from '../rounds.js';
 import { createRandom } from '../seed.js';
 import { make, numberPad, roundFrame } from '../ui.js';
 
@@ -53,17 +54,7 @@ export function check(state, answer) {
   if (state.status !== 'playing') throw new Error('All the coins are counted.');
   const round = state.puzzle.rounds[state.round];
   const correct = Number(answer) === round.total;
-  const tries = correct ? 0 : state.tries + 1;
-  const shown = !correct && tries >= MAX_TRIES;
-  const next = correct || shown ? state.round + 1 : state.round;
-  return {
-    ...state,
-    round: next,
-    tries: next === state.round ? tries : 0,
-    shown: shown ? [...state.shown, state.round] : state.shown,
-    status: next >= state.puzzle.rounds.length ? 'won' : 'playing',
-    last: { round: state.round, correct, shown },
-  };
+  return nextRound(state, correct, { maxTries: MAX_TRIES });
 }
 
 /** Counting on from the biggest coin: "25, 35, 40, 41". */

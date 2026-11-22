@@ -17,6 +17,7 @@
 // Sentences, runs, and lists are dealt from shuffled decks, so none repeats
 // until its deck is used up.
 
+import { nextRound } from '../rounds.js';
 import { createRandom, dealForDay } from '../seed.js';
 import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
@@ -146,17 +147,7 @@ export function check(state, answer) {
   if (state.status !== 'playing') throw new Error('All the rounds are done.');
   const round = state.puzzle.rounds[state.round];
   const correct = isRight(round, answer);
-  const tries = correct ? 0 : state.tries + 1;
-  const shown = round.kind !== 'mark' && !correct && tries >= MAX_TRIES;
-  const next = correct || shown ? state.round + 1 : state.round;
-  return {
-    ...state,
-    round: next,
-    tries: next === state.round ? tries : 0,
-    shown: shown ? [...state.shown, state.round] : state.shown,
-    status: next >= state.puzzle.rounds.length ? 'won' : 'playing',
-    last: { round: state.round, correct, shown },
-  };
+  return nextRound(state, correct, { canShow: round.kind !== 'mark', maxTries: MAX_TRIES });
 }
 
 /** A hint after a miss. */

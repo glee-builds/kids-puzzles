@@ -11,6 +11,7 @@
 // and adds, and the story has to be worked out ("2 more ducks than
 // frogs"); level 3 counts by 2s on the side of the graph and has two steps.
 
+import { nextRound } from '../rounds.js';
 import { createRandom } from '../seed.js';
 import { choicesFor } from '../times.js';
 import { make, button, wiggle, roundFrame, shape } from '../ui.js';
@@ -173,17 +174,7 @@ export function check(state, answer) {
   if (state.status !== 'playing') throw new Error('All the rounds are done.');
   const round = state.puzzle.rounds[state.round];
   const correct = isRight(round, answer);
-  const tries = correct ? 0 : state.tries + 1;
-  const shown = round.kind === 'build' && !correct && tries >= MAX_TRIES;
-  const next = correct || shown ? state.round + 1 : state.round;
-  return {
-    ...state,
-    round: next,
-    tries: next === state.round ? tries : 0,
-    shown: shown ? [...state.shown, state.round] : state.shown,
-    status: next >= state.puzzle.rounds.length ? 'won' : 'playing',
-    last: { round: state.round, correct, shown },
-  };
+  return nextRound(state, correct, { canShow: round.kind === 'build', maxTries: MAX_TRIES });
 }
 
 /** A hint after a miss, about what was answered. */
