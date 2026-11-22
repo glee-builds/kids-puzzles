@@ -2,14 +2,13 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, loadData, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, hint, current, storiesForDay, storyProblems, STORIES_PER_DAY,
 } from '../src/games/story-order.js';
 
-const STORIES = JSON.parse(readFileSync(new URL('../data/stories.json', import.meta.url), 'utf8')).stories;
+const STORIES = loadData('stories.json').stories;
 const seedForDay = (key) => seedFor(key, 'story-order');
 
 const fixed = {
@@ -48,8 +47,7 @@ test('no story repeats until the whole bank has been used', () => {
 
 test('every day for two years makes 2 valid, mixed-up stories', () => {
   everyDay((key, day) => {
-    const result = verify(generate(seedForDay(key), STORIES, day));
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(generate(seedForDay(key), STORIES, day)), key);
   });
 });
 

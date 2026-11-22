@@ -5,12 +5,9 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { loadData } from './helpers.js';
 
-function loadList(fileName) {
-  const url = new URL(`../data/words/${fileName}`, import.meta.url);
-  return JSON.parse(readFileSync(url, 'utf8'));
-}
+const loadList = (fileName) => loadData(`words/${fileName}`);
 
 const level1 = loadList('level-1.json');
 const allLevel1Words = Object.values(level1.words).flat();

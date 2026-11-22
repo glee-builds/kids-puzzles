@@ -2,15 +2,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, loadData, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, fill, entryProblems, wordsForDay, hasSound, WORDS_PER_DAY, MAX_TRIES,
 } from '../src/games/spell-it.js';
 
-const WORDS = JSON.parse(readFileSync(new URL('../data/spelling.json', import.meta.url), 'utf8')).words;
-const LEVEL3 = Object.values(JSON.parse(readFileSync(new URL('../data/words/level-3.json', import.meta.url), 'utf8')).words).flat();
+const WORDS = loadData('spelling.json').words;
+const LEVEL3 = Object.values(loadData('words/level-3.json').words).flat();
 const seedForDay = (key) => seedFor(key, 'spell-it');
 const sample = generate(seedForDay('2026-11-13'), WORDS, 0);
 
@@ -45,8 +44,7 @@ test('fill puts letters into the blanks in order', () => {
 
 test('every day for two years makes 3 valid rounds', () => {
   everyDay((key, day) => {
-    const result = verify(generate(seedForDay(key), WORDS, day));
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(generate(seedForDay(key), WORDS, day)), key);
   });
 });
 
@@ -111,13 +109,13 @@ const isEnding = (word) => Boolean(WORDS.find((w) => w.word === word).ending);
 test('level 2 asks which ending is right; level 3 has that word spelled in full', () => {
   everyDay((key, day) => {
     const two = generate(seedForDay(key), WORDS, day, [], 2);
-    assert.ok(verify(two).ok, `${key}: ${verify(two).problems.join('; ')}`);
+    assertValid(verify(two), key);
     assert.equal(two.rounds[1].kind, 'sound');
     assert.ok(isEnding(two.rounds[1].word) && two.rounds[1].shape.endsWith('+ ?'));
     assert.equal(two.rounds.filter((r) => isEnding(r.word)).length, 1);
 
     const three = generate(seedForDay(key), WORDS, day, [], 3);
-    assert.ok(verify(three).ok, `${key}: ${verify(three).problems.join('; ')}`);
+    assertValid(verify(three), key);
     assert.equal(three.rounds[2].kind, 'spell');
     assert.ok(isEnding(three.rounds[2].word));
   }, 365);

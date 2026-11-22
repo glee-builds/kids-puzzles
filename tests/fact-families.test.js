@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, assertValid } from './helpers.js';
 import {
   generate, verify, factsFor, start, check, hint, prompt, currentWindow, HOUSES, MAX_TRIES, FIRST_HOUSE_MAX,
 } from '../src/games/fact-families.js';
@@ -25,8 +25,7 @@ test('generate gives the same street for the same day', () => {
 test('every day for two years makes a valid street', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key));
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.equal(puzzle.houses.length, HOUSES);
     assert.ok(puzzle.houses[0].c <= FIRST_HOUSE_MAX);
   });
@@ -134,8 +133,7 @@ test('level 1 is the same as before; levels 2 and 3 end with 1 and 2 times house
     assert.deepEqual(generate(seedForDay(key), 1), generate(seedForDay(key)));
     for (const [level, timesHouses] of [[1, 0], [2, 1], [3, 2]]) {
       const puzzle = generate(seedForDay(key), level);
-      const result = verify(puzzle);
-      assert.ok(result.ok, `level ${level}, ${key}: ${result.problems.join('; ')}`);
+      assertValid(verify(puzzle), `level ${level}, ${key}`);
       assert.equal(puzzle.houses.filter((h) => h.times).length, timesHouses);
       assert.ok(!puzzle.houses[0].times);
     }

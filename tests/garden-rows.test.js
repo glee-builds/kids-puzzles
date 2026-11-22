@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, assertValid } from './helpers.js';
 import { stageFor } from '../src/times.js';
 import {
   generate, verify, start, check, hint, total, ROUNDS, SPLIT_AT, BIG_ROWS,
@@ -16,8 +16,7 @@ test('every day for two years, at every level, makes valid rounds', () => {
   for (const level of [1, 2, 3]) {
     everyDay((key) => {
       const puzzle = generate(seedForDay(key), level);
-      const result = verify(puzzle);
-      assert.ok(result.ok, `${key}, level ${level}: ${result.problems.join('; ')}`);
+      assertValid(verify(puzzle), `${key}, level ${level}`);
       assert.equal(puzzle.stage, stageFor(level));
     });
   }
@@ -69,7 +68,7 @@ test('hints point at the rows, the turn, or the two parts', () => {
 test('a small missed fact comes back in the first round, a big one in the split round', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key), 1, ['4x7', '8x6']);
-    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.deepEqual([puzzle.rounds[0].rows, puzzle.rounds[0].size], [4, 7]);
     assert.deepEqual([puzzle.rounds[2].rows, puzzle.rounds[2].size], [8, 6]);
   }, 60);
@@ -80,7 +79,7 @@ test('a small missed fact comes back in the first round, a big one in the split 
 test('level 4 has a sharing round in the middle, every day for two years', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key), 4);
-    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.deepEqual(puzzle.rounds.map((r) => r.kind), ['add', 'share', 'split']);
     const share = puzzle.rounds[1];
     assert.ok(share.choices.includes(share.size));

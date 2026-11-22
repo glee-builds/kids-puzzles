@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay, dayKey } from './helpers.js';
+import { everyDay, dayKey, assertValid } from './helpers.js';
 import {
   generate, verify, solution, canMove, start, step, hintSquares, offRoute, gridFor, SIZE, SMALL_SIZE, SHAPES, N, E, S, W,
 } from '../src/games/maze.js';
@@ -36,8 +36,7 @@ test('generate gives the same maze for the same day', () => {
 test('every day for two years makes a perfect maze with one route to the star', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key));
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.equal(puzzle.size, SIZE);
   });
 });
@@ -54,7 +53,7 @@ test('every outline makes a perfect maze, and all of them come up', () => {
   for (const shape of Object.keys(SHAPES)) {
     const puzzle = generate(seedForDay('2026-11-14'), SIZE, shape);
     assert.equal(puzzle.shape, shape);
-    assert.ok(verify(puzzle).ok, `${shape}: ${verify(puzzle).problems.join('; ')}`);
+    assertValid(verify(puzzle), shape);
   }
   const seen = new Set();
   everyDay((key) => seen.add(generate(seedForDay(key)).shape), 120);
@@ -137,7 +136,7 @@ test('after a wrong turn, the hint starts where the path left the route', () => 
 test('the 20 by 20 maze is perfect every day for two years, in every outline', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key), SMALL_SIZE);
-    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.equal(puzzle.size, SMALL_SIZE);
     assert.ok(solution(puzzle).length >= 60, `${puzzle.shape}: route of ${solution(puzzle).length}`);
   });
@@ -196,8 +195,7 @@ test('every outline makes a valid maze in every screen shape, at both sizes', ()
     for (const [name, room] of Object.entries(ROOMS)) {
       for (const shape of Object.keys(SHAPES)) {
         const puzzle = generate(seedForDay('2026-11-14'), size, shape, room);
-        const result = verify(puzzle);
-        assert.ok(result.ok, `${size}, ${name}, ${shape}: ${result.problems.join('; ')}`);
+        assertValid(verify(puzzle), `${size}, ${name}, ${shape}`);
         assert.equal(puzzle.walls.length, puzzle.rows);
         assert.equal(puzzle.walls[0].length, puzzle.cols);
         assert.ok(solution(puzzle).length >= size * 2, `${size}, ${name}, ${shape}: the route is ${solution(puzzle).length} squares`);

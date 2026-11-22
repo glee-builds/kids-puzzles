@@ -2,15 +2,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, assertValid, loadData } from './helpers.js';
 import {
   generate, verify, start, check, hint, current, wordsWithLetters, PLAN, PLANS,
 } from '../src/games/letter-scramble.js';
 
-const load = (path) => Object.values(JSON.parse(readFileSync(new URL(path, import.meta.url))).words).flat();
-const WORDS = [...load('../data/words/level-1.json'), ...load('../data/words/level-2.json')];
+const load = (path) => Object.values(loadData(path).words).flat();
+const WORDS = [...load('words/level-1.json'), ...load('words/level-2.json')];
 const seedForDay = (key) => seedFor(key, 'letter-scramble');
 
 // A fixed day: net, cup, frog, bell.
@@ -38,8 +37,7 @@ test('generate gives the same words for the same day', () => {
 test('every day for two years makes 4 valid scrambles', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key), WORDS);
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.deepEqual(puzzle.items.map((item) => item.word.length), PLAN);
   });
 });
@@ -106,19 +104,18 @@ test('hint: locks the first letter not yet locked, then the next', () => {
 // --- levels ---
 
 test('levels 2 and 3 bring in 5-letter words, valid every day for two years', () => {
-  const all = [...WORDS, ...load('../data/words/level-3.json')];
+  const all = [...WORDS, ...load('words/level-3.json')];
   for (const level of [1, 2, 3]) {
     everyDay((key) => {
       const puzzle = generate(seedForDay(key), all, level);
-      const result = verify(puzzle);
-      assert.ok(result.ok, `level ${level}, ${key}: ${result.problems.join('; ')}`);
+      assertValid(verify(puzzle), `level ${level}, ${key}`);
       assert.deepEqual(puzzle.items.map((item) => item.word.length), PLANS[level - 1]);
     });
   }
 });
 
 test('level 1 picks the same words with or without the 5-letter list', () => {
-  const all = [...WORDS, ...load('../data/words/level-3.json')];
+  const all = [...WORDS, ...load('words/level-3.json')];
   everyDay((key) => {
     assert.deepEqual(generate(seedForDay(key), all, 1).items, generate(seedForDay(key), WORDS).items);
   }, 60);

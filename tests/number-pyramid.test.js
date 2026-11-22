@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay, dayKey } from './helpers.js';
+import { everyDay, dayKey, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, hint, workable, buildValues, isSolvable, answerFor,
   BLANKS, MAX_TOP, MIN_TOP, MAX_TRIES, LEVELS} from '../src/games/number-pyramid.js';
@@ -33,8 +33,7 @@ test('generate gives the same pyramid for the same day', () => {
 test('every day for two years makes a valid, solvable pyramid', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key));
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     const top = puzzle.values[3][0];
     assert.ok(top >= MIN_TOP && top <= MAX_TOP, `${key}: top is ${top}`);
   });

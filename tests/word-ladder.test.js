@@ -2,15 +2,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, assertValid, loadData } from './helpers.js';
 import {
   generate, verify, start, change, back, hint, current, stepsLeft,
   shortestLadder, acceptedWords,
 } from '../src/games/word-ladder.js';
 
-const load = (name) => JSON.parse(readFileSync(new URL(`../data/words/${name}`, import.meta.url), 'utf8'));
+const load = (name) => loadData(`words/${name}`);
 const LADDER = Object.values(load('ladder.json').words).flat();
 const PHONICS = ['level-1.json', 'level-2.json'].flatMap((f) => Object.values(load(f).words).flat());
 const seedForDay = (key) => seedFor(key, 'word-ladder');
@@ -46,8 +45,7 @@ test('plurals of 3-letter words are accepted, but not used to start or end', () 
 
 test('every day for two years makes a 3-step and a 4-step ladder from phonics words', () => {
   everyDay((key) => {
-    const result = verify(generate(seedForDay(key), LADDER, PHONICS));
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(generate(seedForDay(key), LADDER, PHONICS)), key);
   });
 });
 

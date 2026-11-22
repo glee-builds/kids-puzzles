@@ -2,14 +2,13 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, loadData, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, hint, unpunctuate, uncapitalize, uncomma, dataProblems, MARKS, MAX_TRIES, KINDS,
 } from '../src/games/end-marks.js';
 
-const DATA = JSON.parse(readFileSync(new URL('../data/end-marks.json', import.meta.url), 'utf8'));
+const DATA = loadData('end-marks.json');
 const seedForDay = (key) => seedFor(key, 'end-marks');
 const sample = generate(seedForDay('2026-11-13'), DATA, 0);
 const rightAnswer = (round) => (round.kind === 'mark' ? round.mark : round.kind === 'breaks' ? round.ends : round.marks);
@@ -36,8 +35,7 @@ test('unpunctuate lowercases each start (but not I) and finds the ends', () => {
 
 test('every day for two years makes 5 valid rounds', () => {
   everyDay((key, day) => {
-    const result = verify(generate(seedForDay(key), DATA, day));
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(generate(seedForDay(key), DATA, day)), key);
   });
 });
 
@@ -93,8 +91,7 @@ test('levels 2 and 3 make 5 valid rounds every day for two years', () => {
   for (const level of [2, 3]) {
     everyDay((key, day) => {
       const puzzle = generate(seedForDay(key), DATA, day, level);
-      const result = verify(puzzle);
-      assert.ok(result.ok, `level ${level}, ${key}: ${result.problems.join('; ')}`);
+      assertValid(verify(puzzle), `level ${level}, ${key}`);
       assert.deepEqual(puzzle.rounds.map((r) => r.kind), KINDS[level - 1]);
     });
   }

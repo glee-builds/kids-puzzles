@@ -2,15 +2,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, loadData, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, hint, lineBetween, themeForDay,
   SIZE, WORDS_PER_DAY, MIN_WORD, MAX_WORD,
 } from '../src/games/word-search.js';
 
-const THEMES = JSON.parse(readFileSync(new URL('../data/search-themes.json', import.meta.url), 'utf8')).themes;
+const THEMES = loadData('search-themes.json').themes;
 const seedForDay = (key) => seedFor(key, 'word-search');
 const sample = generate(seedForDay('2026-11-08'), THEMES, 0);
 const placedCells = (puzzle, word) => puzzle.placed.find((p) => p.word === word).cells;
@@ -40,8 +39,7 @@ test('no theme repeats until every theme has been used', () => {
 test('every day for two years makes a valid 15x15 grid with 10 words', () => {
   everyDay((key, day) => {
     const puzzle = generate(seedForDay(key), THEMES, day);
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
   });
 });
 
@@ -114,8 +112,7 @@ test('levels 2 and 3 make a valid grid every day for a year', () => {
   for (const level of [2, 3]) {
     everyDay((key, day) => {
       const puzzle = generate(seedForDay(key), THEMES, day, level);
-      const result = verify(puzzle);
-      assert.ok(result.ok, `level ${level}, ${key}: ${result.problems.join('; ')}`);
+      assertValid(verify(puzzle), `level ${level}, ${key}`);
     }, 365);
   }
 });
@@ -159,7 +156,7 @@ test('a backward word at level 3 is found by tracing from either end', () => {
 
 // --- level 4: clues ---
 
-const CLUES = JSON.parse(readFileSync(new URL('../data/search-clues.json', import.meta.url), 'utf8')).clues;
+const CLUES = loadData('search-clues.json').clues;
 
 test('every word of every theme has a short clue that does not give it away', () => {
   for (const theme of THEMES) {
@@ -176,8 +173,7 @@ test('every word of every theme has a short clue that does not give it away', ()
 test('level 4 has the level 3 directions and a clue for each of the 10 words, every day for a year', () => {
   everyDay((key, day) => {
     const puzzle = generate(seedForDay(key), THEMES, day, 4, CLUES);
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.deepEqual(Object.keys(puzzle.clues).sort(), [...puzzle.words].sort());
     assert.deepEqual(puzzle.grid, generate(seedForDay(key), THEMES, day, 3).grid);
   }, 365);

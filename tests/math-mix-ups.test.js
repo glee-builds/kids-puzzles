@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, assertValid } from './helpers.js';
 import { generate, verify, start, check, switchHeat, roundsAt, hint, kindsForDay, KINDS, HEATS } from '../src/games/math-mix-ups.js';
 
 const seedForDay = (key) => seedFor(key, 'math-mix-ups');
@@ -24,8 +24,7 @@ test('every day for two years, mild and spicy, makes 3 valid rounds', () => {
   let day = 0;
   everyDay((key) => {
     const puzzle = generate(seedForDay(key), day);
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     for (const level of [1, 2]) assert.deepEqual(roundsAt(puzzle, level).map((r) => r.kind), kindsForDay(day));
     day += 1;
   });

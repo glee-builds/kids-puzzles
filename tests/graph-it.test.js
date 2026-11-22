@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, assertValid } from './helpers.js';
 import { generate, verify, start, check, hint, isRight, ROUNDS, MAX_TRIES } from '../src/games/graph-it.js';
 
 const seedForDay = (key) => seedFor(key, 'graph-it');
@@ -14,8 +14,7 @@ test('every day for two years, at every level, makes 4 valid rounds', () => {
   for (const level of [1, 2, 3]) {
     everyDay((key) => {
       const puzzle = generate(seedForDay(key), level);
-      const result = verify(puzzle);
-      assert.ok(result.ok, `level ${level}, ${key}: ${result.problems.join('; ')}`);
+      assertValid(verify(puzzle), `level ${level}, ${key}`);
       assert.deepEqual(puzzle.rounds.map((r) => r.kind), ROUNDS);
     });
   }
