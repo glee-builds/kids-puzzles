@@ -40,27 +40,19 @@ const started = new Set();
 let justHopped = false;
 
 function drawPond() {
-  // `|| 0` covers a phone still holding an older progress.js for a few minutes after an update.
-  const at = progress.totalDays || 0;
+  const at = progress.totalDays;
   const doneToday = progress.lastDay === today;
   const pond = document.getElementById('pond');
   pond.replaceChildren();
   for (const { number, kind } of pondPads(at, doneToday)) {
-    const spot = document.createElement('span');
-    spot.className = `pad pad-${kind}`;
+    const spot = make('span', `pad pad-${kind}`);
     if (kind === 'frog') {
-      const frog = document.createElement('img');
-      frog.className = 'pond-frog' + (justHopped ? ' pond-frog-hop' : '');
+      const frog = make('img', 'pond-frog' + (justHopped ? ' pond-frog-hop' : ''));
       frog.src = 'assets/frog.svg';
       frog.alt = '';
       spot.append(frog);
     }
-    if (number > 0) {
-      const label = document.createElement('span');
-      label.className = 'pad-number';
-      label.textContent = String(number);
-      spot.append(label);
-    }
+    if (number > 0) spot.append(make('span', 'pad-number', String(number)));
     pond.append(spot);
   }
   justHopped = false;
@@ -79,12 +71,7 @@ function drawPond() {
   }
   const captionNode = document.getElementById('pond-caption');
   captionNode.textContent = caption;
-  if (days >= 2) {
-    const inARow = document.createElement('span');
-    inARow.className = 'pond-streak';
-    inARow.textContent = `★ ${days} days in a row`;
-    captionNode.append(inARow);
-  }
+  if (days >= 2) captionNode.append(make('span', 'pond-streak', `★ ${days} days in a row`));
   drawCatchUp();
   drawPastDays();
   drawStickerLink();
@@ -94,7 +81,7 @@ function drawPond() {
 /** The link between today's and yesterday's puzzles, when it's needed. */
 function drawCatchUp() {
   const link = document.getElementById('catch-up');
-  const missedYesterday = (progress.totalDays || 0) > 0 && !progressStore.isFinished(progress, yesterday);
+  const missedYesterday = progress.totalDays > 0 && !progressStore.isFinished(progress, yesterday);
   link.hidden = !playingPast && !missedYesterday;
   if (playingPast) {
     link.textContent = '← Back to today\'s puzzles';
@@ -122,11 +109,14 @@ function drawPastDays() {
 
 /** The 5 puzzles picked for the day being played (see src/today.js). */
 function todaysPuzzles() {
-  const names = (kind) => Object.keys(GAMES).filter((name) => GAMES[name].kind === kind);
-  return todaysSet(Object.fromEntries(GROUPS.map(({ kind }) => [kind, names(kind)])), DAY);
+  return todaysSet(Object.fromEntries(GROUPS.map(({ kind }) => [kind, gamesIn(kind)])), DAY);
 }
 
 const isDone = (game) => progressStore.isFinished(progress, playDay, game);
+/** The names of the puzzles in a group. */
+const gamesIn = (kind) => Object.keys(GAMES).filter((name) => GAMES[name].kind === kind);
+/** Whether a screen is one of the mazes (they share src/games/maze.js). */
+const isMaze = (name) => (GAMES[name]?.file ?? name) === 'maze';
 
 function drawToday() {
   const set = todaysPuzzles();
@@ -154,15 +144,13 @@ function updateHome() {
   drawPond();
   drawToday();
   for (const game of Object.keys(GAMES)) {
-    if (progressStore.isFinished(progress, playDay, game)) {
-      document.getElementById(`status-${game}`).textContent = 'Done ✓';
-    }
+    if (isDone(game)) document.getElementById(`status-${game}`).textContent = 'Done ✓';
   }
 }
 
 /** A puzzle was finished. `result` is how it went: { misses, helped }. */
 function finishGame(game, result) {
-  const before = progress.totalDays || 0;
+  const before = progress.totalDays;
   // A puzzle gives a gift, and counts toward its level, the first time
   // it's finished each day.
   const firstTime = !progressStore.isFinished(progress, playDay, game);
@@ -172,7 +160,7 @@ function finishGame(game, result) {
     if (result?.practiced) progress = progressStore.recordReview(progress, game, DAY, result);
   }
   progressStore.save(progress);
-  const hopped = (progress.totalDays || 0) > before;
+  const hopped = progress.totalDays > before;
   updateHome();
   justHopped = hopped; // show the hop when the home screen comes back
 
@@ -197,7 +185,6 @@ function finishGame(game, result) {
 
 // ---------- Gifts and the sticker book ----------
 
-/** Show a wrapped gift on the celebration card, or no gift (a replay, or a full book). */
 // A gift that hasn't been opened yet. If the player leaves the card without
 // opening it, the sticker still goes into the book (see show()).
 let waitingGift = null;
@@ -208,6 +195,7 @@ function keepSticker(sticker) {
   waitingGift = null;
 }
 
+/** Show a wrapped gift on the celebration card, or no gift (a replay, or a full book). */
 function showGift(sticker) {
   const gift = document.getElementById('gift');
   const shown = document.getElementById('gift-sticker');
@@ -242,14 +230,14 @@ function drawWeek() {
 }
 
 function drawStickerLink() {
-  const count = (progress.stickers || []).length;
+  const count = progress.stickers.length;
   document.getElementById('sticker-link').textContent = count ? `My stickers (${count}) →` : 'My sticker book →';
 }
 
 function drawStickers() {
   const area = document.getElementById('game-stickers');
   area.replaceChildren();
-  const owned = progress.stickers || [];
+  const owned = progress.stickers;
   const newest = owned[owned.length - 1];
   area.append(make('p', 'sb-count', owned.length === STICKERS.length
     ? 'Your sticker book is full. Wow!'
@@ -284,16 +272,14 @@ const TILTS = [-7, 4, -3, 6, -5, 3, -6, 5, -2, 7];
 
 // ---------- Celebration: falling stars ----------
 
-const CONFETTI_COLORS = ['#ffb627', '#1f9e89', '#7b68e0', '#ff8a5c'];
+const CONFETTI_COLORS = ['var(--star)', 'var(--here)', 'var(--elsewhere)', 'var(--go)'];
 
 function celebrate() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const layer = document.getElementById('confetti');
   layer.replaceChildren();
   for (let i = 0; i < 30; i++) {
-    const piece = document.createElement('span');
-    piece.className = 'confetti-piece';
-    piece.textContent = i % 3 === 0 ? '★' : '●';
+    const piece = make('span', 'confetti-piece', i % 3 === 0 ? '★' : '●');
     piece.style.left = `${Math.random() * 100}%`;
     piece.style.color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
     piece.style.fontSize = `${14 + Math.random() * 18}px`;
@@ -519,7 +505,7 @@ function makeScreen(name, { title, legend }) {
  */
 function showHowTo(name, area) {
   const { how } = GAMES[name];
-  if (!how || (progress.seen || []).includes(name) || progress.plays?.[name]) return;
+  if (!how || progress.seen.includes(name) || progress.plays[name]) return;
   if (area.previousElementSibling?.classList.contains('how-to')) area.previousElementSibling.remove(); // drawn again: one card
   const card = make('div', 'how-to');
   card.append(make('h2', 'how-title', 'How to play'), ...how.map((line) => make('p', 'how-line', line)));
@@ -618,7 +604,7 @@ async function startGame(name) {
 async function refitMaze() {
   const name = location.hash.slice(1);
   const area = document.getElementById(`game-${name}`);
-  if (GAMES[name]?.file !== 'maze' && name !== 'maze') return;
+  if (!isMaze(name)) return;
   if (!area?.dataset.grid || area.classList.contains('finished')) return;
   const { gridFor } = await import('./games/maze.js');
   const [size, , room] = GAMES[name].data();
@@ -675,13 +661,13 @@ function drawGrownUps() {
   area.replaceChildren();
   const days = progressStore.currentStreak(progress, today);
   area.append(make('p', 'gu-summary',
-    `${progress.totalDays || 0} puzzle days in all · ${days} day${days === 1 ? '' : 's'} in a row now`));
+    `${progress.totalDays} puzzle days in all · ${days} day${days === 1 ? '' : 's'} in a row now`));
   area.append(make('p', 'gu-level',
     'Puzzles with levels move up after 3 easy days in a row, and down after 2 hard ones.'));
 
   // How each group is going: its puzzles that are going well or need practice.
   const groupLines = GROUPS.map(({ kind, title }) => {
-    const trends = Object.keys(GAMES).filter((name) => GAMES[name].kind === kind).map((name) => progressStore.trend(progress, name));
+    const trends = gamesIn(kind).map((name) => progressStore.trend(progress, name));
     const well = trends.filter((t) => t === 'well').length;
     const practice = trends.filter((t) => t === 'practice').length;
     const parts = [well ? `${well} going well` : '', practice ? `${practice} need${practice === 1 ? 's' : ''} practice` : ''].filter(Boolean);
@@ -696,7 +682,6 @@ function drawGrownUps() {
 
   // The last 4 weeks, oldest first, with today in the last square.
   area.append(make('h2', 'gu-heading', 'Last 4 weeks'));
-  const now = new Date();
   const dates = Array.from({ length: progressStore.KEEP_DAYS }, (_, i) =>
     new Date(now.getFullYear(), now.getMonth(), now.getDate() - (progressStore.KEEP_DAYS - 1 - i)));
   const weeks = make('div', 'gu-weeks');
@@ -717,7 +702,7 @@ function drawGrownUps() {
   area.append(make('h2', 'gu-heading', 'Puzzles played'));
   const list = make('ul', 'gu-games');
   const rows = Object.entries(GAMES)
-    .map(([name, { title, levels }]) => ({ name, title, levels, times: progress.plays?.[name] || 0 }))
+    .map(([name, { title, levels }]) => ({ name, title, levels, times: progress.plays[name] || 0 }))
     .sort((a, b) => b.times - a.times || a.title.localeCompare(b.title));
   for (const { name, title, levels, times } of rows) {
     const row = make('li', 'gu-game');
@@ -731,7 +716,7 @@ function drawGrownUps() {
     ].filter(Boolean).join(' · ');
     if (notes) about.append(make('span', `gu-note${trend === 'practice' ? ' gu-note-practice' : ''}`, notes));
     // Missed words and facts that will come back for more practice.
-    const coming = (progress.review?.[name] || []).map((entry) => entry.item.replace(/^(\d+)x(\d+)$/, '$1 × $2'));
+    const coming = (progress.review[name] || []).map((entry) => entry.item.replace(/^(\d+)x(\d+)$/, '$1 × $2'));
     if (coming.length) about.append(make('span', 'gu-note', `Coming back for practice: ${coming.join(', ')}`));
     row.append(about, make('span', 'gu-times', times ? `${times} day${times === 1 ? '' : 's'}` : 'not yet'));
     list.append(row);
@@ -769,7 +754,7 @@ function show() {
   if (waitingGift) keepSticker(waitingGift); // left without opening the gift: keep the sticker anyway
   window.scrollTo(0, 0);
   // On a maze, a resting hand or a second finger must not zoom the page (see `.tracing` in styles.css).
-  const tracing = GAMES[current]?.file === 'maze' || current === 'maze';
+  const tracing = isMaze(current);
   document.documentElement.classList.toggle('tracing', tracing);
   // maximum-scale also snaps an already zoomed page back to normal size on an iPad.
   document.querySelector('meta[name="viewport"]').content = `width=device-width, initial-scale=1, viewport-fit=cover${tracing ? ', maximum-scale=1, user-scalable=no' : ''}`;
