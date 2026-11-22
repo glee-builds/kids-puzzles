@@ -62,11 +62,13 @@ styles.css
 src/app.js          the GAMES list, game screens, streak, navigation
 src/seed.js         date -> repeatable random numbers
 src/games/          one file per game
-src/ui.js           screen helpers the games share (buttons, tracing, drag-or-tap)
+src/ui.js           screen helpers the games share (buttons, number pad, the
+                    fill-in screen, tracing, drag-or-tap)
 src/voice.js        reading aloud: picks the device's best voice
 src/stickers.js     the sticker book: pages, stickers, and which gift comes next
 src/today.js        which 5 puzzles make up Today's set
 src/times.js        which times facts the multiplication puzzles use, by stage
+src/rounds.js       nextRound: right moves on, the third miss shows the answer
 sw.js               service worker: offline play, newest files when online
 data/words/         curated word lists by level (JSON)
 tests/              one test file per game, plus seed tests; helpers.js has

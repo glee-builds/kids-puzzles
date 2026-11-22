@@ -25,6 +25,7 @@ const FILES = [
   'src/progress.js',
   'src/seed.js',
   'src/stickers.js',
+  'src/rounds.js',
   'src/times.js',
   'src/today.js',
   'src/ui.js',

@@ -12,6 +12,7 @@
 // Every round has a sentence with a blank, and "Hear it" says the word
 // with the phone's own built-in voice (no internet needed; see src/voice.js).
 
+import { nextRound } from '../rounds.js';
 import { createRandom, dealForDay } from '../seed.js';
 import { make, button, liveMessage, wiggle, letterKeyboard, roundFrame } from '../ui.js';
 import { say, canSpeak } from '../voice.js';
@@ -111,18 +112,8 @@ export function check(state, answer) {
   const round = state.puzzle.rounds[state.round];
   const right = round.kind === 'sound' ? round.correct : round.word;
   const correct = answer === right;
-  const tries = correct ? 0 : state.tries + 1;
-  const shown = round.kind === 'spell' && !correct && tries >= MAX_TRIES;
-  const next = correct || shown ? state.round + 1 : state.round;
   const marks = round.kind === 'spell' ? [...round.word].map((ch, i) => answer[i] === ch) : null;
-  return {
-    ...state,
-    round: next,
-    tries: next === state.round ? tries : 0,
-    shown: shown ? [...state.shown, state.round] : state.shown,
-    status: next >= state.puzzle.rounds.length ? 'won' : 'playing',
-    last: { round: state.round, correct, shown, marks },
-  };
+  return nextRound(state, correct, { canShow: round.kind === 'spell', maxTries: MAX_TRIES, extra: { marks } });
 }
 
 /** Confirm a puzzle is valid. Returns { ok, problems }. */
