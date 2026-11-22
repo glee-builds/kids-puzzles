@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, assertValid } from './helpers.js';
 import { stageFor, STAGES, choicesFor } from '../src/times.js';
 import {
   generate, verify, start, check, hint, isRight, shows, ROUNDS,
@@ -44,8 +44,7 @@ test('every day for two years, at every level, makes valid rounds', () => {
   for (const level of [1, 2, 3]) {
     everyDay((key) => {
       const puzzle = generate(seedForDay(key), level);
-      const result = verify(puzzle);
-      assert.ok(result.ok, `${key}, level ${level}: ${result.problems.join('; ')}`);
+      assertValid(verify(puzzle), `${key}, level ${level}`);
       assert.equal(puzzle.stage, stageFor(level));
     });
   }
@@ -101,7 +100,7 @@ test('the turned-around picture is wrong, and the hint says why', () => {
 test('missed facts come back in the add and build rounds, even from another level', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key), 1, ['4x7', '3x9']);
-    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.deepEqual([puzzle.rounds[1].groups, puzzle.rounds[1].size], [4, 7]);
     assert.deepEqual([puzzle.rounds[2].groups, puzzle.rounds[2].size], [3, 9]);
   }, 60);
@@ -116,7 +115,7 @@ test('facts that do not fit the lily pads are ignored', () => {
 test('level 4 asks two facts from memory, then a build, every day for two years', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key), 4);
-    assert.ok(verify(puzzle).ok, `${key}: ${verify(puzzle).problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.deepEqual(puzzle.rounds.map((r) => r.kind), ['recall', 'recall', 'build']);
     assert.equal(puzzle.stage, 2); // the hardest facts
   });

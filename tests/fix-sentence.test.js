@@ -3,15 +3,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, loadData, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, next, hint, current, itemProblems, sentencesForDay, fixedSentence,
   PER_DAY, FIND_TRIES,
 } from '../src/games/fix-sentence.js';
 
-const ITEMS = JSON.parse(readFileSync(new URL('../data/fix-sentences.json', import.meta.url), 'utf8')).sentences;
+const ITEMS = loadData('fix-sentences.json').sentences;
 const seedForDay = (key) => seedFor(key, 'fix-sentence');
 
 const ran = { sentence: 'Yesterday the robot run to the park.', wrong: 3, fix: 'ran', options: ['ran', 'runs', 'running'], why: 'It already happened, so it is ran.' };
@@ -50,8 +49,7 @@ test('no sentence repeats until the whole list has been used', () => {
 
 test('every day for two years is valid', () => {
   everyDay((key, day) => {
-    const result = verify(generate(seedForDay(key), ITEMS, day));
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(generate(seedForDay(key), ITEMS, day)), key);
   });
 });
 

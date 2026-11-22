@@ -2,13 +2,11 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
 import { generate, start, check, markGuess, verify, clue, MAX_GUESSES } from '../src/games/word-guess.js';
+import { loadData, assertValid } from './helpers.js';
 
-const level1 = JSON.parse(
-  readFileSync(new URL('../data/words/level-1.json', import.meta.url), 'utf8'),
-);
+const level1 = loadData('words/level-1.json');
 const words = Object.values(level1.words).flat();
 
 // --- generate ---
@@ -155,28 +153,21 @@ test('clue: no clue once the puzzle is finished', () => {
 
 test('verify: every word in the level 1 list makes a valid puzzle', () => {
   for (const answer of words) {
-    const result = verify({ answer, length: answer.length, maxGuesses: MAX_GUESSES });
-    assert.ok(result.ok, `${answer}: ${result.problems.join('; ')}`);
+    assertValid(verify({ answer, length: answer.length, maxGuesses: MAX_GUESSES }), answer);
   }
 });
 
 test('verify: every word in the level 2 list makes a valid puzzle', () => {
-  const level2 = JSON.parse(
-    readFileSync(new URL('../data/words/level-2.json', import.meta.url), 'utf8'),
-  );
+  const level2 = loadData('words/level-2.json');
   for (const answer of Object.values(level2.words).flat()) {
-    const result = verify({ answer, length: answer.length, maxGuesses: MAX_GUESSES });
-    assert.ok(result.ok, `${answer}: ${result.problems.join('; ')}`);
+    assertValid(verify({ answer, length: answer.length, maxGuesses: MAX_GUESSES }), answer);
   }
 });
 
 test('verify: every word in the level 3 list makes a valid puzzle', () => {
-  const level3 = JSON.parse(
-    readFileSync(new URL('../data/words/level-3.json', import.meta.url), 'utf8'),
-  );
+  const level3 = loadData('words/level-3.json');
   for (const answer of Object.values(level3.words).flat()) {
-    const result = verify({ answer, length: answer.length, maxGuesses: MAX_GUESSES });
-    assert.ok(result.ok, `${answer}: ${result.problems.join('; ')}`);
+    assertValid(verify({ answer, length: answer.length, maxGuesses: MAX_GUESSES }), answer);
   }
 });
 

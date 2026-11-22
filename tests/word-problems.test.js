@@ -3,15 +3,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay, dayKey } from './helpers.js';
+import { everyDay, dayKey, loadData, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, next, hint, current, pieces, worked, answerFor, textProblems,
   KINDS, PER_DAY, MAX_TRIES, PICK_TRIES,
 } from '../src/games/word-problems.js';
 
-const ITEMS = JSON.parse(readFileSync(new URL('../data/word-problems.json', import.meta.url), 'utf8')).problems;
+const ITEMS = loadData('word-problems.json').problems;
 const seedForDay = (key) => seedFor(key, 'word-problems');
 
 const fixed = {
@@ -48,8 +47,7 @@ test('generate gives the same problems for the same day', () => {
 test('every day for two years: 3 valid problems, extra first, two-step second', () => {
   everyDay((key, day) => {
     const puzzle = generate(seedForDay(dayKey(day)), ITEMS);
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${dayKey(day)}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), `${dayKey(day)}`);
     assert.equal(puzzle.problems.length, PER_DAY);
     assert.ok(puzzle.problems[0].kind.startsWith('extra'));
     assert.ok(puzzle.problems[1].kind.startsWith('two'));

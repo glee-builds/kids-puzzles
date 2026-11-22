@@ -3,15 +3,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, loadData, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, next, hint, currentStep, answerFor, entryProblems, wordsForDay,
   WORDS_PER_DAY,
 } from '../src/games/word-clues.js';
 
-const WORDS = JSON.parse(readFileSync(new URL('../data/rich-words.json', import.meta.url), 'utf8')).words;
+const WORDS = loadData('rich-words.json').words;
 const ALL = WORDS.map((w) => w.word);
 const seedForDay = (key) => seedFor(key, 'word-clues');
 
@@ -63,8 +62,7 @@ test('no word repeats until the whole list has been used', () => {
 
 test('every day for two years is valid', () => {
   everyDay((key, day) => {
-    const result = verify(generate(seedForDay(key), WORDS, day));
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(generate(seedForDay(key), WORDS, day)), key);
   });
 });
 

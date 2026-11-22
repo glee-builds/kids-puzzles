@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay } from './helpers.js';
+import { everyDay, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, hint, totalOf, countingOn, COINS, HANDFULS, MAX_TRIES,
 } from '../src/games/coin-count.js';
@@ -20,8 +20,7 @@ test('every day for two years, at every level, makes 4 valid handfuls', () => {
   for (const level of [1, 2, 3]) {
     everyDay((key) => {
       const puzzle = generate(seedForDay(key), level);
-      const result = verify(puzzle);
-      assert.ok(result.ok, `level ${level}, ${key}: ${result.problems.join('; ')}`);
+      assertValid(verify(puzzle), `level ${level}, ${key}`);
     });
   }
 });

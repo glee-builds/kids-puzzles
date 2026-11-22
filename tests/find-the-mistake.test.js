@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay, dayKey } from './helpers.js';
+import { everyDay, dayKey, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, next, hint, lines, questionAnswer, current,
   PROBLEMS, MAX_TRIES, ORDER,
@@ -49,8 +49,7 @@ test('generate gives the same problems for the same day', () => {
 test('every day for two years has exactly one mistake per problem, numbers 0 to 100', () => {
   everyDay((key, day) => {
     const puzzle = generate(seedForDay(dayKey(day)));
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${dayKey(day)}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), `${dayKey(day)}`);
     assert.equal(puzzle.problems.length, PROBLEMS);
     assert.deepEqual(puzzle.problems.map((p) => p.kind), ORDER);
   });

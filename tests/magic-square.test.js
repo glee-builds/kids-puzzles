@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
-import { everyDay, dayKey } from './helpers.js';
+import { everyDay, dayKey, assertValid } from './helpers.js';
 import {
   generate, verify, start, check, hint, hintLine, workable, isSolvable, answerFor,
   LINES, BLANKS, MIN_TARGET, MAX_TARGET, MAX_TRIES, LEVELS} from '../src/games/magic-square.js';
@@ -29,8 +29,7 @@ test('generate gives the same square for the same day', () => {
 test('every day for two years makes a valid, solvable magic square', () => {
   everyDay((key) => {
     const puzzle = generate(seedForDay(key));
-    const result = verify(puzzle);
-    assert.ok(result.ok, `${key}: ${result.problems.join('; ')}`);
+    assertValid(verify(puzzle), key);
     assert.equal(puzzle.hidden.length, BLANKS);
   });
 });
