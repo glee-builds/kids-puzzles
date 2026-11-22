@@ -314,3 +314,13 @@ test('setLevel: a level picked by hand starts right away, and other puzzles keep
   assert.deepEqual(after.levels['graph-it'], before.levels['graph-it']);
   assert.equal(before.levels['math-mix-ups'], undefined);
 });
+
+test('a day from earlier in the week can be filled in: the frog hops, the streak stays', () => {
+  let p = recordFinish(emptyProgress(), '2026-11-08', 'maze');
+  p = recordFinish(p, '2026-11-09', 'maze');
+  p = recordFinish(p, '2026-11-05', 'maze'); // 4 days before the last day played
+  assert.equal(p.totalDays, 3);
+  assert.equal(p.streak, 2);
+  assert.equal(p.lastDay, '2026-11-09');
+  assert.deepEqual(p.finished['2026-11-05'], ['maze']);
+});

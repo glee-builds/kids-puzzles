@@ -15,14 +15,19 @@ import { todaysSet, SET_SIZE } from './today.js';
 const today = dateKey();
 let progress = progressStore.load();
 
-// Yesterday's puzzles: after a missed day, the home screen links to
-// ?day=yesterday, which plays yesterday's puzzles instead of today's.
-// Finishing one fills in the missed day (see progress.js). Only yesterday,
-// not older days.
+// Earlier days: the home screen has a row of the 7 days before today. Each
+// opens ?day=2026-11-20 (for example), which plays that day's puzzles
+// instead of today's. Finishing one fills in that day (see progress.js).
+// ?day=yesterday works too. Older days aren't offered.
 const now = new Date();
-const yesterday = dateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
-const playingYesterday = new URLSearchParams(location.search).get('day') === 'yesterday';
-const playDay = playingYesterday ? yesterday : today; // the day whose puzzles are shown
+const PAST_DAYS = [1, 2, 3, 4, 5, 6, 7].map((ago) => dateKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - ago)));
+const yesterday = PAST_DAYS[0];
+const askedDay = new URLSearchParams(location.search).get('day');
+const playDay = askedDay === 'yesterday' ? yesterday : PAST_DAYS.includes(askedDay) ? askedDay : today; // the day whose puzzles are shown
+const playingPast = playDay !== today;
+/** "yesterday", or the day of the week ("Thursday"). */
+const dayName = (key, style = 'long') => (key === yesterday && style === 'long' ? 'yesterday' : new Date(`${key}T12:00`).toLocaleDateString('en-US', { weekday: style }));
+const capital = (text) => text[0].toUpperCase() + text.slice(1);
 
 // Games are started the first time they are opened, then kept, so
 // leaving a game halfway and coming back keeps the guesses.
@@ -69,8 +74,8 @@ function drawPond() {
   if (at === 0) caption = 'Finish a puzzle and the frog hops onto a lily pad!';
   else if (!doneToday) caption = 'Finish a puzzle to hop to the next lily pad!';
   else caption = `The frog is on lily pad ${at}!`;
-  if (playingYesterday && !progressStore.isFinished(progress, yesterday)) {
-    caption = 'Finish one of yesterday\'s puzzles to fill in the missed day!';
+  if (playingPast && !progressStore.isFinished(progress, playDay)) {
+    caption = `Finish one of ${dayName(playDay)}'s puzzles to fill in that day!`;
   }
   const captionNode = document.getElementById('pond-caption');
   captionNode.textContent = caption;
@@ -81,6 +86,7 @@ function drawPond() {
     captionNode.append(inARow);
   }
   drawCatchUp();
+  drawPastDays();
   drawStickerLink();
   drawWeek();
 }
@@ -89,14 +95,27 @@ function drawPond() {
 function drawCatchUp() {
   const link = document.getElementById('catch-up');
   const missedYesterday = (progress.totalDays || 0) > 0 && !progressStore.isFinished(progress, yesterday);
-  link.hidden = !playingYesterday && !missedYesterday;
-  if (playingYesterday) {
+  link.hidden = !playingPast && !missedYesterday;
+  if (playingPast) {
     link.textContent = '← Back to today\'s puzzles';
     link.href = './';
   } else {
     link.textContent = 'Missed yesterday? Play it now →';
     link.href = '?day=yesterday';
   }
+}
+
+/** The row of the last 7 days: tap one to play its puzzles. ✓ means a puzzle was finished that day. */
+function drawPastDays() {
+  const row = document.getElementById('past-days');
+  row.replaceChildren(...PAST_DAYS.map((key) => {
+    const day = make('a', 'past-day', dayName(key, 'short'));
+    day.href = `?day=${key}`;
+    day.setAttribute('aria-label', capital(dayName(key)));
+    if (key === playDay) day.setAttribute('aria-current', 'page');
+    if (progressStore.isFinished(progress, key)) day.append(make('span', 'past-day-done', '✓'));
+    return day;
+  }));
 }
 
 // ---------- Today's set ----------
@@ -113,7 +132,7 @@ function drawToday() {
   const set = todaysPuzzles();
   const done = set.filter(isDone).length;
   const next = set.find((game) => !isDone(game));
-  document.getElementById('today-title').textContent = playingYesterday ? 'Yesterday\'s 5' : 'Today\'s 5';
+  document.getElementById('today-title').textContent = `${capital(playingPast ? dayName(playDay) : 'today')}'s 5`;
   document.getElementById('today-count').textContent = done === SET_SIZE
     ? `★ All ${SET_SIZE} done! Great work.`
     : `${done} of ${SET_SIZE} done`;
@@ -483,9 +502,9 @@ function makeScreen(name, { title, legend }) {
   back.href = '#';
   back.setAttribute('aria-label', 'Back to puzzles');
   top.append(back, make('h1', '', title));
-  // Yesterday's puzzles show a tag in place of the legend, so the screen
+  // An earlier day's puzzles show a tag in place of the legend, so the screen
   // is no taller than usual.
-  if (playingYesterday && name in GAMES) top.append(make('p', 'yesterday-tag', 'Yesterday\'s puzzle'));
+  if (playingPast && name in GAMES) top.append(make('p', 'yesterday-tag', `${capital(dayName(playDay))}'s puzzle`));
   else if (legend) top.append(make('p', 'legend', legend));
   const area = make('main', 'game');
   area.id = `game-${name}`;
@@ -798,7 +817,7 @@ show();
 // the new day's puzzles.
 function startNewDayIfNeeded() {
   if (document.visibilityState !== 'visible' || dateKey() === today) return;
-  // Go to today's home screen: not yesterday's puzzles, and not a puzzle left open.
+  // Go to today's home screen: not an earlier day's puzzles, and not a puzzle left open.
   location.replace(location.pathname);
 }
 // The Refresh button at the bottom of the home screen does the same by

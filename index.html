@@ -22,7 +22,7 @@
   </div>
   <script>
     // The splash shows once each time the app is opened, not on every page
-    // load (switching to yesterday's puzzles loads the page again).
+    // load (switching to an earlier day's puzzles loads the page again).
     try {
       if (sessionStorage.getItem('lily-pad-opened')) document.getElementById('splash').remove();
       else sessionStorage.setItem('lily-pad-opened', '1');
@@ -51,6 +51,9 @@
         <h2 class="today-title" id="today-title">Today's 5</h2>
         <p class="today-count" id="today-count"></p>
         <nav class="today-list" id="today-list" aria-label="Today's puzzles"></nav>
+        <!-- The last 7 days: tap one to play that day's puzzles. Filled in by app.js. -->
+        <p class="past-label">Play an earlier day:</p>
+        <nav class="past-days" id="past-days" aria-label="Earlier days"></nav>
       </section>
 
       <!-- Every puzzle, for free choice. Closed until tapped. -->

@@ -416,6 +416,10 @@ try {
   await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-sticker").length > 100' });
   await checkScreen('For grown-ups', '#grown-ups', { ready: 'document.querySelectorAll(".gu-day").length === 28' });
   await checkScreen('Yesterday home', '?day=yesterday', { ready: 'document.getElementById("today-title").textContent.includes("Yesterday")' });
+  // A week ago (the fixed date is a Friday, so 7 days back is a Friday too).
+  await checkScreen('A week ago home', '?day=2026-11-06', { ready: 'document.getElementById("today-title").textContent === "Friday\'s 5" && document.querySelectorAll("#past-days a").length === 7' });
+  await checkScreen('A week ago puzzle', '?day=2026-11-06#maze', { ready: 'Boolean(document.querySelector("#game-maze .mz-grid")) && document.querySelector(".yesterday-tag")?.textContent === "Friday\'s puzzle"', fits: true });
+  await checkScreen('Too long ago home', '?day=2026-11-05', { ready: 'document.getElementById("today-title").textContent === "Today\'s 5"' });
 
   // Puzzles with levels, at their top level: do they still draw and fit?
   const levels = Object.fromEntries(TOP_LEVELS.map((game) => [game, { now: 9, was: 9, since: null }]));

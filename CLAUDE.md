@@ -26,7 +26,7 @@ Shared rules for all coding projects are in `../CLAUDE.md`. This file adds the r
 - **Groups:** puzzles are in five groups (`GROUPS` in `src/app.js`): Spelling, Reading, Numbers, Everyday Math, and Just for Fun (the two mazes). Each has a color and a shape (`.kind-...` in `styles.css`).
 - **Today's set:** the home screen leads with 5 puzzles for the day (`src/today.js`); all puzzles stay under "All puzzles". A new game joins a group and the rotation through its `kind` in `GAMES`.
 - **Sticker gifts:** the first finish of each puzzle each day gives a gift with a new sticker (`src/stickers.js`; never a repeat). The sticker book is the `#stickers` screen. Stickers are emoji from 2019 or earlier; no image files.
-- **Yesterday's puzzles:** after a missed day, the home screen links to `?day=yesterday`, which plays that day's puzzles; finishing one fills in the missed day (`playDay` in `src/app.js`, catching up in `src/progress.js`). Only yesterday.
+- **Earlier days:** under Today's 5, the home screen has a row of the 7 days before today; each opens `?day=2026-11-20` (for example), which plays that day's puzzles (`playDay` and `PAST_DAYS` in `src/app.js`). `?day=yesterday` works too, and after a missed day a link offers yesterday. Finishing a puzzle fills in that day: the frog hops, and yesterday also joins the days in a row (catching up in `src/progress.js`). Nothing older than 7 days.
 - **Difficulty:** lives in data, not code. Hand-curated word lists by level in `data/words/` (JSON).
 - **Game modules:** each game is one file in `src/games/` that exports:
   - `generate(seed, words)`: build a puzzle (word games get their word list passed in)
