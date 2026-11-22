@@ -3518,6 +3518,43 @@ button.gr-row {
   font-size: 1.3rem;
 }
 
+/* The last 7 days, under Today's 5: one small button each. */
+.past-label {
+  margin: 12px 0 4px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.past-days {
+  display: flex;
+  gap: 4px;
+}
+
+.past-day {
+  flex: 1;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.past-day[aria-current] {
+  border-color: var(--words-ink);
+  color: var(--words-ink);
+}
+
+.past-day-done {
+  font-size: 0.75rem;
+  color: var(--go);
+}
+
 .today-count {
   margin: 2px 0 8px;
   color: var(--muted);
