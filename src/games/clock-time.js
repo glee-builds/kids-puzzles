@@ -10,7 +10,7 @@
 // hands, and being an hour off.
 
 import { createRandom } from '../seed.js';
-import { make, button, wiggle, roundFrame } from '../ui.js';
+import { make, button, wiggle, roundFrame, shape } from '../ui.js';
 
 export const CLOCKS = 5;
 // The minutes a clock can show at each level.
@@ -105,18 +105,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
-
-const SVG = 'http://www.w3.org/2000/svg';
-
-/** A piece of the clock drawing, e.g. shape('circle', { r: 46 }). */
-function shape(tag, attributes) {
-  const node = document.createElementNS(SVG, tag);
-  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value);
-  return node;
-}
+// ---------- The screen ----------
 
 /** A clock face showing hour:minute, drawn in a 100 by 100 box. */
 function clockFace(hour, minute) {

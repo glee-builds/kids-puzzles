@@ -178,9 +178,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
+// ---------- The screen ----------
 
 // For messages like "Four threes make 12!"
 const COUNT_WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five'];

@@ -85,9 +85,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// Playing: pick a choice; a wrong one is crossed off, so it never gets stuck.
-// ---------------------------------------------------------------------------
+// ---------- Playing: pick a choice; a wrong one is crossed off, so it never gets stuck. ----------
 
 export function start(puzzle) {
   return { puzzle, index: 0, tried: [], done: false, status: 'playing', last: null };
@@ -126,9 +124,7 @@ export function hint(state) {
     : 'Read the sentence with each word. Which one makes sense?';
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
+// ---------- The screen ----------
 
 const CHEERS = ['You used the clues!', 'Word detective!', 'You got it!', 'Great reading!'];
 

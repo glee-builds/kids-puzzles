@@ -148,9 +148,7 @@ export function clue(state) {
   return [...answer].map((letter, i) => (i === hidden ? null : letter));
 }
 
-// ---------------------------------------------------------------------------
-// The screen: board, message line, and on-screen ABC keyboard.
-// ---------------------------------------------------------------------------
+// ---------- The screen: board, message line, and on-screen ABC keyboard. ----------
 
 const MARK_WORDS = {
   here: 'right spot',

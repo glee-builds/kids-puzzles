@@ -207,9 +207,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen: target, 3x3 grid, message line, and number pad.
-// ---------------------------------------------------------------------------
+// ---------- The screen: target, 3x3 grid, message line, and number pad. ----------
 
 const CHEERS = ['Yes!', 'Great adding!', 'You got it!', 'Nice work!', 'Correct!'];
 

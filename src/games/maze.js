@@ -273,9 +273,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen: the maze grid, a message line, and a Hint button.
-// ---------------------------------------------------------------------------
+// ---------- The screen: the maze grid, a message line, and a Hint button. ----------
 
 /**
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })

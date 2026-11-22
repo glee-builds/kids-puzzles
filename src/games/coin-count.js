@@ -97,9 +97,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
+// ---------- The screen ----------
 
 const CHEERS = ['You counted it!', 'Right on the money!', 'Great counting!', 'Yes!'];
 

@@ -13,7 +13,7 @@
 
 import { createRandom } from '../seed.js';
 import { choicesFor } from '../times.js';
-import { make, button, wiggle, roundFrame } from '../ui.js';
+import { make, button, wiggle, roundFrame, shape } from '../ui.js';
 
 export const ROUNDS = ['read', 'build', 'line', 'spot'];
 export const MAX_TRIES = 3; // tries at building a graph before it's shown
@@ -230,17 +230,8 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
+// ---------- The screen ----------
 
-const SVG = 'http://www.w3.org/2000/svg';
-function shape(tag, attributes, text) {
-  const node = document.createElementNS(SVG, tag);
-  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value);
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
 
 /**
  * A bar graph: numbers up the side, a bar for each name. Returns its node
