@@ -142,9 +142,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// Playing: find the wrong step, fix it, then move to the next problem.
-// ---------------------------------------------------------------------------
+// ---------- Playing: find the wrong step, fix it, then move to the next problem. ----------
 
 /** The starting state. */
 export function start(puzzle) {
@@ -215,9 +213,7 @@ export function hint(state) {
   return op === '+' ? `Count on ${right} from ${left}.` : `Count back ${right} from ${left}.`;
 }
 
-// ---------------------------------------------------------------------------
-// The screen: the frog's work, a message line, and a number pad.
-// ---------------------------------------------------------------------------
+// ---------- The screen: the frog's work, a message line, and a number pad. ----------
 
 const CHEERS = ['You fixed it!', 'Great checking!', 'Nice work!', 'You got it!'];
 

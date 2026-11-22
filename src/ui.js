@@ -1,7 +1,7 @@
 // ui.js: small screen helpers the games share.
 //
 // Each game draws its own screen; these are the pieces several games need
-// the same way: making elements, a message line, the "not quite" wiggle,
+// the same way: making elements and drawing shapes, a message line, the "not quite" wiggle,
 // progress dots, the frame for rounds, the number pad, the letter keyboard, finger tracing on a
 // grid, and drag-or-tap.
 
@@ -9,6 +9,14 @@
 export function make(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+/** A piece of a drawing (SVG), e.g. shape('circle', { r: 46 }), with optional text inside. */
+export function shape(tag, attributes, text) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value);
   if (text !== undefined) node.textContent = text;
   return node;
 }

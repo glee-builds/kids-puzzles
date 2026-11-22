@@ -142,9 +142,7 @@ export function windowFor(from, to) {
   return { lo, hi };
 }
 
-// ---------------------------------------------------------------------------
-// The screen: number line with the frog, the hop card, and a number pad.
-// ---------------------------------------------------------------------------
+// ---------- The screen: number line with the frog, the hop card, and a number pad. ----------
 
 const CHEERS = ['Hop! Yes!', 'Great counting!', 'You got it!', 'Nice jump!', 'Correct!'];
 

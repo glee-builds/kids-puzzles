@@ -125,9 +125,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen (styles are shared with Bug Groups: .grp-*)
-// ---------------------------------------------------------------------------
+// ---------- The screen (styles are shared with Bug Groups: .grp-*) ----------
 
 const rowsText = (n) => make('span', 'grp-groups', String(n)); // orange
 const sizeText = (n) => make('span', 'grp-size', String(n));   // teal

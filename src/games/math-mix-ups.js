@@ -449,9 +449,7 @@ function verifyRounds(rounds) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
+// ---------- The screen ----------
 
 /** One shape, as a picture. Each has its own color and its own outline, so it isn't color alone. */
 const shapeNode = (name) => {

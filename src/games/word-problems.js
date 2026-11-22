@@ -127,9 +127,7 @@ export function worked(problem) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Playing
-// ---------------------------------------------------------------------------
+// ---------- Playing ----------
 
 function phaseFor(problem) {
   return isExtra(problem) ? 'pick' : 'answer';
@@ -217,9 +215,7 @@ export function hint(state) {
   return `${a} ${firstSign} ${b} = ${first}. Now ${first} ${secondSign} ${c} = ?`;
 }
 
-// ---------------------------------------------------------------------------
-// The screen: the story, a prompt, and a number pad.
-// ---------------------------------------------------------------------------
+// ---------- The screen: the story, a prompt, and a number pad. ----------
 
 const CHEERS = ['You thought it through!', 'Great thinking!', 'You got it!', 'Nice work!'];
 

@@ -139,9 +139,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
+// ---------- The screen ----------
 
 // How fast "Hear it" reads: 1 is normal speed. The word is said slowly on
 // its own, then the sentence a little faster, then the word again.

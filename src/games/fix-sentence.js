@@ -65,9 +65,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// Playing: find the wrong word, then pick its fix.
-// ---------------------------------------------------------------------------
+// ---------- Playing: find the wrong word, then pick its fix. ----------
 
 export function start(puzzle, index = 0) {
   return { puzzle, index, phase: 'find', fine: [], findMisses: 0, shown: false, tried: [], status: 'playing', last: null };
@@ -120,9 +118,7 @@ export function hint(state) {
   return 'Try each word in the sentence. Which one sounds right?';
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
+// ---------- The screen ----------
 
 const CHEERS = ['You fixed it!', 'Sharp eyes!', 'Great editing!', 'You got it!'];
 

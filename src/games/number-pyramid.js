@@ -230,9 +230,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen: pyramid of bricks, message line, and number pad.
-// ---------------------------------------------------------------------------
+// ---------- The screen: pyramid of bricks, message line, and number pad. ----------
 
 const CHEERS = ['Yes!', 'Great adding!', 'You got it!', 'Nice work!', 'Correct!'];
 

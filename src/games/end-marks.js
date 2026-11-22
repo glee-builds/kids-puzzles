@@ -205,9 +205,7 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------------------------------------------------------------------------
-// The screen
-// ---------------------------------------------------------------------------
+// ---------- The screen ----------
 
 /**
  * Draw the game inside `container`. Calls onDone({ status, misses, helped })
