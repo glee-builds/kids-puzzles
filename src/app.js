@@ -750,7 +750,10 @@ function show() {
   if (waitingGift) keepSticker(waitingGift); // left without opening the gift: keep the sticker anyway
   window.scrollTo(0, 0);
   // On a maze, a resting hand or a second finger must not zoom the page (see `.tracing` in styles.css).
-  document.documentElement.classList.toggle('tracing', GAMES[current]?.file === 'maze' || current === 'maze');
+  const tracing = GAMES[current]?.file === 'maze' || current === 'maze';
+  document.documentElement.classList.toggle('tracing', tracing);
+  // maximum-scale also snaps an already zoomed page back to normal size on an iPad.
+  document.querySelector('meta[name="viewport"]').content = `width=device-width, initial-scale=1, viewport-fit=cover${tracing ? ', maximum-scale=1, user-scalable=no' : ''}`;
 
   if (current === '') drawPond();
   if (current === 'grown-ups') drawGrownUps();
@@ -776,10 +779,11 @@ document.getElementById('done-close').addEventListener('click', () => {
   document.getElementById('done').hidden = true;
 });
 
-// Safari's own pinch: stop it while a maze is showing. (Other browsers follow `touch-action`.)
-document.addEventListener('gesturestart', (event) => {
-  if (document.documentElement.classList.contains('tracing')) event.preventDefault();
-});
+// While a maze is showing, turn away a pinch: iPad Safari doesn't always follow `touch-action` (styles.css) for one.
+const noZoom = (event) => {
+  if (document.documentElement.classList.contains('tracing') && (event.touches?.length ?? 2) > 1) event.preventDefault();
+};
+for (const type of ['gesturestart', 'gesturechange', 'touchmove']) document.addEventListener(type, noZoom, { passive: false });
 
 window.addEventListener('hashchange', show);
 updateHome();
