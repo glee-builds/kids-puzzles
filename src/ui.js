@@ -2,7 +2,7 @@
 //
 // Each game draws its own screen; these are the pieces several games need
 // the same way: making elements and drawing shapes, a message line, the "not quite" wiggle,
-// progress dots, the frame for rounds, the number pad, the letter keyboard, finger tracing on a
+// progress dots, the frame for rounds, the number pad, the fill-in-the-blanks screen, the letter keyboard, finger tracing on a
 // grid, and drag-or-tap.
 
 /** A new element, e.g. make('p', 'ws-message', 'Hello'). */
@@ -100,6 +100,141 @@ export function numberPad(container, { onDigit, onErase, onCheck }, extraClass =
     else if (event.key === 'Enter') onCheck();
   });
   return { node, stop };
+}
+
+/**
+ * The screen Magic Square and Number Pyramid share: a board of cells, a
+ * message line, and the number pad. Tap a ? cell, type its number, press
+ * Check. Calls onDone({ status, misses, helped }) once when finished: how
+ * many wrong answers, and how many answers were shown.
+ *   game      the game's own rules: start, check, workable, hint, answerFor,
+ *             and hintLine if a miss lights up the line to use
+ *   prefix    for the class names: 'ms' gives ms-message, ms-hint-line
+ *   board     board(select) builds the board, with a button per cell that
+ *             calls select(id). Returns { nodes, cells: { id: button } }
+ *   cellClass every cell button's own class ('ms-cell')
+ *   word      what a cell is called ('square', 'brick')
+ *   finished  the message when every blank is filled
+ */
+export function fillIn(container, puzzle, onDone, session, game, { prefix, board, cellClass, word, finished }) {
+  const CHEERS = ['Yes!', 'Great adding!', 'You got it!', 'Nice work!', 'Correct!'];
+  let state = game.start(puzzle);
+  // Picking up a half-done puzzle: put back the numbers found and the misses so far.
+  if (session.saved) state = { ...state, ...session.saved };
+  const keep = () => session.save?.({ entries: state.entries, tries: state.tries, revealed: state.revealed });
+  let selected = null;
+  let typed = '';
+  let highlight = []; // cells in the hinted line
+  let cheerCount = 0;
+
+  container.replaceChildren();
+  container.classList.add(prefix);
+  const { nodes, cells } = board(select);
+  const message = liveMessage(`${prefix}-message`, `Tap a ? ${word} and type its number.`);
+  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit });
+  container.append(...nodes, message, pad);
+
+  function select(id) {
+    if (state.status !== 'playing' || !puzzle.hidden.includes(id) || id in state.entries) return;
+    if (!game.workable(state).includes(id)) {
+      // Not ready yet: say so, and keep the current cell selected.
+      message.textContent = game.hint(state, id);
+      return;
+    }
+    selected = id;
+    typed = '';
+    highlight = [];
+    draw();
+  }
+
+  function selectNext() {
+    selected = game.workable(state)[0] || null;
+    highlight = [];
+  }
+
+  function typeDigit(digit) {
+    if (state.status !== 'playing' || !selected || typed.length >= 3) return;
+    typed = typed === '0' ? digit : typed + digit;
+    draw();
+  }
+
+  function erase() {
+    typed = typed.slice(0, -1);
+    draw();
+  }
+
+  function submit() {
+    if (state.status !== 'playing') return;
+    if (!selected) {
+      message.textContent = `Tap a blank ${word} first.`;
+      return;
+    }
+    if (typed === '') {
+      message.textContent = 'Type a number, then press Check.';
+      return;
+    }
+    const cell = selected;
+    state = game.check(state, { cell, value: Number(typed) });
+    typed = '';
+    if (state.status === 'playing') keep();
+
+    if (state.last.correct) {
+      message.textContent = CHEERS[cheerCount++ % CHEERS.length];
+      selectNext();
+    } else if (state.last.revealed) {
+      message.textContent = `It's ${game.answerFor(puzzle, cell)}. On to the next one!`;
+      selectNext();
+    } else {
+      message.textContent = `Not quite. ${game.hint(state, cell)}`;
+      highlight = game.hintLine?.(state, cell) || [];
+      wiggle(cells[cell]);
+    }
+    draw();
+
+    if (state.status === 'won') {
+      message.textContent = finished;
+      stopKeys();
+      container.classList.add('finished');
+      // Every wrong answer is in state.tries; every answer shown is in state.revealed.
+      const misses = Object.values(state.tries).reduce((sum, n) => sum + n, 0);
+      onDone({ status: state.status, misses, helped: state.revealed.length });
+    }
+  }
+
+  function draw() {
+    for (const [id, cell] of Object.entries(cells)) {
+      const hidden = puzzle.hidden.includes(id);
+      let text;
+      let className = cellClass;
+      let label;
+      if (!hidden) {
+        text = String(game.answerFor(puzzle, id));
+        className += ' np-given';
+        label = text;
+      } else if (id in state.entries) {
+        text = String(state.entries[id]);
+        const shown = state.revealed.includes(id);
+        className += shown ? ' np-shown' : ' np-found';
+        label = shown ? `${text}, shown` : `${text}, correct`;
+      } else if (id === selected) {
+        text = typed || '?';
+        className += ' np-blank np-selected';
+        label = typed ? `typing ${typed}` : `selected blank ${word}`;
+      } else {
+        text = '?';
+        className += ' np-blank';
+        label = `blank ${word}`;
+      }
+      if (highlight.includes(id)) className += ` ${prefix}-hint-line`;
+      cell.textContent = text;
+      cell.className = className + (cell.classList.contains('np-wiggle') ? ' np-wiggle' : '');
+      cell.setAttribute('aria-label', label);
+      cell.disabled = !hidden || id in state.entries;
+    }
+  }
+
+  selectNext();
+  draw();
 }
 
 /**

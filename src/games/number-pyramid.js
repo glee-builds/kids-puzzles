@@ -10,7 +10,7 @@
 // "3-0" is the top brick.
 
 import { createRandom, combinations } from '../seed.js';
-import { make, button, liveMessage, wiggle, numberPad } from '../ui.js';
+import { make, button, fillIn } from '../ui.js';
 
 export const LEVEL_SIZES = [4, 3, 2, 1];
 // Harder as the player goes on (the app picks the level; see src/app.js).
@@ -230,146 +230,27 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------- The screen: pyramid of bricks, message line, and number pad. ----------
+// ---------- The screen: pyramid of bricks, message line, and number pad (fillIn in src/ui.js). ----------
 
-const CHEERS = ['Yes!', 'Great adding!', 'You got it!', 'Nice work!', 'Correct!'];
-
-/**
- * Draw the game inside `container`. Calls onDone({ status, misses, helped })
- * once when finished: how many wrong answers, and how many answers were shown.
- */
+/** Draw the game inside `container` (see fillIn in src/ui.js). */
 export function render(container, puzzle, onDone, session = {}) {
-  let state = start(puzzle);
-  // Picking up a half-done puzzle: put back the numbers found and the misses so far.
-  if (session.saved) state = { ...state, ...session.saved };
-  const keep = () => session.save?.({ entries: state.entries, tries: state.tries, revealed: state.revealed });
-  let selected = null;
-  let typed = '';
-  let cheerCount = 0;
-
-  container.replaceChildren();
-  container.classList.add('np');
-
-  // Pyramid: drawn top row first.
-  const pyramid = make('div', 'np-pyramid');
-  const bricks = {};
-  for (let level = LEVEL_SIZES.length - 1; level >= 0; level--) {
-    const row = make('div', 'np-row');
-    for (let index = 0; index < LEVEL_SIZES[level]; index++) {
-      const id = cellId(level, index);
-      const brick = button('np-brick', '', () => select(id));
-      row.append(brick);
-      bricks[id] = brick;
-    }
-    pyramid.append(row);
-  }
-
-  const message = liveMessage('np-message', 'Tap a ? brick and type its number.');
-
-  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit });
-
-  container.append(pyramid, message, pad);
-
-  function isOpen(id) {
-    return puzzle.hidden.includes(id) && !(id in state.entries);
-  }
-
-  function select(id) {
-    if (state.status !== 'playing' || !isOpen(id)) return;
-    if (!workable(state).includes(id)) {
-      // Not ready yet: say so, and keep the current brick selected.
-      message.textContent = hint(state, id);
-      return;
-    }
-    selected = id;
-    typed = '';
-    draw();
-  }
-
-  function selectNext() {
-    selected = workable(state)[0] || null;
-  }
-
-  function typeDigit(digit) {
-    if (state.status !== 'playing' || !selected || typed.length >= 3) return;
-    typed = typed === '0' ? digit : typed + digit;
-    draw();
-  }
-
-  function erase() {
-    typed = typed.slice(0, -1);
-    draw();
-  }
-
-  function submit() {
-    if (state.status !== 'playing') return;
-    if (!selected) {
-      message.textContent = 'Tap a blank brick first.';
-      return;
-    }
-    if (typed === '') {
-      message.textContent = 'Type a number, then press Check.';
-      return;
-    }
-    const cell = selected;
-    state = check(state, { cell, value: Number(typed) });
-    typed = '';
-    if (state.status === 'playing') keep();
-
-    if (state.last.correct) {
-      message.textContent = CHEERS[cheerCount++ % CHEERS.length];
-      selectNext();
-    } else if (state.last.revealed) {
-      message.textContent = `It's ${answerFor(puzzle, cell)}. On to the next one!`;
-      selectNext();
-    } else {
-      message.textContent = `Not quite. ${hint(state, cell)}`;
-      wiggle(bricks[cell]);
-    }
-    draw();
-
-    if (state.status === 'won') {
-      message.textContent = 'You built the pyramid!';
-      stopKeys();
-      container.classList.add('finished');
-      // Every wrong answer is in state.tries; every answer shown is in state.revealed.
-      const misses = Object.values(state.tries).reduce((sum, n) => sum + n, 0);
-      onDone({ status: state.status, misses, helped: state.revealed.length });
-    }
-  }
-
-  function draw() {
-    for (const [id, brick] of Object.entries(bricks)) {
-      const hidden = puzzle.hidden.includes(id);
-      let text;
-      let className = 'np-brick';
-      let label;
-      if (!hidden) {
-        text = String(answerFor(puzzle, id));
-        className += ' np-given';
-        label = text;
-      } else if (id in state.entries) {
-        text = String(state.entries[id]);
-        const shown = state.revealed.includes(id);
-        className += shown ? ' np-shown' : ' np-found';
-        label = shown ? `${text}, shown` : `${text}, correct`;
-      } else if (id === selected) {
-        text = typed || '?';
-        className += ' np-blank np-selected';
-        label = typed ? `typing ${typed}` : 'selected blank brick';
-      } else {
-        text = '?';
-        className += ' np-blank';
-        label = 'blank brick';
+  fillIn(container, puzzle, onDone, session, { start, check, workable, hint, answerFor }, {
+    prefix: 'np',
+    cellClass: 'np-brick',
+    word: 'brick',
+    finished: 'You built the pyramid!',
+    board(select) {
+      // Drawn top row first.
+      const pyramid = make('div', 'np-pyramid');
+      const cells = {};
+      for (let level = LEVEL_SIZES.length - 1; level >= 0; level--) {
+        const row = pyramid.appendChild(make('div', 'np-row'));
+        for (let index = 0; index < LEVEL_SIZES[level]; index++) {
+          const id = cellId(level, index);
+          cells[id] = row.appendChild(button('np-brick', '', () => select(id)));
+        }
       }
-      brick.textContent = text;
-      brick.className = className + (brick.classList.contains('np-wiggle') ? ' np-wiggle' : '');
-      brick.setAttribute('aria-label', label);
-      brick.disabled = !hidden || id in state.entries;
-    }
-  }
-
-
-  selectNext();
-  draw();
+      return { nodes: [pyramid], cells };
+    },
+  });
 }
