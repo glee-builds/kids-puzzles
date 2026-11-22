@@ -189,7 +189,20 @@ const HELPERS = `
   const today = seed.dateKey();
   const dayNumber = Math.round((new Date(today) - new Date('2026-01-01')) / 86400000);
 `;
+// Magic Square and Number Pyramid: one wrong number, then the right number for each blank in turn.
+const fillAll = (name) => `
+    const game = await import('/src/games/${name}.js');
+    let state = game.start(game.generate(seed.seedFor(today, '${name}')));
+    await type(999);
+    while (state.status === 'playing') {
+      const cell = game.workable(state)[0];
+      const value = game.answerFor(state.puzzle, cell);
+      await type(value);
+      state = game.check(state, { cell, value });
+    }`;
 const PLAYS = {
+  'magic-square': fillAll('magic-square'),
+  'number-pyramid': fillAll('number-pyramid'),
   'number-line': `
     const game = await import('/src/games/number-line.js');
     const spots = game.positions(game.generate(seed.seedFor(today, 'number-line')));

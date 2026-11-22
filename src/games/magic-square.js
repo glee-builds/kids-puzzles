@@ -9,7 +9,7 @@
 // "0-0" is the top-left square, "2-2" is the bottom-right.
 
 import { createRandom, combinations } from '../seed.js';
-import { make, button, liveMessage, wiggle, numberPad } from '../ui.js';
+import { make, button, fillIn } from '../ui.js';
 
 export const SIZE = 3;
 export const BLANKS = 4;
@@ -207,147 +207,22 @@ export function verify(puzzle) {
   return { ok: problems.length === 0, problems };
 }
 
-// ---------- The screen: target, 3x3 grid, message line, and number pad. ----------
+// ---------- The screen: target, 3x3 grid, message line, and number pad (fillIn in src/ui.js). ----------
 
-const CHEERS = ['Yes!', 'Great adding!', 'You got it!', 'Nice work!', 'Correct!'];
-
-/**
- * Draw the game inside `container`. Calls onDone({ status, misses, helped })
- * once when finished: how many wrong answers, and how many answers were shown.
- */
+/** Draw the game inside `container` (see fillIn in src/ui.js). */
 export function render(container, puzzle, onDone, session = {}) {
-  let state = start(puzzle);
-  // Picking up a half-done puzzle: put back the numbers found and the misses so far.
-  if (session.saved) state = { ...state, ...session.saved };
-  const keep = () => session.save?.({ entries: state.entries, tries: state.tries, revealed: state.revealed });
-  let selected = null;
-  let typed = '';
-  let highlight = []; // squares in the hinted line
-  let cheerCount = 0;
-
-  container.replaceChildren();
-  container.classList.add('ms');
-
-  const target = make('p', 'ms-target');
-  target.append('Every line adds to ', make('strong', 'ms-target-number', String(puzzle.target)));
-
-  const grid = make('div', 'ms-grid');
-  const squares = {};
-  for (const id of allCells()) {
-    const square = button('ms-cell', '', () => select(id));
-    grid.append(square);
-    squares[id] = square;
-  }
-
-  const message = liveMessage('ms-message', 'Tap a ? square and type its number.');
-
-  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit });
-
-  container.append(target, grid, message, pad);
-
-  function isOpen(id) {
-    return puzzle.hidden.includes(id) && !(id in state.entries);
-  }
-
-  function select(id) {
-    if (state.status !== 'playing' || !isOpen(id)) return;
-    if (!workable(state).includes(id)) {
-      message.textContent = hint(state, id);
-      return;
-    }
-    selected = id;
-    typed = '';
-    highlight = [];
-    draw();
-  }
-
-  function selectNext() {
-    selected = workable(state)[0] || null;
-    highlight = [];
-  }
-
-  function typeDigit(digit) {
-    if (state.status !== 'playing' || !selected || typed.length >= 3) return;
-    typed = typed === '0' ? digit : typed + digit;
-    draw();
-  }
-
-  function erase() {
-    typed = typed.slice(0, -1);
-    draw();
-  }
-
-  function submit() {
-    if (state.status !== 'playing') return;
-    if (!selected) {
-      message.textContent = 'Tap a blank square first.';
-      return;
-    }
-    if (typed === '') {
-      message.textContent = 'Type a number, then press Check.';
-      return;
-    }
-    const cell = selected;
-    state = check(state, { cell, value: Number(typed) });
-    typed = '';
-    if (state.status === 'playing') keep();
-
-    if (state.last.correct) {
-      message.textContent = CHEERS[cheerCount++ % CHEERS.length];
-      selectNext();
-    } else if (state.last.revealed) {
-      message.textContent = `It's ${answerFor(puzzle, cell)}. On to the next one!`;
-      selectNext();
-    } else {
-      message.textContent = `Not quite. ${hint(state, cell)}`;
-      highlight = hintLine(state, cell) || [];
-      wiggle(squares[cell]);
-    }
-    draw();
-
-    if (state.status === 'won') {
-      message.textContent = 'Every line adds up. Magic!';
-      stopKeys();
-      container.classList.add('finished');
-      // Every wrong answer is in state.tries; every answer shown is in state.revealed.
-      const misses = Object.values(state.tries).reduce((sum, n) => sum + n, 0);
-      onDone({ status: state.status, misses, helped: state.revealed.length });
-    }
-  }
-
-  function draw() {
-    for (const [id, square] of Object.entries(squares)) {
-      const hidden = puzzle.hidden.includes(id);
-      let text;
-      let className = 'ms-cell';
-      let label;
-      if (!hidden) {
-        text = String(answerFor(puzzle, id));
-        className += ' np-given';
-        label = text;
-      } else if (id in state.entries) {
-        text = String(state.entries[id]);
-        const shown = state.revealed.includes(id);
-        className += shown ? ' np-shown' : ' np-found';
-        label = shown ? `${text}, shown` : `${text}, correct`;
-      } else if (id === selected) {
-        text = typed || '?';
-        className += ' np-blank np-selected';
-        label = typed ? `typing ${typed}` : 'selected blank square';
-      } else {
-        text = '?';
-        className += ' np-blank';
-        label = 'blank square';
-      }
-      if (highlight.includes(id)) className += ' ms-hint-line';
-      square.textContent = text;
-      square.className = className + (square.classList.contains('np-wiggle') ? ' np-wiggle' : '');
-      square.setAttribute('aria-label', label);
-      square.disabled = !hidden || id in state.entries;
-    }
-  }
-
-
-  selectNext();
-  draw();
+  fillIn(container, puzzle, onDone, session, { start, check, workable, hint, answerFor, hintLine }, {
+    prefix: 'ms',
+    cellClass: 'ms-cell',
+    word: 'square',
+    finished: 'Every line adds up. Magic!',
+    board(select) {
+      const target = make('p', 'ms-target');
+      target.append('Every line adds to ', make('strong', 'ms-target-number', String(puzzle.target)));
+      const grid = make('div', 'ms-grid');
+      const cells = {};
+      for (const id of allCells()) cells[id] = grid.appendChild(button('ms-cell', '', () => select(id)));
+      return { nodes: [target, grid], cells };
+    },
+  });
 }
