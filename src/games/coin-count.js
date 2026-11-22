@@ -114,7 +114,6 @@ function coinNode(coin, names) {
  */
 export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
-  let typed = '';
   let misses = 0;
   // Pick up where a half-done puzzle left off (see "Half-done puzzles" in src/app.js).
   if (session.saved) {
@@ -127,7 +126,7 @@ export function render(container, puzzle, onDone, session = {}) {
   container.classList.add('cc');
 
   const entry = make('p', 'cc-entry');
-  const drawEntry = () => { entry.textContent = `${typed || '?'}¢`; };
+  const drawEntry = () => { entry.textContent = `${pad.typed || '?'}¢`; };
 
   const frame = roundFrame(container, {
     count: puzzle.rounds.length,
@@ -135,7 +134,7 @@ export function render(container, puzzle, onDone, session = {}) {
     draw(i) {
       const round = puzzle.rounds[i];
       waiting = false;
-      typed = '';
+      pad.set('');
       question.textContent = 'How many cents?';
       const coins = make('div', 'cc-coins');
       for (const coin of round.coins) coins.append(coinNode(coin, round.names));
@@ -148,22 +147,22 @@ export function render(container, puzzle, onDone, session = {}) {
 
   function submit() {
     if (waiting || state.status !== 'playing') return;
-    if (typed === '') {
+    if (pad.typed === '') {
       message.textContent = 'Type a number, then press Check.';
       return;
     }
     const round = puzzle.rounds[state.round];
-    state = check(state, Number(typed));
+    state = check(state, Number(pad.typed));
     const { correct, shown } = state.last;
     if (!correct) misses += 1;
     if (!correct && !shown) {
-      typed = '';
+      pad.set('');
       drawEntry();
       message.textContent = `Not quite. ${hint(round, state.tries)}`;
       return;
     }
     waiting = true;
-    typed = String(round.total);
+    pad.set(String(round.total));
     drawEntry();
     entry.classList.add(correct ? 'cc-entry-right' : 'cc-entry-shown');
     const text = correct
@@ -171,26 +170,21 @@ export function render(container, puzzle, onDone, session = {}) {
       : `It's ${round.total}¢. Count on: ${countingOn(round.coins)}.`;
     keep();
     frame.finish(text, state.round, () => {
-      stopKeys();
+      pad.stop();
       onDone({ status: state.status, misses, helped: state.shown.length });
     });
   }
 
-  const { node: pad, stop: stopKeys } = numberPad(container, {
-    onDigit(digit) {
-      if (waiting || state.status !== 'playing' || typed.length >= 2) return;
-      typed = typed === '0' ? digit : typed + digit;
+  const pad = numberPad(container, {
+    maxDigits: 2,
+    canType: () => !waiting && state.status === 'playing',
+    onType() {
       message.textContent = '';
-      drawEntry();
-    },
-    onErase() {
-      if (waiting) return;
-      typed = typed.slice(0, -1);
       drawEntry();
     },
     onCheck: submit,
   });
-  container.append(pad);
+  container.append(pad.node);
 
   frame.begin(state.round);
 }
