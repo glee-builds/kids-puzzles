@@ -225,7 +225,6 @@ const CHEERS = ['You thought it through!', 'Great thinking!', 'You got it!', 'Ni
  */
 export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
-  let typed = '';
   let cheerCount = 0;
   let misses = 0; // wrong answers in the whole puzzle
   let helped = 0; // answers the game showed after too many tries
@@ -251,11 +250,11 @@ export function render(container, puzzle, onDone, session = {}) {
   const entry = make('p', 'wp-entry');
   const message = liveMessage('wp-message');
 
-  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit }, 'wp-pad');
+  const pad = numberPad(container, { onType: draw, onCheck: submit, canType: () => state.phase === 'answer' }, 'wp-pad');
 
   const nextButton = button('button next-button', '', goNext);
 
-  container.append(count, story, ask, entry, message, pad, nextButton);
+  container.append(count, story, ask, entry, message, pad.node, nextButton);
 
   function pick(slot) {
     if (state.phase !== 'pick' || state.tapped.includes(slot)) return;
@@ -269,25 +268,14 @@ export function render(container, puzzle, onDone, session = {}) {
     draw();
   }
 
-  function typeDigit(digit) {
-    if (state.phase !== 'answer' || typed.length >= 3) return;
-    typed = typed === '0' ? digit : typed + digit;
-    draw();
-  }
-
-  function erase() {
-    typed = typed.slice(0, -1);
-    draw();
-  }
-
   function submit() {
     if (state.phase !== 'answer') return;
-    if (typed === '') {
+    if (pad.typed === '') {
       message.textContent = 'Type a number, then press Check.';
       return;
     }
-    state = check(state, { answer: Number(typed) });
-    typed = '';
+    state = check(state, { answer: Number(pad.typed) });
+    pad.set('');
     if (!state.last.correct) misses++;
     if (state.last.revealed) helped++;
     if (state.last.correct) message.textContent = CHEERS[cheerCount++ % CHEERS.length];
@@ -302,7 +290,7 @@ export function render(container, puzzle, onDone, session = {}) {
     if (state.status === 'won') {
       message.textContent = 'You thought them all through!';
       nextButton.hidden = true;
-      stopKeys();
+      pad.stop();
       onDone({ status: state.status, misses, helped });
       return;
     }
@@ -350,13 +338,13 @@ export function render(container, puzzle, onDone, session = {}) {
 
     entry.replaceChildren();
     if (state.phase === 'answer') {
-      entry.append(make('span', 'wp-typed', typed || '?'));
+      entry.append(make('span', 'wp-typed', pad.typed || '?'));
     } else if (state.phase === 'done') {
       entry.append(make('span', state.revealed ? 'wp-worked wp-shown' : 'wp-worked', `${worked(problem)} ${state.revealed ? '' : '✓'}`.trim()));
     }
     entry.hidden = state.phase === 'pick';
 
-    pad.hidden = state.phase !== 'answer';
+    pad.node.hidden = state.phase !== 'answer';
     nextButton.hidden = state.phase !== 'done';
     nextButton.textContent = state.index === puzzle.problems.length - 1 ? 'Finish ✓' : 'Next problem →';
   }

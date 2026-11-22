@@ -223,7 +223,6 @@ const CHEERS = ['You fixed it!', 'Great checking!', 'Nice work!', 'You got it!']
  */
 export function render(container, puzzle, onDone, session = {}) {
   let state = start(puzzle);
-  let typed = '';
   let cheerCount = 0;
   let misses = 0; // wrong answers in the whole puzzle
   let helped = 0; // answers the game showed after too many tries
@@ -255,11 +254,11 @@ export function render(container, puzzle, onDone, session = {}) {
   const list = make('ol', 'fm-steps');
   const message = liveMessage('fm-message');
 
-  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit }, 'fm-pad');
+  const pad = numberPad(container, { onType: draw, onCheck: submit, canType: () => state.phase === 'fix' }, 'fm-pad');
 
   const nextButton = button('button next-button', '', goNext);
 
-  container.append(talk, count, question, list, message, pad, nextButton);
+  container.append(talk, count, question, list, message, pad.node, nextButton);
 
   function pick(step) {
     if (state.status !== 'playing' || state.phase !== 'find' || state.checked.includes(step)) return;
@@ -274,25 +273,14 @@ export function render(container, puzzle, onDone, session = {}) {
     draw();
   }
 
-  function typeDigit(digit) {
-    if (state.phase !== 'fix' || typed.length >= 3) return;
-    typed = typed === '0' ? digit : typed + digit;
-    draw();
-  }
-
-  function erase() {
-    typed = typed.slice(0, -1);
-    draw();
-  }
-
   function submit() {
     if (state.phase !== 'fix') return;
-    if (typed === '') {
+    if (pad.typed === '') {
       message.textContent = 'Type a number, then press Check.';
       return;
     }
-    state = check(state, { fix: Number(typed) });
-    typed = '';
+    state = check(state, { fix: Number(pad.typed) });
+    pad.set('');
     if (!state.last.correct) misses++;
     if (state.last.revealed) helped++;
     if (state.last.correct) {
@@ -313,8 +301,8 @@ export function render(container, puzzle, onDone, session = {}) {
       message.textContent = 'You checked all the frog\'s work!';
       bubble.textContent = 'Thank you for fixing my mistakes!';
       nextButton.hidden = true;
-      pad.hidden = true;
-      stopKeys();
+      pad.node.hidden = true;
+      pad.stop();
       onDone({ status: state.status, misses, helped });
       return;
     }
@@ -347,7 +335,7 @@ export function render(container, puzzle, onDone, session = {}) {
       const sum = make('span', 'fm-sum', `${line.left} ${line.op} ${line.right} = `);
       const result = make('span', 'fm-result');
       if (isMistake && state.phase === 'fix') {
-        result.append(make('s', 'fm-old', String(before[i].result)), ' ', make('span', 'fm-typed', typed || '?'));
+        result.append(make('s', 'fm-old', String(before[i].result)), ' ', make('span', 'fm-typed', pad.typed || '?'));
       } else if (isMistake && fixed) {
         result.append(make('s', 'fm-old', String(before[i].result)), ' ', String(line.result));
       } else {
@@ -365,7 +353,7 @@ export function render(container, puzzle, onDone, session = {}) {
       } else if (isMistake) {
         stepButton.classList.add('fm-wrong');
         mark = '✗';
-        label = `${line.left} ${line.op} ${line.right}, the wrong step, typing ${typed || 'nothing yet'}`;
+        label = `${line.left} ${line.op} ${line.right}, the wrong step, typing ${pad.typed || 'nothing yet'}`;
       } else if (state.checked.includes(i)) {
         stepButton.classList.add('fm-ok');
         mark = '✓';
@@ -382,7 +370,7 @@ export function render(container, puzzle, onDone, session = {}) {
       list.append(row);
     });
 
-    pad.hidden = state.phase !== 'fix';
+    pad.node.hidden = state.phase !== 'fix';
     nextButton.hidden = !fixed;
     nextButton.textContent = state.index === puzzle.problems.length - 1 ? 'Finish ✓' : 'Next problem →';
   }

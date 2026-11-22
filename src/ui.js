@@ -77,9 +77,22 @@ export function onKeys(container, onKey) {
 /**
  * The number pad: 1 to 9, erase, 0, and Check. A computer keyboard's
  * digits, Backspace, and Enter work too while `container` is on screen.
- * Returns { node, stop }; call stop() when the game is finished.
+ * It keeps the number being typed (up to `maxDigits`, only while canType()
+ * says yes) and calls onType(typed) after each change.
+ * Returns { node, stop, typed, set }; call stop() when the game is finished.
  */
-export function numberPad(container, { onDigit, onErase, onCheck }, extraClass = '') {
+export function numberPad(container, { onType, onCheck, canType = () => true, maxDigits = 3 }, extraClass = '') {
+  let typed = '';
+  const onDigit = (digit) => {
+    if (!canType() || typed.length >= maxDigits) return;
+    typed = typed === '0' ? digit : typed + digit;
+    onType(typed);
+  };
+  const onErase = () => {
+    if (!canType()) return;
+    typed = typed.slice(0, -1);
+    onType(typed);
+  };
   const node = make('div', `np-pad ${extraClass}`.trim());
   for (const label of ['1', '2', '3', '4', '5', '6', '7', '8', '9', '⌫', '0', 'Check']) {
     const key = button('np-key', label);
@@ -99,7 +112,12 @@ export function numberPad(container, { onDigit, onErase, onCheck }, extraClass =
     else if (event.key === 'Backspace') onErase();
     else if (event.key === 'Enter') onCheck();
   });
-  return { node, stop };
+  return {
+    node,
+    stop,
+    get typed() { return typed; }, // the number typed so far, as text ('' for none)
+    set(text) { typed = text; }, // e.g. set('') to clear it after a check
+  };
 }
 
 /**
@@ -123,7 +141,6 @@ export function fillIn(container, puzzle, onDone, session, game, { prefix, board
   if (session.saved) state = { ...state, ...session.saved };
   const keep = () => session.save?.({ entries: state.entries, tries: state.tries, revealed: state.revealed });
   let selected = null;
-  let typed = '';
   let highlight = []; // cells in the hinted line
   let cheerCount = 0;
 
@@ -131,8 +148,8 @@ export function fillIn(container, puzzle, onDone, session, game, { prefix, board
   container.classList.add(prefix);
   const { nodes, cells } = board(select);
   const message = liveMessage(`${prefix}-message`, `Tap a ? ${word} and type its number.`);
-  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit });
-  container.append(...nodes, message, pad);
+  const pad = numberPad(container, { onType: draw, onCheck: submit, canType: () => state.status === 'playing' && selected });
+  container.append(...nodes, message, pad.node);
 
   function select(id) {
     if (state.status !== 'playing' || !puzzle.hidden.includes(id) || id in state.entries) return;
@@ -142,7 +159,7 @@ export function fillIn(container, puzzle, onDone, session, game, { prefix, board
       return;
     }
     selected = id;
-    typed = '';
+    pad.set('');
     highlight = [];
     draw();
   }
@@ -152,30 +169,19 @@ export function fillIn(container, puzzle, onDone, session, game, { prefix, board
     highlight = [];
   }
 
-  function typeDigit(digit) {
-    if (state.status !== 'playing' || !selected || typed.length >= 3) return;
-    typed = typed === '0' ? digit : typed + digit;
-    draw();
-  }
-
-  function erase() {
-    typed = typed.slice(0, -1);
-    draw();
-  }
-
   function submit() {
     if (state.status !== 'playing') return;
     if (!selected) {
       message.textContent = `Tap a blank ${word} first.`;
       return;
     }
-    if (typed === '') {
+    if (pad.typed === '') {
       message.textContent = 'Type a number, then press Check.';
       return;
     }
     const cell = selected;
-    state = game.check(state, { cell, value: Number(typed) });
-    typed = '';
+    state = game.check(state, { cell, value: Number(pad.typed) });
+    pad.set('');
     if (state.status === 'playing') keep();
 
     if (state.last.correct) {
@@ -193,7 +199,7 @@ export function fillIn(container, puzzle, onDone, session, game, { prefix, board
 
     if (state.status === 'won') {
       message.textContent = finished;
-      stopKeys();
+      pad.stop();
       container.classList.add('finished');
       // Every wrong answer is in state.tries; every answer shown is in state.revealed.
       const misses = Object.values(state.tries).reduce((sum, n) => sum + n, 0);
@@ -217,9 +223,9 @@ export function fillIn(container, puzzle, onDone, session, game, { prefix, board
         className += shown ? ' np-shown' : ' np-found';
         label = shown ? `${text}, shown` : `${text}, correct`;
       } else if (id === selected) {
-        text = typed || '?';
+        text = pad.typed || '?';
         className += ' np-blank np-selected';
-        label = typed ? `typing ${typed}` : `selected blank ${word}`;
+        label = pad.typed ? `typing ${pad.typed}` : `selected blank ${word}`;
       } else {
         text = '?';
         className += ' np-blank';

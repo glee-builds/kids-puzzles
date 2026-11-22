@@ -156,7 +156,6 @@ export function render(container, puzzle, onDone, session = {}) {
   if (session.saved) state = { ...state, ...session.saved };
   const keep = () => session.save?.({ hop: state.hop, tries: state.tries, revealed: state.revealed });
   const spots = positions(puzzle);
-  let typed = '';
   let frogAt = spots[state.hop]; // the frog sits where the current hop starts
   let cheerCount = 0;
 
@@ -180,9 +179,9 @@ export function render(container, puzzle, onDone, session = {}) {
   const card = make('div', 'nl-card');
   const message = liveMessage('nl-message', 'Where will the frog land?');
 
-  const { node: pad, stop: stopKeys } = numberPad(container, { onDigit: typeDigit, onErase: erase, onCheck: submit });
+  const pad = numberPad(container, { onType: drawCard, onCheck: submit, canType: () => state.status === 'playing' });
 
-  container.append(dots, line, card, message, pad);
+  container.append(dots, line, card, message, pad.node);
 
   let view = windowFor(spots[state.hop], spots[state.hop + 1]);
 
@@ -207,7 +206,7 @@ export function render(container, puzzle, onDone, session = {}) {
       make('span', 'nl-from', String(spots[state.hop])),
       make('span', `nl-hop ${op === '+' ? 'nl-hop-plus' : 'nl-hop-minus'}`, `${op === '+' ? '+' : '−'}${amount}`),
       make('span', 'nl-arrow', '→'),
-      make('span', 'nl-answer', typed || '?'),
+      make('span', 'nl-answer', pad.typed || '?'),
     );
     dotNodes.forEach((dot, i) => {
       dot.className = 'nl-dot'
@@ -216,25 +215,14 @@ export function render(container, puzzle, onDone, session = {}) {
     });
   }
 
-  function typeDigit(digit) {
-    if (state.status !== 'playing' || typed.length >= 3) return;
-    typed = typed === '0' ? digit : typed + digit;
-    drawCard();
-  }
-
-  function erase() {
-    typed = typed.slice(0, -1);
-    drawCard();
-  }
-
   function submit() {
     if (state.status !== 'playing') return;
-    if (typed === '') {
+    if (pad.typed === '') {
       message.textContent = 'Type a number, then press Check.';
       return;
     }
-    state = check(state, Number(typed));
-    typed = '';
+    state = check(state, Number(pad.typed));
+    pad.set('');
     if (state.status === 'playing') keep();
     const { hop, correct, revealed } = state.last;
 
@@ -264,7 +252,7 @@ export function render(container, puzzle, onDone, session = {}) {
         dot.className = 'nl-dot ' + (state.revealed.includes(i) ? 'nl-dot-shown' : 'nl-dot-done');
       });
       message.textContent = 'The frog finished all its hops!';
-      stopKeys();
+      pad.stop();
       container.classList.add('finished');
       // Every wrong answer is in state.tries; every answer shown is in state.revealed.
       const misses = Object.values(state.tries).reduce((sum, n) => sum + n, 0);
