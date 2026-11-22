@@ -313,14 +313,16 @@ const part = async (name, key) => (await loadJson(`data/${name}.json`))[key];
  * numbers match `.mz-grid` and the tablet rule in styles.css.
  */
 function mazeRoom() {
+  // The page's own size: innerWidth and innerHeight shrink while the page is pinched bigger.
+  const { clientWidth, clientHeight } = document.documentElement;
   const zoom = matchMedia('(min-width: 700px) and (min-height: 900px)').matches ? 1.3 : 1;
-  const width = Math.round(innerWidth / zoom);
+  const width = Math.round(clientWidth / zoom);
   // Space is left at the sides for a hand to rest on, and for the edge of the
   // screen's own swipes: a tenth of a phone's width (at least 40px). A tablet
   // has room to spare, so it keeps less: 6% at the sides, 240px above and below.
-  const tablet = innerWidth >= 700;
+  const tablet = clientWidth >= 700;
   const sides = Math.max(40, Math.round(width * (tablet ? 0.06 : 0.1)));
-  return { width: width - sides, height: Math.round(innerHeight / zoom) - (tablet ? 240 : 270) };
+  return { width: width - sides, height: Math.round(clientHeight / zoom) - (tablet ? 240 : 270) };
 }
 
 // Some puzzles have levels (`levels` in GAMES). Each one's level goes up
