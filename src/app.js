@@ -521,6 +521,11 @@ const GAMES = {
     how: ['A fraction is part of a whole. 3/4 means 3 of 4 equal slices.', 'The bottom number is how many slices in all. The top number is how many have toppings.'],
     art: '<span class="pizza-art"></span>',
   },
+  'pattern-train': {
+    title: 'Pattern Train', kind: 'numbers', legend: 'Find the rule and fill the empty car', levels: 3, data: () => [levelFor('pattern-train')],
+    how: ['The cars of each train follow a rule. One car is empty.', 'Work out the rule, then pick what goes in the empty car.'],
+    art: '<span class="train-art"><i>2</i><i>4</i><i>?</i></span>',
+  },
   'math-mix-ups': {
     title: 'Math Mix-Ups', kind: 'everyday', legend: 'Puzzles that take some thinking', levels: 2, data: () => [DAY],
     how: ["These take some thinking! Use what you know to work out what you don't.", 'Pick Mild or Spicy at the top. You can switch any time.'],

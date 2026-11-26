@@ -201,6 +201,8 @@ const fillAll = (name) => `
       state = game.check(state, { cell, value });
     }`;
 const PLAYS = {
+  'pattern-train': `
+    for (let train = 0; train < 4; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
   'fraction-pizza': `
     const game = await import('/src/games/fraction-pizza.js');
     const { rounds } = game.generate(seed.seedFor(today, 'fraction-pizza'));
@@ -328,7 +330,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
+const TOP_LEVELS = ['pattern-train', 'fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
 
 // Half-done puzzles: `play` plays part of a puzzle; then the page is
 // loaded again and `check` must be true: the puzzle picked up where it

@@ -137,6 +137,7 @@ button {
 .em-marks,
 .ct-choices,
 .fp-choices,
+.pt-choices,
 .gi-choices {
   display: flex;
   justify-content: center;
@@ -3744,6 +3745,7 @@ button.gr-row {
 
 .ct-question,
 .fp-question,
+.pt-question,
 .cc-question {
   margin: 4px 0 6px;
   text-align: center;
@@ -3753,6 +3755,7 @@ button.gr-row {
 
 .ct-stage,
 .fp-stage,
+.pt-stage,
 .cc-stage {
   display: flex;
   flex-direction: column;
@@ -4692,3 +4695,75 @@ button.gr-row {
   border-radius: 50%;
   background: conic-gradient(var(--go) 0 75%, color-mix(in srgb, var(--star) 30%, var(--surface)) 0);
 }
+
+/* ---------- Pattern Train ---------- */
+
+/* The engine, then the cars in a row, joined by a line like couplings. */
+.pt-train {
+  --car: min(48px, calc((100vw - 96px) / 6));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 5px;
+  margin: 18px 0 22px;
+  padding-bottom: 6px;
+  border-bottom: 4px solid var(--border); /* the track */
+}
+
+.pt-engine {
+  font-size: calc(var(--car) * 0.9);
+  line-height: 1;
+  transform: scaleX(-1); /* the engine faces left, pulling the cars */
+}
+
+.pt-car {
+  display: grid;
+  place-items: center;
+  width: var(--car);
+  height: var(--car);
+  border: 2px solid var(--numbers-ink);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: calc(var(--car) * 0.42);
+  font-weight: 800;
+}
+
+.pt-shapes .pt-car { font-size: calc(var(--car) * 0.55); }
+
+/* The empty car: a dashed orange edge and a "?". Once filled, a teal edge. */
+.pt-empty {
+  border-style: dashed;
+  border-color: var(--go);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--go) 35%, transparent);
+  color: var(--numbers-ink);
+}
+
+.pt-filled {
+  border-color: var(--here);
+  box-shadow: 0 0 0 2px var(--here);
+}
+
+.pt-choice {
+  min-width: 84px;
+  font-size: 1.3rem;
+}
+
+.train-art {
+  display: flex;
+  gap: 2px;
+}
+
+.train-art i {
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 20px;
+  border: 2px solid var(--numbers-ink);
+  border-radius: 3px;
+  background: var(--surface);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.train-art i:last-child { border-style: dashed; border-color: var(--go); }
