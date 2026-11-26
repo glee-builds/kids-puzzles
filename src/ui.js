@@ -254,6 +254,7 @@ export function fillIn(container, puzzle, onDone, session, game, { prefix, board
  * question, a play area, a message line, and a Next button.
  *   count   how many rounds
  *   prefix  for the class names: `${prefix}-question`, -stage, -message
+ *           (the play area is also `round-stage`: a centered column, in styles.css)
  *   draw    draw(round) fills in the question and play area for a round
  * Returns { question, stage, message, begin, finish }:
  *   begin(round)                    clear the frame and draw that round
@@ -264,7 +265,7 @@ export function fillIn(container, puzzle, onDone, session, game, { prefix, board
 export function roundFrame(container, { count, prefix, draw }) {
   const dots = progressDots(count);
   const question = make('div', `${prefix}-question`);
-  const stage = make('div', `${prefix}-stage`);
+  const stage = make('div', `round-stage ${prefix}-stage`);
   const message = liveMessage(`${prefix}-message`, '');
   let upNext = 0;
   const nextButton = button('button next-button', 'Next', () => begin(upNext));

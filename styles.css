@@ -144,6 +144,28 @@ button {
   gap: 10px;
 }
 
+/* The play area of every puzzle with rounds (roundFrame in src/ui.js): a
+   centered column. A few puzzles set their own gap further down. */
+.round-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The question above it, for the puzzles whose question is one line of text. */
+.sp-question,
+.em-question,
+.ct-question,
+.fp-question,
+.pt-question,
+.cc-question {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
 /* ---------- Splash ---------- */
 
 /* The splash fades out by itself (CSS only), so it can never get stuck
@@ -2774,13 +2796,6 @@ button.fs-word {
   font-weight: 700;
 }
 
-.grp-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
 .grp-pads {
   display: flex;
   flex-wrap: wrap;
@@ -3036,20 +3051,6 @@ button.gr-row {
 /* Right answers use .grp-right (a teal ring and a check mark). The letter
    keyboard uses Mystery Word's .wg-key styles. */
 
-.sp-question {
-  margin: 4px 0 6px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
-.sp-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
 .sp-sentence {
   margin: 0;
   font-size: 1.25rem;
@@ -3158,19 +3159,9 @@ button.gr-row {
 /* ---------- End Marks ---------- */
 /* Right answers use .grp-right (a teal ring and a check mark). */
 
-.em-question {
-  margin: 4px 0 8px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
+.em-question { margin-bottom: 8px; }
 
-.em-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
+.em-stage { gap: 12px; }
 
 .em-sentence {
   margin: 6px 0;
@@ -3743,25 +3734,10 @@ button.gr-row {
 /* ---------- Clock Time ---------- */
 /* Right answers use .grp-right (a teal ring and a check mark). */
 
-.ct-question,
-.fp-question,
-.pt-question,
-.cc-question {
-  margin: 4px 0 6px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
 .ct-stage,
 .fp-stage,
 .pt-stage,
-.cc-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
+.cc-stage { gap: 8px; }
 
 .ct-clock {
   width: min(230px, 38dvh);
@@ -3960,14 +3936,6 @@ button.gr-row {
   text-align: center;
   font-size: 1.15rem;
   font-weight: 700;
-}
-
-.mm-stage,
-.gi-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
 }
 
 /* The three shapes: each has its own color and its own outline. */
