@@ -48,11 +48,16 @@ const MAKERS = {
   name(random, { slices: list }) {
     const { slices, topped } = pizza(random, list);
     const answer = fractionText(topped, slices);
-    // Wrong choices are the mistakes kids make: naming the plain part, and
-    // putting the plain slices on the bottom.
-    const wrong = [fractionText(slices - topped, slices), fractionText(topped, slices - topped), fractionText(topped, slices + 1), fractionText(slices, topped)];
+    // Wrong choices are the mistakes kids make: naming the plain part, putting
+    // the plain slices on the bottom, and miscounting the slices. Each is a
+    // real fraction (top smaller than bottom), so none is a giveaway.
+    const plain = slices - topped;
+    const wrong = [[plain, slices], [topped, plain], [topped, slices + 1], [topped + 1, slices + 1]];
     const choices = [answer];
-    for (const text of wrong) if (choices.length < 3 && !choices.includes(text)) choices.push(text);
+    for (const [top, bottom] of wrong) {
+      const text = fractionText(top, bottom);
+      if (choices.length < 3 && top < bottom && !choices.includes(text)) choices.push(text);
+    }
     return { kind: 'name', slices, topped, answer, choices: random.shuffle(choices) };
   },
   make(random, { slices: list }) {

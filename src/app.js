@@ -517,7 +517,7 @@ const GAMES = {
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
   'fraction-pizza': {
-    title: 'Fraction Pizza', kind: 'numbers', legend: 'How much of the pizza has toppings?', levels: 3, data: () => [levelFor('fraction-pizza')],
+    title: 'Fraction Pizza', kind: 'numbers', legend: 'Fractions, one slice at a time', levels: 3, data: () => [levelFor('fraction-pizza')],
     how: ['A fraction is part of a whole. 3/4 means 3 of 4 equal slices.', 'The bottom number is how many slices in all. The top number is how many have toppings.'],
     art: '<span class="pizza-art"></span>',
   },
