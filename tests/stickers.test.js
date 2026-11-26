@@ -26,3 +26,18 @@ test('the first gifts come from different pages', () => {
   for (let i = 0; i < 8; i++) owned.push(nextSticker(owned).id);
   assert.ok(new Set(owned.map((id) => stickerById(id).page)).size >= 4);
 });
+
+test('the first 8 pages never change, so the stickers a player already has stay theirs', () => {
+  // A sticker is saved by its page and place. New pages go at the end.
+  assert.equal(PAGES.slice(0, 8).map((page) => page.stickers.map(([picture]) => picture).join('')).join(' '),
+    '🐸🦆🐢🐟🦢🐌🦎🌸🌾🦦🐿️🦝🐊🦩🌿 🐶🐱🐰🦊🐻🐼🐨🦁🐯🐘🦒🦓🐵🦘🦔 🐳🐬🦈🐙🦀🦞🐠🐡🦑🐚🦐🐧🐋⚓⛵ 🦋🐝🐞🐛🐜🦗🕷️🦉🦜🦅🐦🦚🐥🥚🐓 '
+    + '🍎🍌🍓🍉🍇🍊🍍🥕🌽🍕🥞🧁🍪🍦🥨 ☀️🌙⭐🌈☁️⚡❄️🌍🪐🚀🛰️☄️🔭🌋🌊 🚲🛴🚗🚌🚂🚜🚒🚁✈️🎈🛶🚤🛷🚠🛹 ⚽🏀🪁🎨🎸🥁🎺🧩🪀🎲🧸🎪🏰👑🏆');
+  assert.equal(stickerById('0-0').name, 'frog');
+  assert.equal(stickerById('7-14').name, 'trophy');
+});
+
+test('a player with the whole first book gets new stickers from the new pages', () => {
+  const owned = STICKERS.filter((s) => s.page < 8).map((s) => s.id);
+  const next = nextSticker(owned);
+  assert.ok(next && next.page >= 8);
+});

@@ -247,7 +247,7 @@ function drawStickers() {
   PAGES.forEach((page, p) => {
     const mine = STICKERS.filter((s) => s.page === p);
     const have = mine.filter((s) => owned.includes(s.id)).length;
-    const album = make('section', `sb-album sb-album-${p}`);
+    const album = make('section', `sb-album sb-album-${p % 8}`); // 8 page colors, used in turn
     const heading = make('h2', 'sb-page', page.name);
     heading.append(make('span', `sb-have${have === mine.length ? ' sb-have-all' : ''}`, have === mine.length ? '★ All 15' : `${have} of ${mine.length}`));
     const grid = make('div', 'sb-grid');
