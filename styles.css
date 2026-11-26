@@ -3445,6 +3445,28 @@ button.gr-row {
   filter: brightness(0) opacity(0.13);
 }
 
+/* A shiny sticker (a second copy, won after the book is full): a gold edge
+   in place of the white one, and a sparkle in the corner. */
+.sb-shiny .sticker-art,
+.sticker-shiny {
+  filter:
+    drop-shadow(2px 0 0 var(--star)) drop-shadow(-2px 0 0 var(--star))
+    drop-shadow(0 2px 0 var(--star)) drop-shadow(0 -2px 0 var(--star))
+    drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
+}
+
+.sb-shiny {
+  position: relative;
+}
+
+.sb-shiny::after {
+  content: '✨';
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1rem;
+}
+
 /* The newest sticker wiggles once and sits on a gold glow. */
 .sb-new {
   border-radius: 50%;

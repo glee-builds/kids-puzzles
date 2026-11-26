@@ -199,6 +199,21 @@ test('a sticker is added once and kept through later puzzles', () => {
   assert.deepEqual(p.stickers, ['0-0', '1-3']);
 });
 
+test('a shiny sticker is kept apart from the collection, once', () => {
+  let p = addSticker(emptyProgress(), '0-0');
+  p = addSticker(p, '0-0', true);
+  p = addSticker(p, '0-0', true);
+  assert.deepEqual(p.stickers, ['0-0']);
+  assert.deepEqual(p.shiny, ['0-0']);
+});
+
+test('progress saved before shiny stickers existed loads with none, and keeps its stickers', () => {
+  const storage = fakeStorage({ [STORAGE_KEY]: JSON.stringify({ streak: 1, finished: {}, stickers: ['0-0', '1-3'] }) });
+  const p = load(storage);
+  assert.deepEqual(p.stickers, ['0-0', '1-3']);
+  assert.deepEqual(p.shiny, []);
+});
+
 test('progress saved before stickers existed loads with none', () => {
   const old = { streak: 1, totalDays: 1, lastDay: '2026-11-08', finished: { '2026-11-08': ['maze'] }, plays: { maze: 1 } };
   assert.deepEqual(load({ getItem: () => JSON.stringify(old) }).stickers, []);
