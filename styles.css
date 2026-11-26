@@ -3403,6 +3403,54 @@ button.gr-row {
 .sb-album-6 { --page: var(--here); }
 .sb-album-7 { --page: var(--go); }
 
+/* The covers: a tile for each page, two across. Each uses its page's color. */
+.sb-covers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sb-cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  padding: 10px 6px 12px;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--page) 20%, var(--surface));
+  border: 2px solid color-mix(in srgb, var(--page) 45%, var(--surface));
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.sb-cover-name {
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.sb-taste {
+  display: flex;
+  gap: 8px;
+  font-size: 1.7rem;
+}
+
+.sb-pale {
+  filter: brightness(0) opacity(0.13);
+}
+
+/* The page with the newest sticker: a gold ring. */
+.sb-cover-new {
+  border-color: var(--star);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--star) 45%, transparent);
+}
+
+.sb-back {
+  margin: 0 0 10px;
+}
+
 .sb-page {
   display: flex;
   align-items: center;

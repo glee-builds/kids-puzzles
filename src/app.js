@@ -239,6 +239,9 @@ function drawStickerLink() {
   document.getElementById('sticker-link').textContent = count ? `My stickers (${count}) →` : 'My sticker book →';
 }
 
+// Which page of the sticker book is open (a number), or null for the covers.
+let stickerPage = null;
+
 function drawStickers() {
   const area = document.getElementById('game-stickers');
   area.replaceChildren();
@@ -252,30 +255,60 @@ function drawStickers() {
   if (shiny.length === all) count = `✨ Every sticker is shiny! 🌈 ${rainbow.length} of ${all} are rainbow. Finish a puzzle for another!`;
   if (rainbow.length === all) count = '🌈 Every sticker is rainbow. Wow!';
   area.append(make('p', 'sb-count', count));
-  // Each page of the album is a card in its own soft color, with the
-  // stickers stuck on at slightly different angles.
-  PAGES.forEach((page, p) => {
-    const mine = STICKERS.filter((s) => s.page === p);
-    const have = mine.filter((s) => owned.includes(s.id)).length;
-    const album = make('section', `sb-album sb-album-${p % 8}`); // 8 page colors, used in turn
-    const heading = make('h2', 'sb-page', page.name);
-    heading.append(make('span', `sb-have${have === mine.length ? ' sb-have-all' : ''}`, have === mine.length ? '★ All 15' : `${have} of ${mine.length}`));
-    const grid = make('div', 'sb-grid');
-    mine.forEach((sticker, i) => {
-      const got = owned.includes(sticker.id);
-      const tier = rainbow.includes(sticker.id) ? 'rainbow' : shiny.includes(sticker.id) ? 'shiny' : '';
-      const spot = make('span', 'sb-sticker' + (got ? '' : ' sb-empty') + (tier ? ` sb-${tier}` : '') + (sticker.id === newest ? ' sb-new' : ''));
-      // A sticker not collected yet shows as a pale outline of what's coming.
-      const art = make('span', 'sticker-art', sticker.picture);
-      art.style.setProperty('--tilt', `${TILTS[i % TILTS.length]}deg`);
-      spot.append(art);
-      spot.setAttribute('role', 'img');
-      spot.setAttribute('aria-label', tier ? `${sticker.name}, ${tier}` : got ? sticker.name : 'A sticker you don\'t have yet');
-      grid.append(spot);
+  const onPage = (p) => STICKERS.filter((s) => s.page === p);
+  const haveOn = (p) => onPage(p).filter((s) => owned.includes(s.id)).length;
+  const haveText = (p) => (haveOn(p) === onPage(p).length ? '★ All 15' : `${haveOn(p)} of ${onPage(p).length}`);
+  const haveNode = (p) => make('span', `sb-have${haveOn(p) === onPage(p).length ? ' sb-have-all' : ''}`, haveText(p));
+
+  // The covers: one tile for each page, so the book fits on a screen or two
+  // however many pages it has. Tap a tile to open its page.
+  if (stickerPage === null) {
+    const covers = make('div', 'sb-covers');
+    PAGES.forEach((page, p) => {
+      const isNew = onPage(p).some((s) => s.id === newest);
+      const cover = button(`sb-cover sb-album-${p % 8}${isNew ? ' sb-cover-new' : ''}`, '', () => {
+        stickerPage = p;
+        drawStickers();
+        window.scrollTo(0, 0);
+      });
+      // A taste of the page: its first 3 stickers (pale if not collected yet).
+      const taste = make('span', 'sb-taste');
+      for (const sticker of onPage(p).slice(0, 3)) {
+        taste.append(make('span', `sticker-art${owned.includes(sticker.id) ? '' : ' sb-pale'}`, sticker.picture));
+      }
+      cover.append(make('span', 'sb-cover-name', page.name), taste, haveNode(p));
+      cover.setAttribute('aria-label', `${page.name}: ${haveText(p)}${isNew ? ', with your newest sticker' : ''}`);
+      covers.append(cover);
     });
-    album.append(heading, grid);
-    area.append(album);
+    area.append(covers);
+    return;
+  }
+
+  // One page of the album: a card in its own soft color, with the stickers
+  // stuck on at slightly different angles.
+  const p = stickerPage;
+  area.append(button('lw-button sb-back', '← All pages', () => {
+    stickerPage = null;
+    drawStickers();
+  }));
+  const album = make('section', `sb-album sb-album-${p % 8}`); // 8 page colors, used in turn
+  const heading = make('h2', 'sb-page', PAGES[p].name);
+  heading.append(haveNode(p));
+  const grid = make('div', 'sb-grid');
+  onPage(p).forEach((sticker, i) => {
+    const got = owned.includes(sticker.id);
+    const tier = rainbow.includes(sticker.id) ? 'rainbow' : shiny.includes(sticker.id) ? 'shiny' : '';
+    const spot = make('span', 'sb-sticker' + (got ? '' : ' sb-empty') + (tier ? ` sb-${tier}` : '') + (sticker.id === newest ? ' sb-new' : ''));
+    // A sticker not collected yet shows as a pale outline of what's coming.
+    const art = make('span', 'sticker-art', sticker.picture);
+    art.style.setProperty('--tilt', `${TILTS[i % TILTS.length]}deg`);
+    spot.append(art);
+    spot.setAttribute('role', 'img');
+    spot.setAttribute('aria-label', tier ? `${sticker.name}, ${tier}` : got ? sticker.name : 'A sticker you don\'t have yet');
+    grid.append(spot);
   });
+  album.append(heading, grid);
+  area.append(album);
 }
 
 // How far each sticker in a row is turned, so they look stuck on by hand.
@@ -774,7 +807,10 @@ function show() {
 
   if (current === '') drawPond();
   if (current === 'grown-ups') drawGrownUps();
-  if (current === 'stickers') drawStickers();
+  if (current === 'stickers') {
+    stickerPage = null; // the book always opens at its covers
+    drawStickers();
+  }
 
   if (current in GAMES && !started.has(current)) {
     started.add(current);
