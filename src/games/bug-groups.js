@@ -17,7 +17,7 @@
 
 import { createRandom } from '../seed.js';
 import { stageFor, STAGES, choicesFor, factKey, parseFact } from '../times.js';
-import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
+import { make, button, liveMessage, wiggle, roundFrame, markRight } from '../ui.js';
 
 export const ROUNDS = ['match', 'add', 'build'];
 // Level 4: quick recall. The fact comes first and the picture after, as a check.
@@ -262,8 +262,7 @@ export function render(container, puzzle, onDone, session = {}) {
       choice.addEventListener('click', () => {
         if (state.round !== puzzle.rounds.indexOf(round)) return;
         if (answer(i, choice)) {
-          choice.classList.add('grp-right');
-          for (const other of list.children) other.disabled = true;
+          markRight(choice);
           finishRound(`✓ ${groups} pads, ${size} bugs on each!`);
         }
       });
@@ -328,8 +327,7 @@ export function render(container, puzzle, onDone, session = {}) {
       const choice = button('lw-button grp-choice', String(n), () => {
         if (state.round !== puzzle.rounds.indexOf(round)) return;
         if (!answer(n, choice)) return;
-        choice.classList.add('grp-right');
-        for (const other of row.children) other.disabled = true;
+        markRight(choice);
         const picture = make('div', 'grp-pads');
         for (let i = 0; i < groups; i++) picture.append(pad(size));
         stage.prepend(picture, line('grp-sum', groupsText(groups), ' × ', sizeText(size), ` = ${groups * size}`));

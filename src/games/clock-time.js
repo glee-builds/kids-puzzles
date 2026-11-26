@@ -10,7 +10,7 @@
 // hands, and being an hour off.
 
 import { createRandom, forLevel } from '../seed.js';
-import { make, button, wiggle, roundFrame, shape } from '../ui.js';
+import { make, button, wiggle, roundFrame, shape, markRight } from '../ui.js';
 
 export const CLOCKS = 5;
 // The minutes a clock can show at each level.
@@ -170,8 +170,7 @@ export function render(container, puzzle, onDone, session = {}) {
             wiggle(choice);
             return;
           }
-          choice.classList.add('grp-right');
-          for (const other of row.children) other.disabled = true;
+          markRight(choice);
           keep();
           frame.finish(`✓ It's ${time}!`, state.round, () => onDone({ status: state.status, misses, helped: 0 }));
         });

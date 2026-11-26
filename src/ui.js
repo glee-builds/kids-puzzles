@@ -36,6 +36,12 @@ export function liveMessage(className, text) {
   return node;
 }
 
+/** Mark a choice as the right one (a teal ring and a check mark) and turn off every choice in its row. */
+export function markRight(choice) {
+  choice.classList.add('grp-right');
+  for (const other of choice.parentElement.children) other.disabled = true;
+}
+
 /** Play the "not quite" wiggle on `node`, even if it just played. */
 export function wiggle(node) {
   node.classList.remove('np-wiggle');

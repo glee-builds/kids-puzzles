@@ -14,7 +14,7 @@
 
 import { nextRound } from '../rounds.js';
 import { createRandom, dealForDay } from '../seed.js';
-import { make, button, liveMessage, wiggle, letterKeyboard, roundFrame } from '../ui.js';
+import { make, button, liveMessage, wiggle, letterKeyboard, roundFrame, markRight } from '../ui.js';
 import { say, canSpeak } from '../voice.js';
 
 export const WORDS_PER_DAY = 3;
@@ -209,8 +209,7 @@ export function render(container, puzzle, onDone, session = {}) {
           wiggle(choice);
           return;
         }
-        choice.classList.add('grp-right');
-        for (const other of row.children) other.disabled = true;
+        markRight(choice);
         onRight();
       });
       row.append(choice);

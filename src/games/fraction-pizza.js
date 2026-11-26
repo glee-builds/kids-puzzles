@@ -17,7 +17,7 @@
 
 import { createRandom, forLevel } from '../seed.js';
 import { nextRound } from '../rounds.js';
-import { make, button, shape, wiggle, roundFrame } from '../ui.js';
+import { make, button, shape, wiggle, roundFrame, markRight } from '../ui.js';
 
 export const ROUNDS = 5;
 export const MATCHES = 4; // fractions to join to pizzas in the last round
@@ -270,8 +270,7 @@ export function render(container, puzzle, onDone, session = {}) {
       for (const text of round.choices) {
         const choice = row.appendChild(button('lw-button fp-choice', text, () => {
           if (!answer(round, text, choice)?.correct) return;
-          choice.classList.add('grp-right');
-          for (const other of row.children) other.disabled = true;
+          markRight(choice);
           finishRound(`✓ ${round.topped} of ${round.slices} slices: ${text}.`);
         }));
       }
@@ -324,8 +323,7 @@ export function render(container, puzzle, onDone, session = {}) {
       for (const side of round.choices) {
         const pick = row.appendChild(button(`fp-pick fp-pick-${side}`, '', () => {
           if (!answer(round, side, pick)?.correct) return;
-          pick.classList.add('grp-right');
-          for (const other of row.children) other.disabled = true;
+          markRight(pick);
           finishRound(done);
         }));
         if (side === 'same') {

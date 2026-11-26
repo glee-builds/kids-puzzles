@@ -19,7 +19,7 @@
 
 import { nextRound } from '../rounds.js';
 import { createRandom, dealForDay, forLevel } from '../seed.js';
-import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
+import { make, button, liveMessage, wiggle, roundFrame, markRight } from '../ui.js';
 
 export const MARKS = ['.', '?', '!'];
 const MARK_NAMES = { '.': 'telling', '?': 'asking', '!': 'strong feeling' };
@@ -262,8 +262,7 @@ export function render(container, puzzle, onDone, session = {}) {
       const choice = markButton(mark, () => {
         const result = answer(round, mark, choice);
         if (!result?.correct) return;
-        choice.classList.add('grp-right');
-        for (const other of row.children) other.disabled = true;
+        markRight(choice);
         end.textContent = mark;
         end.classList.add('em-end-done');
         finishRound(`✓ ${round.why}`);

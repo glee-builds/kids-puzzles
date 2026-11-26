@@ -26,7 +26,7 @@
 
 import { createRandom, dealForDay } from '../seed.js';
 import { choicesFor } from '../times.js';
-import { make, button, wiggle, roundFrame } from '../ui.js';
+import { make, button, wiggle, roundFrame, markRight } from '../ui.js';
 
 export const KINDS = ['shapes', 'scale', 'machine', 'pattern', 'missing', 'equal', 'area', 'sides'];
 const ROUNDS_PER_DAY = 3;
@@ -613,8 +613,7 @@ export function render(container, puzzle, onDone, session = {}) {
           wiggle(choice);
           return;
         }
-        choice.classList.add('grp-right');
-        for (const other of row.children) other.disabled = true;
+        markRight(choice);
         keep();
         frame.finish(`✓ ${round.why}`, state.round, () => onDone({ status: state.status, misses, helped: 0 }));
       });

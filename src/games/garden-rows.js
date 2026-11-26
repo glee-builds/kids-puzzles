@@ -13,7 +13,7 @@
 
 import { createRandom } from '../seed.js';
 import { stageFor, STAGES, choicesFor, factKey, parseFact } from '../times.js';
-import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
+import { make, button, liveMessage, wiggle, roundFrame, markRight } from '../ui.js';
 
 export const ROUNDS = ['add', 'turn', 'split'];
 // Level 4: sharing (the start of dividing) takes the place of turning.
@@ -207,8 +207,7 @@ export function render(container, puzzle, onDone, session = {}) {
           wiggle(choice);
           return;
         }
-        choice.classList.add('grp-right');
-        for (const other of row.children) other.disabled = true;
+        markRight(choice);
         onRight();
       });
       row.append(choice);
