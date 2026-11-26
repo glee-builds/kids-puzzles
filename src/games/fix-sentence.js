@@ -15,7 +15,7 @@ import { make, button, liveMessage } from '../ui.js';
 export const PER_DAY = 4;
 export const FIND_TRIES = 2; // after this many wrong taps the wrong word is shown
 export const MAX_SENTENCE = 55; // characters
-export const MAX_WHY = 60;
+const MAX_WHY = 60;
 
 /** The sentences for a day number (days since a fixed start date). */
 export const sentencesForDay = (items, dayNumber) => dealForDay(items, PER_DAY, dayNumber, 'fix-sentence');

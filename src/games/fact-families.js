@@ -16,15 +16,15 @@ import { createRandom } from '../seed.js';
 import { make, button, liveMessage, wiggle, dragOrTap } from '../ui.js';
 
 export const HOUSES = 3;
-export const WINDOWS = ['+', '+', '-', '-'];
-export const TIMES_WINDOWS = ['×', '×', '÷', '÷'];
+const WINDOWS = ['+', '+', '-', '-'];
+const TIMES_WINDOWS = ['×', '×', '÷', '÷'];
 /** The signs of a house's four windows. A times house has `times: true`. */
-export const windowsFor = (house) => (house.times ? TIMES_WINDOWS : WINDOWS);
+const windowsFor = (house) => (house.times ? TIMES_WINDOWS : WINDOWS);
 // How many houses are times families at each level, and their numbers.
 const TIMES_HOUSES = [0, 1, 2];
 const TIMES_NUMBERS = [[], [2, 3, 4, 5, 10], [3, 4, 6, 7, 8, 9]];
 export const MAX_TRIES = 3; // after this many misses the window fills itself
-export const MAX_WHOLE = 100;
+const MAX_WHOLE = 100;
 export const FIRST_HOUSE_MAX = 20;
 
 /** Make today's street of houses from a seed and a level (1 to 3). */

@@ -7,7 +7,7 @@
 // try again. If the letters spell a different real word from the lists
 // (TEN for NET), that counts too.
 
-import { createRandom } from '../seed.js';
+import { createRandom, forLevel } from '../seed.js';
 import { make, button, liveMessage, wiggle, dragOrTap } from '../ui.js';
 
 // Word lengths, in order, at each level. Level 1 is two 3-letter words and
@@ -35,7 +35,7 @@ function scramble(random, word, words) {
 /** Make today's 4 words from a seed and the word lists. */
 export function generate(seed, words, level = 1) {
   const random = createRandom(seed);
-  const plan = PLANS[Math.min(Math.max(level, 1), PLANS.length) - 1];
+  const plan = forLevel(PLANS, level);
   const items = [];
   for (const length of plan) {
     const choices = random.shuffle(words.filter((w) => w.length === length));

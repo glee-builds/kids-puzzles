@@ -8,7 +8,7 @@
 // classic 3x3 magic square pattern. Cells are named by row and column:
 // "0-0" is the top-left square, "2-2" is the bottom-right.
 
-import { createRandom, combinations } from '../seed.js';
+import { createRandom, combinations, forLevel } from '../seed.js';
 import { make, button, fillIn } from '../ui.js';
 
 export const SIZE = 3;
@@ -20,7 +20,7 @@ export const LEVELS = [
   { minTarget: 60, maxTarget: 150, steps: [2, 3, 4, 5, 6, 7, 8] },
   { minTarget: 120, maxTarget: 180, steps: [5, 6, 7, 8, 9, 10] },
 ];
-const levelOf = (level) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
+const settingsFor = (level) => forLevel(LEVELS, level);
 export const MIN_TARGET = LEVELS[0].minTarget;
 export const MAX_TARGET = LEVELS[0].maxTarget;
 export const MAX_TRIES = 3; // after this many misses the square fills itself in
@@ -84,7 +84,7 @@ const BLANK_SETS = combinations(allCells(), BLANKS).filter(isSolvable);
 
 /** Make today's magic square from a seed, at a level from 1 to 3. */
 export function generate(seed, level = 1) {
-  const { minTarget, maxTarget, steps } = levelOf(level);
+  const { minTarget, maxTarget, steps } = settingsFor(level);
   const random = createRandom(seed);
   // The target is 3 times the middle number (first + 4 steps), so pick the
   // step, then a first number that keeps the target in range.
@@ -188,7 +188,7 @@ export function verify(puzzle) {
     problems.push('every square must be a whole number from 1 to 100');
   }
   if (new Set(numbers).size !== numbers.length) problems.push('no number may appear twice');
-  const { minTarget, maxTarget } = levelOf(puzzle.level ?? 1);
+  const { minTarget, maxTarget } = settingsFor(puzzle.level ?? 1);
   if (!Number.isInteger(target) || target < minTarget || target > maxTarget) {
     problems.push(`target ${target} must be from ${minTarget} to ${maxTarget}`);
   }

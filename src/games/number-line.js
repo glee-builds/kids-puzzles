@@ -9,8 +9,8 @@ import { createRandom } from '../seed.js';
 import { make, button, liveMessage, numberPad } from '../ui.js';
 
 export const HOPS = 5;
-export const MIN = 0;
-export const MAX = 100;
+const MIN = 0;
+const MAX = 100;
 export const MAX_TRIES = 3; // after this many misses the frog hops there itself
 
 const TENS = [10, 20];
@@ -43,7 +43,7 @@ export function positions(puzzle) {
   return spots;
 }
 
-export const isTens = (amount) => amount % 10 === 0;
+const isTens = (amount) => amount % 10 === 0;
 
 /** The starting state: on hop 0, no misses. */
 export function start(puzzle) {

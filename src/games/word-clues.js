@@ -15,7 +15,7 @@ import { make, button, liveMessage } from '../ui.js';
 export const WORDS_PER_DAY = 2;
 export const SENTENCES = 3;
 export const MAX_SENTENCE = 60; // characters
-export const MAX_USE = 70;
+const MAX_USE = 70;
 
 /** The words for a day number (days since a fixed start date). */
 export const wordsForDay = (words, dayNumber) => dealForDay(words, WORDS_PER_DAY, dayNumber, 'word-clues');

@@ -27,7 +27,7 @@ export function generate(seed, words, dayNumber, sentences = []) {
   return { answer, length: answer.length, maxGuesses: MAX_GUESSES, sentence };
 }
 
-export const GUESSES_BEFORE_SENTENCE = 3;
+const GUESSES_BEFORE_SENTENCE = 3;
 
 /** The starting state for a puzzle: no guesses yet. */
 export function start(puzzle) {

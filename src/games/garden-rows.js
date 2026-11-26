@@ -17,9 +17,9 @@ import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const ROUNDS = ['add', 'turn', 'split'];
 // Level 4: sharing (the start of dividing) takes the place of turning.
-export const SHARE_ROUNDS = ['add', 'share', 'split'];
+const SHARE_ROUNDS = ['add', 'share', 'split'];
 const roundsFor = (level) => (level >= 4 ? SHARE_ROUNDS : ROUNDS);
-export const SMALL_ROWS = [2, 5];  // rows in the first two rounds (from, to)
+const SMALL_ROWS = [2, 5];  // rows in the first two rounds (from, to)
 export const BIG_ROWS = [6, 9];    // rows in the split round
 export const SPLIT_AT = 5;         // the split round always splits off 5 rows
 
@@ -65,7 +65,7 @@ export function generate(seed, level = 1, review = []) {
 export const total = (round) => round.rows * round.size;
 
 /** The right answer to a round: the seeds in each row when sharing, else all the seeds. */
-export const answerOf = (round) => (round.kind === 'share' ? round.size : total(round));
+const answerOf = (round) => (round.kind === 'share' ? round.size : total(round));
 
 /** The starting state: round 0, no misses. */
 export function start(puzzle) {

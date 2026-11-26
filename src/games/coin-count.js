@@ -9,7 +9,7 @@
 // total is shown.
 
 import { nextRound } from '../rounds.js';
-import { createRandom } from '../seed.js';
+import { createRandom, forLevel } from '../seed.js';
 import { make, numberPad, roundFrame } from '../ui.js';
 
 export const HANDFULS = 4;
@@ -21,7 +21,7 @@ export const LEVELS = [
   { coins: ['penny', 'nickel', 'dime', 'quarter'], count: [3, 6], most: 99 },
   { coins: ['penny', 'nickel', 'dime', 'quarter'], count: [4, 7], most: 99, mixed: true, names: true },
 ];
-const levelFor = (level = 1) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
+const settingsFor = (level) => forLevel(LEVELS, level);
 
 /** How many cents a list of coins is worth. */
 export const totalOf = (coins) => coins.reduce((sum, coin) => sum + COINS[coin], 0);
@@ -31,7 +31,7 @@ const biggestFirst = (coins) => [...coins].sort((a, b) => COINS[b] - COINS[a]);
 /** Make today's 4 handfuls from a seed and a level (1 to 3). */
 export function generate(seed, level = 1) {
   const random = createRandom(seed);
-  const rules = levelFor(level);
+  const rules = settingsFor(level);
   const rounds = [];
   while (rounds.length < HANDFULS) {
     const count = random.int(...rules.count);
@@ -76,7 +76,7 @@ export function verify(puzzle) {
   const problems = [];
   const { rounds, level = 1 } = puzzle;
   if (!Array.isArray(rounds) || rounds.length !== HANDFULS) return { ok: false, problems: [`there must be ${HANDFULS} handfuls`] };
-  const rules = levelFor(level);
+  const rules = settingsFor(level);
   rounds.forEach(({ coins, total }, i) => {
     if (coins.some((coin) => !rules.coins.includes(coin))) problems.push(`handful ${i + 1} has a coin that isn't in level ${level}`);
     if (coins.length < rules.count[0] || coins.length > rules.count[1]) problems.push(`handful ${i + 1} has ${coins.length} coins`);

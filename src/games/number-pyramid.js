@@ -9,10 +9,10 @@
 // Cells are named by level and position: "0-0" is the bottom-left brick,
 // "3-0" is the top brick.
 
-import { createRandom, combinations } from '../seed.js';
+import { createRandom, combinations, forLevel } from '../seed.js';
 import { make, button, fillIn } from '../ui.js';
 
-export const LEVEL_SIZES = [4, 3, 2, 1];
+const LEVEL_SIZES = [4, 3, 2, 1];
 // Harder as the player goes on (the app picks the level; see src/app.js).
 // Level 1 is the original pyramid.
 export const LEVELS = [
@@ -20,7 +20,7 @@ export const LEVELS = [
   { minTop: 80, maxTop: 150, low: 3, high: 35 },
   { minTop: 120, maxTop: 200, low: 5, high: 45 },
 ];
-const levelOf = (level) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
+const settingsFor = (level) => forLevel(LEVELS, level);
 export const MIN_TOP = LEVELS[0].minTop;
 export const MAX_TOP = LEVELS[0].maxTop;
 export const BLANKS = 5;
@@ -97,7 +97,7 @@ const BLANK_SETS = combinations(allCells(), BLANKS).filter((hidden) =>
 
 /** Make today's pyramid from a seed, at a level from 1 to 3. */
 export function generate(seed, level = 1) {
-  const { minTop, maxTop, low: LOW, high: HIGH } = levelOf(level);
+  const { minTop, maxTop, low: LOW, high: HIGH } = settingsFor(level);
   const random = createRandom(seed);
   // With a bottom row of a, b, c, d the top is a + 3b + 3c + d. Pick the
   // top, then the middle pair (b + c), then a; d is what's left.
@@ -217,7 +217,7 @@ export function verify(puzzle) {
     });
   }
   const top = values[values.length - 1][0];
-  const { maxTop } = levelOf(puzzle.level ?? 1);
+  const { maxTop } = settingsFor(puzzle.level ?? 1);
   if (top > maxTop) problems.push(`top brick ${top} is over ${maxTop}`);
 
   const cells = allCells();

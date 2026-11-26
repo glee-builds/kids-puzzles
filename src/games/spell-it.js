@@ -25,7 +25,7 @@ export const wordsForDay = (words, dayNumber) =>
   dealForDay(words.filter((entry) => !entry.ending), WORDS_PER_DAY, dayNumber, 'spell-it');
 
 /** The word with an ending for a day number (used from level 2). */
-export const endingForDay = (words, dayNumber) =>
+const endingForDay = (words, dayNumber) =>
   dealForDay(words.filter((entry) => entry.ending), 1, dayNumber, 'spell-it-endings')[0];
 
 /** True if an entry has a sound step (some patterns have no good choices). */

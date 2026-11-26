@@ -13,8 +13,8 @@ import { dealForDay } from '../seed.js';
 import { make, button, shape, liveMessage, wiggle } from '../ui.js';
 
 export const STEPS = [3, 4, 6]; // what the dots count by, one a day in turn
-export const MIN_GAP = 15; // dots are at least this far apart, so a finger can hit one
-export const MISSES_BEFORE_GLOW = 2;
+const MIN_GAP = 15; // dots are at least this far apart, so a finger can hit one
+const MISSES_BEFORE_GLOW = 2;
 
 // The pictures. There are 38, and the dots count 3 ways, so the same picture
 // with the same numbers comes back only every 114 days. (Keep the number of

@@ -2,7 +2,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { dateKey, hashString, seedFor, createRandom, combinations } from '../src/seed.js';
+import { dateKey, hashString, seedFor, createRandom, combinations, forLevel } from '../src/seed.js';
 
 test('dateKey formats a date as YYYY-MM-DD with leading zeros', () => {
   assert.equal(dateKey(new Date(2026, 0, 5)), '2026-01-05');
@@ -89,4 +89,13 @@ test('combinations lists every way to choose k items, once each', () => {
   assert.deepEqual(combinations(['a', 'b', 'c'], 2), [['a', 'b'], ['a', 'c'], ['b', 'c']]);
   assert.equal(combinations([1, 2, 3, 4, 5, 6, 7, 8, 9], 4).length, 126);
   assert.deepEqual(combinations([1, 2], 0), [[]]);
+});
+
+test('forLevel: level 1 is the first item, and a level off either end gets the nearest', () => {
+  const list = ['easy', 'medium', 'hard'];
+  assert.equal(forLevel(list, 1), 'easy');
+  assert.equal(forLevel(list, 3), 'hard');
+  assert.equal(forLevel(list), 'easy'); // no level given
+  assert.equal(forLevel(list, 0), 'easy');
+  assert.equal(forLevel(list, 9), 'hard');
 });

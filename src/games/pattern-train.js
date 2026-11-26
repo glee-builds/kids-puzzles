@@ -14,7 +14,7 @@
 //   { type: 'add', step: 4 }   { type: 'take', step: 5 }
 //   { type: 'grow' }  add 1, then 2, then 3...   { type: 'double' }
 
-import { createRandom } from '../seed.js';
+import { createRandom, forLevel } from '../seed.js';
 import { nextRound } from '../rounds.js';
 import { make, button, wiggle, roundFrame } from '../ui.js';
 
@@ -43,7 +43,7 @@ export const LEVELS = [
     { type: 'repeat', units: ['ABAC', 'AABC', 'ABCB'], empty: 'middle' },
   ],
 ];
-const levelOf = (level = 1) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
+const settingsFor = (level) => forLevel(LEVELS, level);
 
 /** Every car of a train that follows `rule`, starting from `first` (numbers only). */
 export function carsFor(rule, length, first) {
@@ -107,7 +107,7 @@ function makeRound(random, recipe) {
 /** Make today's 4 trains from a seed and a level (1 to 3). */
 export function generate(seed, level = 1) {
   const random = createRandom(seed);
-  return { level, rounds: levelOf(level).map((recipe) => makeRound(random, recipe)) };
+  return { level, rounds: settingsFor(level).map((recipe) => makeRound(random, recipe)) };
 }
 
 /** The starting state: train 0. */
@@ -133,7 +133,7 @@ export function hint(round, tries) {
 export function verify(puzzle) {
   const problems = [];
   const { rounds, level = 1 } = puzzle;
-  const recipes = levelOf(level);
+  const recipes = settingsFor(level);
   if (!Array.isArray(rounds) || rounds.length !== ROUNDS) return { ok: false, problems: [`there must be ${ROUNDS} trains`] };
   rounds.forEach(({ rule, cars, hidden, answer, choices }, i) => {
     const where = `train ${i + 1}`;
