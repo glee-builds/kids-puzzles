@@ -201,6 +201,12 @@ const fillAll = (name) => `
       state = game.check(state, { cell, value });
     }`;
 const PLAYS = {
+  'pond-sudoku': `
+    const game = await import('/src/games/pond-sudoku.js');
+    const puzzle = game.generate(seed.seedFor(today, 'pond-sudoku'));
+    const picks = G.querySelectorAll('.ps-pick');
+    picks[(game.answerFor(puzzle, puzzle.hidden[0]) + 1) % 4].click(); await wait(60); // a wrong animal first
+    for (const id of puzzle.hidden) { picks[game.answerFor(puzzle, id)].click(); await wait(60); }`,
   'dot-to-dot': `
     const dots = [...G.querySelectorAll('.dd-dot')];
     dots.at(-1).click(); await wait(60); // a wrong dot first
@@ -301,7 +307,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
+const TOP_LEVELS = ['pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
 
 // Half-done puzzles: `play` plays part of a puzzle; then the page is
 // loaded again and `check` must be true: the puzzle picked up where it

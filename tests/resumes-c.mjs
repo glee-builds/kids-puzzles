@@ -3,6 +3,15 @@
 // it) and `check` (a JavaScript expression that is true if, after the page
 // is loaded again, the puzzle picked up where it left off).
 export default {
+  'pond-sudoku': {
+    play: `const game = await import('/src/games/pond-sudoku.js');
+      const puzzle = game.generate(seed.seedFor(today, 'pond-sudoku'));
+      for (const id of puzzle.hidden.slice(0, 2)) { G.querySelectorAll('.ps-pick')[game.answerFor(puzzle, id)].click(); await wait(60); }`,
+    check: `G.querySelectorAll('.ps-found').length === 2 && G.querySelectorAll('.ps-selected').length === 1`,
+    finish: `const game = await import('/src/games/pond-sudoku.js');
+      const puzzle = game.generate(seed.seedFor(today, 'pond-sudoku'));
+      for (const id of puzzle.hidden.slice(2)) { G.querySelectorAll('.ps-pick')[game.answerFor(puzzle, id)].click(); await wait(60); }`,
+  },
   'dot-to-dot': {
     play: `for (const dot of [...G.querySelectorAll('.dd-dot')].slice(0, 3)) { dot.click(); await wait(60); }`,
     check: `G.querySelectorAll('.dd-dot-done').length === 3 && G.querySelector('.dd-line').getAttribute('points').split(' ').length === 3`,
