@@ -27,6 +27,7 @@ import { fileURLToPath } from 'node:url';
 import resumesA from './resumes-a.mjs';
 import resumesB from './resumes-b.mjs';
 import resumesC from './resumes-c.mjs';
+import SETUP, { fillBlanks } from './play-setups.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const PHONE = { width: 375, height: 667 };
@@ -189,57 +190,24 @@ const HELPERS = `
   const today = seed.dateKey();
   const dayNumber = Math.round((new Date(today) - new Date('2026-01-01')) / 86400000);
 `;
-// Magic Square and Number Pyramid: one wrong number, then the right number for each blank in turn.
-const fillAll = (name) => `
-    const game = await import('/src/games/${name}.js');
-    let state = game.start(game.generate(seed.seedFor(today, '${name}')));
-    await type(999);
-    while (state.status === 'playing') {
-      const cell = game.workable(state)[0];
-      const value = game.answerFor(state.puzzle, cell);
-      await type(value);
-      state = game.check(state, { cell, value });
-    }`;
 const PLAYS = {
   'pattern-train': `
     for (let train = 0; train < 4; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
   'fraction-pizza': `
-    const game = await import('/src/games/fraction-pizza.js');
-    const { rounds } = game.generate(seed.seedFor(today, 'fraction-pizza'));
-    const playRound = async (round) => {
-      if (round.kind === 'make') {
-        const slices = G.querySelectorAll('.fp-slice');
-        for (let i = 0; i < round.topped; i++) slices[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        G.querySelector('.fp-check').click(); await wait();
-      } else if (round.kind === 'match') {
-        const fractions = G.querySelectorAll('.fp-match-fraction');
-        const pizzas = G.querySelectorAll('.fp-match-pizza');
-        for (let i = 0; i < 4; i++) { fractions[i].click(); pizzas[round.order.indexOf(i)].click(); await wait(40); }
-      } else await tapUntilRight(round.kind === 'name' ? '.fp-choice' : '.fp-pick');
-      await next();
-    };
     G.querySelector('.fp-check')?.click(); await wait(); // a wrong answer first, if round 1 is a "make" round
     for (const round of rounds) await playRound(round);`,
   'memory-match': `
-    const game = await import('/src/games/memory-match.js');
-    const { cards } = game.generate(seed.seedFor(today, 'memory-match'));
-    const nodes = G.querySelectorAll('.mem-card');
-    const of = (pair) => cards.map((card, i) => (card.pair === pair ? i : -1)).filter((i) => i >= 0);
-    const turn = async (i) => { nodes[i].click(); await wait(50); };
     await turn(of(0)[0]); await turn(of(1)[0]); // two that don't match first
-    for (let pair = 0; pair < cards.length / 2; pair++) { await turn(of(pair)[0]); await turn(of(pair)[1]); }`,
+    for (let pair = 0; pair < pairs; pair++) await findPair(pair);`,
   'pond-sudoku': `
-    const game = await import('/src/games/pond-sudoku.js');
-    const puzzle = game.generate(seed.seedFor(today, 'pond-sudoku'));
-    const picks = G.querySelectorAll('.ps-pick');
-    picks[(game.answerFor(puzzle, puzzle.hidden[0]) + 1) % 4].click(); await wait(60); // a wrong animal first
-    for (const id of puzzle.hidden) { picks[game.answerFor(puzzle, id)].click(); await wait(60); }`,
+    await place(puzzle.hidden[0], 1); // a wrong animal first
+    for (const id of puzzle.hidden) await place(id);`,
   'dot-to-dot': `
     const dots = [...G.querySelectorAll('.dd-dot')];
     dots.at(-1).click(); await wait(60); // a wrong dot first
     for (const dot of dots) { dot.click(); await wait(60); }`,
-  'magic-square': fillAll('magic-square'),
-  'number-pyramid': fillAll('number-pyramid'),
+  'magic-square': fillBlanks('magic-square'),
+  'number-pyramid': fillBlanks('number-pyramid'),
   'number-line': `
     const game = await import('/src/games/number-line.js');
     const spots = game.positions(game.generate(seed.seedFor(today, 'number-line')));
@@ -423,7 +391,7 @@ async function checkScreen(label, address, { ready, fits, play, poke, tip }) {
   }
   if (ok && play) {
     try {
-      await evaluate(`(async () => { const G = document.getElementById('game-${play}'); ${HELPERS} ${PLAYS[play]} })()`);
+      await evaluate(`(async () => { const G = document.getElementById('game-${play}'); ${HELPERS} ${SETUP[play] || ''} ${PLAYS[play]} })()`);
       await sleep(900); // the celebration card comes up a moment after the last answer
       if (await evaluate('document.getElementById("done").hidden')) found.push('was played to the end, but the celebration card did not appear');
       else if (await evaluate('document.getElementById("gift").hidden')) found.push('finished, but there was no gift');
@@ -552,7 +520,7 @@ try {
   for (const [game, { play, check, finish }] of Object.entries(RESUMES)) {
     checked++;
     const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
-    const inPage = (code) => evaluate(`(async () => { const G = document.getElementById('game-${game}'); ${HELPERS} ${DONE_DOTS} ${code} })()`);
+    const inPage = (code) => evaluate(`(async () => { const G = document.getElementById('game-${game}'); ${HELPERS} ${DONE_DOTS} ${SETUP[game] || ''} ${code} })()`);
     let problem = '';
     try {
       await evaluate(`(() => {

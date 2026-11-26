@@ -1,7 +1,8 @@
 // More half-done checks for tests/screens.mjs (see RESUMES there).
 // Each entry: a puzzle's name, with `play` (JavaScript that plays part of
 // it) and `check` (a JavaScript expression that is true if, after the page
-// is loaded again, the puzzle picked up where it left off).
+// is loaded again, the puzzle picked up where it left off). Some puzzles
+// have setup code that runs first: see tests/play-setups.mjs.
 export default {
   'pattern-train': {
     play: `for (let train = 0; train < 2; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
@@ -9,61 +10,19 @@ export default {
     finish: `for (let train = 0; train < 2; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
   },
   'fraction-pizza': {
-    play: `const game = await import('/src/games/fraction-pizza.js');
-    const { rounds } = game.generate(seed.seedFor(today, 'fraction-pizza'));
-    const playRound = async (round) => {
-      if (round.kind === 'make') {
-        const slices = G.querySelectorAll('.fp-slice');
-        for (let i = 0; i < round.topped; i++) slices[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        G.querySelector('.fp-check').click(); await wait();
-      } else if (round.kind === 'match') {
-        const fractions = G.querySelectorAll('.fp-match-fraction');
-        const pizzas = G.querySelectorAll('.fp-match-pizza');
-        for (let i = 0; i < 4; i++) { fractions[i].click(); pizzas[round.order.indexOf(i)].click(); await wait(40); }
-      } else await tapUntilRight(round.kind === 'name' ? '.fp-choice' : '.fp-pick');
-      await next();
-    };
-      for (const round of rounds.slice(0, 2)) await playRound(round);`,
+    play: `for (const round of rounds.slice(0, 2)) await playRound(round);`,
     check: `doneDots(2)`,
-    finish: `const game = await import('/src/games/fraction-pizza.js');
-    const { rounds } = game.generate(seed.seedFor(today, 'fraction-pizza'));
-    const playRound = async (round) => {
-      if (round.kind === 'make') {
-        const slices = G.querySelectorAll('.fp-slice');
-        for (let i = 0; i < round.topped; i++) slices[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        G.querySelector('.fp-check').click(); await wait();
-      } else if (round.kind === 'match') {
-        const fractions = G.querySelectorAll('.fp-match-fraction');
-        const pizzas = G.querySelectorAll('.fp-match-pizza');
-        for (let i = 0; i < 4; i++) { fractions[i].click(); pizzas[round.order.indexOf(i)].click(); await wait(40); }
-      } else await tapUntilRight(round.kind === 'name' ? '.fp-choice' : '.fp-pick');
-      await next();
-    };
-      for (const round of rounds.slice(2)) await playRound(round);`,
+    finish: `for (const round of rounds.slice(2)) await playRound(round);`,
   },
   'memory-match': {
-    play: `const game = await import('/src/games/memory-match.js');
-    const { cards } = game.generate(seed.seedFor(today, 'memory-match'));
-    const nodes = G.querySelectorAll('.mem-card');
-    const of = (pair) => cards.map((card, i) => (card.pair === pair ? i : -1)).filter((i) => i >= 0);
-    const turn = async (i) => { nodes[i].click(); await wait(50); };
-      for (const pair of [0, 1]) { await turn(of(pair)[0]); await turn(of(pair)[1]); }`,
+    play: `await findPair(0); await findPair(1);`,
     check: `G.querySelectorAll('.mem-matched').length === 4 && G.querySelectorAll('.mem-up').length === 4`,
-    finish: `const game = await import('/src/games/memory-match.js');
-    const { cards } = game.generate(seed.seedFor(today, 'memory-match'));
-    const nodes = G.querySelectorAll('.mem-card');
-    const of = (pair) => cards.map((card, i) => (card.pair === pair ? i : -1)).filter((i) => i >= 0);
-    const turn = async (i) => { nodes[i].click(); await wait(50); };
-      for (let pair = 2; pair < cards.length / 2; pair++) { await turn(of(pair)[0]); await turn(of(pair)[1]); }`,
+    finish: `for (let pair = 2; pair < pairs; pair++) await findPair(pair);`,
   },
   'pond-sudoku': {
-    play: `const game = await import('/src/games/pond-sudoku.js');
-      const puzzle = game.generate(seed.seedFor(today, 'pond-sudoku'));
-      for (const id of puzzle.hidden.slice(0, 2)) { G.querySelectorAll('.ps-pick')[game.answerFor(puzzle, id)].click(); await wait(60); }`,
+    play: `for (const id of puzzle.hidden.slice(0, 2)) await place(id);`,
     check: `G.querySelectorAll('.ps-found').length === 2 && G.querySelectorAll('.ps-selected').length === 1`,
-    finish: `const game = await import('/src/games/pond-sudoku.js');
-      const puzzle = game.generate(seed.seedFor(today, 'pond-sudoku'));
-      for (const id of puzzle.hidden.slice(2)) { G.querySelectorAll('.ps-pick')[game.answerFor(puzzle, id)].click(); await wait(60); }`,
+    finish: `for (const id of puzzle.hidden.slice(2)) await place(id);`,
   },
   'dot-to-dot': {
     play: `for (const dot of [...G.querySelectorAll('.dd-dot')].slice(0, 3)) { dot.click(); await wait(60); }`,
