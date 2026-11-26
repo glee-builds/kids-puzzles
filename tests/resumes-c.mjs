@@ -3,6 +3,31 @@
 // it) and `check` (a JavaScript expression that is true if, after the page
 // is loaded again, the puzzle picked up where it left off).
 export default {
+  'fraction-pizza': {
+    play: `const game = await import('/src/games/fraction-pizza.js');
+    const { rounds } = game.generate(seed.seedFor(today, 'fraction-pizza'));
+    const playRound = async (round) => {
+      if (round.kind === 'make') {
+        const slices = G.querySelectorAll('.fp-slice');
+        for (let i = 0; i < round.topped; i++) slices[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        G.querySelector('.fp-check').click(); await wait();
+      } else await tapUntilRight(round.kind === 'name' ? '.fp-choice' : '.fp-pick');
+      await next();
+    };
+      for (const round of rounds.slice(0, 2)) await playRound(round);`,
+    check: `doneDots(2)`,
+    finish: `const game = await import('/src/games/fraction-pizza.js');
+    const { rounds } = game.generate(seed.seedFor(today, 'fraction-pizza'));
+    const playRound = async (round) => {
+      if (round.kind === 'make') {
+        const slices = G.querySelectorAll('.fp-slice');
+        for (let i = 0; i < round.topped; i++) slices[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        G.querySelector('.fp-check').click(); await wait();
+      } else await tapUntilRight(round.kind === 'name' ? '.fp-choice' : '.fp-pick');
+      await next();
+    };
+      for (const round of rounds.slice(2)) await playRound(round);`,
+  },
   'memory-match': {
     play: `const game = await import('/src/games/memory-match.js');
     const { cards } = game.generate(seed.seedFor(today, 'memory-match'));

@@ -516,6 +516,11 @@ const GAMES = {
     how: ["Seeds grow in rows. Each row is a group.", "Add the rows, turn the garden, and split the big ones."],
     art: '<span class="garden-art"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>',
   },
+  'fraction-pizza': {
+    title: 'Fraction Pizza', kind: 'numbers', legend: 'How much of the pizza has toppings?', levels: 3, data: () => [levelFor('fraction-pizza')],
+    how: ['A fraction is part of a whole. 3/4 means 3 of 4 equal slices.', 'The bottom number is how many slices in all. The top number is how many have toppings.'],
+    art: '<span class="pizza-art"></span>',
+  },
   'math-mix-ups': {
     title: 'Math Mix-Ups', kind: 'everyday', legend: 'Puzzles that take some thinking', levels: 2, data: () => [DAY],
     how: ["These take some thinking! Use what you know to work out what you don't.", 'Pick Mild or Spicy at the top. You can switch any time.'],

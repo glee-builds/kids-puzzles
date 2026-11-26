@@ -136,6 +136,7 @@ button {
 .grp-choices,
 .em-marks,
 .ct-choices,
+.fp-choices,
 .gi-choices {
   display: flex;
   justify-content: center;
@@ -3742,6 +3743,7 @@ button.gr-row {
 /* Right answers use .grp-right (a teal ring and a check mark). */
 
 .ct-question,
+.fp-question,
 .cc-question {
   margin: 4px 0 6px;
   text-align: center;
@@ -3750,6 +3752,7 @@ button.gr-row {
 }
 
 .ct-stage,
+.fp-stage,
 .cc-stage {
   display: flex;
   flex-direction: column;
@@ -4618,4 +4621,74 @@ button.gr-row {
 .memory-art i:not(:empty) {
   background: var(--surface);
   box-shadow: 0 0 0 1.5px var(--here);
+}
+
+/* ---------- Fraction Pizza ---------- */
+
+.fp-pizza {
+  width: min(210px, 52vw);
+  height: auto;
+}
+
+.fp-crust { fill: var(--bank); }
+
+/* A plain slice is pale cheese; a slice with toppings is orange with round pieces on it. */
+.fp-cheese {
+  fill: color-mix(in srgb, var(--star) 30%, var(--surface));
+  stroke: var(--bank);
+  stroke-width: 1.5;
+}
+
+.fp-topped .fp-cheese { fill: var(--go); }
+.fp-topping { display: none; fill: var(--numbers-ink); }
+.fp-topped .fp-topping { display: inline; }
+
+/* On a "make" round, slices are buttons. */
+.fp-slice[role="button"] { cursor: pointer; }
+
+.fp-fraction {
+  font-size: 1.3em;
+  color: var(--numbers-ink);
+}
+
+.fp-choice {
+  min-width: 84px;
+  font-size: 1.3rem;
+}
+
+.fp-check { min-width: 150px; }
+
+/* Two pizzas side by side, each a button, with "The same" between them at level 3. */
+.fp-pair {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.fp-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.fp-pick .fp-pizza { width: min(124px, 30vw); }
+.fp-pick-same { min-height: 56px; padding: 0 10px; }
+.fp-under { font-size: 1.15rem; }
+
+.pizza-art {
+  width: 42px;
+  height: 42px;
+  border: 3px solid var(--bank);
+  border-radius: 50%;
+  background: conic-gradient(var(--go) 0 75%, color-mix(in srgb, var(--star) 30%, var(--surface)) 0);
 }
