@@ -8,7 +8,7 @@
 //   compare  which of two pizzas has more with toppings (or are they the same?)
 //
 //   level 1: halves, thirds, and fourths; name and make
-//   level 2: sixths and eighths too; comparing pizzas cut the same way, or
+//   level 2: fifths, sixths, eighths, and tenths too; comparing pizzas cut the same way, or
 //            with the same number of topped slices
 //   level 3: comparing pizzas cut differently, and fractions that are equal
 //            (1/2 is the same as 2/4)
@@ -22,12 +22,15 @@ export const MAX_TRIES = 3; // tries at making a pizza before it's shown
 // How many slices a pizza can be cut into, and the kinds of round, at each level.
 export const LEVELS = [
   { slices: [2, 3, 4], kinds: ['name', 'make', 'name', 'make'] },
-  { slices: [2, 3, 4, 6, 8], kinds: ['name', 'make', 'compare', 'make'] },
-  { slices: [2, 3, 4, 6, 8], kinds: ['make', 'compare', 'name', 'compare'] },
+  { slices: [2, 3, 4, 5, 6, 8, 10], kinds: ['name', 'make', 'compare', 'make'] },
+  { slices: [2, 3, 4, 5, 6, 8, 10], kinds: ['make', 'compare', 'name', 'compare'] },
 ];
 const levelOf = (level = 1) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
 // Pairs of fractions that are the same amount, as [topped, slices] twice.
-const EQUALS = [[1, 2, 2, 4], [1, 2, 3, 6], [1, 2, 4, 8], [1, 3, 2, 6], [2, 3, 4, 6], [1, 4, 2, 8], [3, 4, 6, 8]];
+const EQUALS = [
+  [1, 2, 2, 4], [1, 2, 3, 6], [1, 2, 4, 8], [1, 2, 5, 10], [1, 3, 2, 6], [2, 3, 4, 6], [1, 4, 2, 8], [3, 4, 6, 8],
+  [1, 5, 2, 10], [2, 5, 4, 10], [3, 5, 6, 10], [4, 5, 8, 10],
+];
 
 /** A fraction as text: fractionText(3, 4) is "3/4". */
 export const fractionText = (topped, slices) => `${topped}/${slices}`;

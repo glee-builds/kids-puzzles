@@ -103,3 +103,18 @@ test('every choice for naming a pizza is a real fraction: top smaller than botto
     });
   }
 });
+
+test('levels 2 and 3 go up to tenths, and use every way of cutting a pizza', () => {
+  for (const level of [2, 3]) {
+    const used = new Set();
+    everyDay((key) => {
+      for (const round of generate(seed(key), level).rounds) {
+        for (const pizza of round.kind === 'compare' ? [round.left, round.right] : [round]) {
+          used.add(pizza.slices);
+          assert.ok(pizza.slices <= 10);
+        }
+      }
+    });
+    assert.deepEqual([...used].sort((a, b) => a - b), [2, 3, 4, 5, 6, 8, 10]);
+  }
+});
