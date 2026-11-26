@@ -201,6 +201,10 @@ const fillAll = (name) => `
       state = game.check(state, { cell, value });
     }`;
 const PLAYS = {
+  'dot-to-dot': `
+    const dots = [...G.querySelectorAll('.dd-dot')];
+    dots.at(-1).click(); await wait(60); // a wrong dot first
+    for (const dot of dots) { dot.click(); await wait(60); }`,
   'magic-square': fillAll('magic-square'),
   'number-pyramid': fillAll('number-pyramid'),
   'number-line': `

@@ -32,6 +32,7 @@ const FILES = [
   'src/voice.js',
   'src/games/bug-groups.js',
   'src/games/clock-time.js',
+  'src/games/dot-to-dot.js',
   'src/games/coin-count.js',
   'src/games/end-marks.js',
   'src/games/fact-families.js',

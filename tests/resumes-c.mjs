@@ -3,6 +3,11 @@
 // it) and `check` (a JavaScript expression that is true if, after the page
 // is loaded again, the puzzle picked up where it left off).
 export default {
+  'dot-to-dot': {
+    play: `for (const dot of [...G.querySelectorAll('.dd-dot')].slice(0, 3)) { dot.click(); await wait(60); }`,
+    check: `G.querySelectorAll('.dd-dot-done').length === 3 && G.querySelector('.dd-line').getAttribute('points').split(' ').length === 3`,
+    finish: `for (const dot of [...G.querySelectorAll('.dd-dot')].slice(3)) { dot.click(); await wait(60); }`,
+  },
   // Fix the first problem, then find (but don't fix) the mistake in the second.
   'find-the-mistake': {
     play: `const game = await import('/src/games/find-the-mistake.js');
