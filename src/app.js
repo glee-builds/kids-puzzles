@@ -195,6 +195,30 @@ function keepSticker(sticker) {
   waitingGift = null;
 }
 
+/**
+ * A sticker's picture. A shiny one gets a gold edge (styles.css). A rainbow
+ * one is drawn as a small SVG picture, so its edge can follow the sticker's
+ * shape in rainbow colors: the shape is made 6 units fatter all round (and
+ * its corners rounded off), filled with the colors, and the sticker is
+ * drawn on top.
+ */
+function stickerArt(picture, tier, extraClass = '') {
+  const art = make('span', `${extraClass} sticker-art${tier ? ` sticker-${tier}` : ''}`.trim(), tier === 'rainbow' ? '' : picture);
+  if (tier !== 'rainbow') return art;
+  const color = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stops = ['--go', '--star', '--pad', '--here', '--elsewhere', '--blush']
+    .map((name, i, all) => `<stop offset="${i / (all.length - 1)}" stop-color="${color(name)}"/>`).join('');
+  const text = `<text x="50" y="50" font-size="62" text-anchor="middle" dominant-baseline="central">${picture}</text>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs>
+    <linearGradient id="colors" x1="0.15" y1="0.15" x2="0.85" y2="0.85">${stops}</linearGradient>
+    <filter id="fatter" x="-30%" y="-30%" width="160%" height="160%"><feMorphology operator="dilate" radius="6"/><feGaussianBlur stdDeviation="1.5"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 9 -4"/></filter>
+    <mask id="edge"><g filter="url(#fatter)">${text}</g></mask></defs>
+    <rect width="100" height="100" fill="url(#colors)" mask="url(#edge)"/>${text}</svg>`;
+  art.classList.add('rainbow-art');
+  art.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  return art;
+}
+
 // The mark beside each kind of copy, so it isn't told apart by color alone.
 const TIER_MARKS = { shiny: '✨', rainbow: '🌈' };
 
@@ -214,7 +238,7 @@ function showGift(sticker) {
     for (const node of buttons) node.hidden = false;
     gift.hidden = true;
     shown.replaceChildren(
-      make('span', `gift-picture sticker-art${sticker.tier ? ` sticker-${sticker.tier}` : ''}`, sticker.picture),
+      stickerArt(sticker.picture, sticker.tier, 'gift-picture'),
       make('span', 'gift-name', sticker.tier ? `${TIER_MARKS[sticker.tier]} A ${sticker.tier} sticker: ${sticker.name}!` : `A new sticker: ${sticker.name}!`));
     shown.hidden = false;
     drawStickerLink();
@@ -300,7 +324,7 @@ function drawStickers() {
     const tier = rainbow.includes(sticker.id) ? 'rainbow' : shiny.includes(sticker.id) ? 'shiny' : '';
     const spot = make('span', 'sb-sticker' + (got ? '' : ' sb-empty') + (tier ? ` sb-${tier}` : '') + (sticker.id === newest ? ' sb-new' : ''));
     // A sticker not collected yet shows as a pale outline of what's coming.
-    const art = make('span', 'sticker-art', sticker.picture);
+    const art = stickerArt(sticker.picture, tier);
     art.style.setProperty('--tilt', `${TILTS[i % TILTS.length]}deg`);
     spot.append(art);
     spot.setAttribute('role', 'img');
