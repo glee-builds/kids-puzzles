@@ -2,10 +2,12 @@
 //
 // A pizza is cut into equal slices, and some have toppings. A fraction
 // says how much of the pizza that is: 3/4 is 3 of 4 equal slices. Each day
-// has 4 rounds, of three kinds:
+// has 5 rounds, of four kinds:
 //   name     look at a pizza and pick its fraction from 3 choices
 //   make     tap slices to put toppings on a fraction of the pizza
 //   compare  which of two pizzas has more with toppings (or are they the same?)
+//   match    join 4 fractions to the 4 pizzas that show them, with lines
+//            (always the last round)
 //
 //   level 1: halves, thirds, and fourths; name and make
 //   level 2: fifths, sixths, eighths, and tenths too; comparing pizzas cut the same way, or
@@ -17,13 +19,14 @@ import { createRandom } from '../seed.js';
 import { nextRound } from '../rounds.js';
 import { make, button, shape, wiggle, roundFrame } from '../ui.js';
 
-export const ROUNDS = 4;
+export const ROUNDS = 5;
+export const MATCHES = 4; // fractions to join to pizzas in the last round
 export const MAX_TRIES = 3; // tries at making a pizza before it's shown
 // How many slices a pizza can be cut into, and the kinds of round, at each level.
 export const LEVELS = [
-  { slices: [2, 3, 4], kinds: ['name', 'make', 'name', 'make'] },
-  { slices: [2, 3, 4, 5, 6, 8, 10], kinds: ['name', 'make', 'compare', 'make'] },
-  { slices: [2, 3, 4, 5, 6, 8, 10], kinds: ['make', 'compare', 'name', 'compare'] },
+  { slices: [2, 3, 4], kinds: ['name', 'make', 'name', 'make', 'match'] },
+  { slices: [2, 3, 4, 5, 6, 8, 10], kinds: ['name', 'make', 'compare', 'make', 'match'] },
+  { slices: [2, 3, 4, 5, 6, 8, 10], kinds: ['make', 'compare', 'name', 'compare', 'match'] },
 ];
 const levelOf = (level = 1) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
 // Pairs of fractions that are the same amount, as [topped, slices] twice.
@@ -86,9 +89,19 @@ const MAKERS = {
     }
     return { kind: 'compare', left, right, answer: bigger(left, right), choices: level >= 3 ? ['left', 'same', 'right'] : ['left', 'right'] };
   },
+  match(random, { slices: list }) {
+    // 4 pizzas that are all different amounts (so 1/2 and 2/4 are never both
+    // here), cut at least 2 different ways.
+    let pairs;
+    do {
+      pairs = Array.from({ length: MATCHES }, () => pizza(random, list));
+    } while (new Set(pairs.map((p) => p.topped / p.slices)).size < MATCHES || new Set(pairs.map((p) => p.slices)).size < 2);
+    // `order` is the pizzas from top to bottom: order[0] is which fraction the top pizza shows.
+    return { kind: 'match', pairs, order: random.shuffle(pairs.map((_, i) => i)) };
+  },
 };
 
-/** Make today's 4 rounds from a seed and a level (1 to 3). */
+/** Make today's 5 rounds from a seed and a level (1 to 3). */
 export function generate(seed, level = 1) {
   const random = createRandom(seed);
   const spec = levelOf(level);
@@ -100,7 +113,7 @@ export function generate(seed, level = 1) {
     do {
       round = MAKERS[kind](random, spec, level, rounds.some((r) => r.answer === 'same'));
       tries++;
-    } while (tries < 20 && rounds.some((r) => JSON.stringify([r.slices, r.topped, r.left, r.right]) === JSON.stringify([round.slices, round.topped, round.left, round.right])));
+    } while (tries < 20 && kind !== 'match' && rounds.some((r) => JSON.stringify([r.slices, r.topped, r.left, r.right]) === JSON.stringify([round.slices, round.topped, round.left, round.right])));
     rounds.push(round);
   }
   return { level, rounds };
@@ -111,10 +124,18 @@ export function start(puzzle) {
   return { puzzle, round: 0, tries: 0, shown: [], status: 'playing', last: null };
 }
 
-/** Whether `answer` is right: a fraction's text (name), a count of topped slices (make), or 'left', 'right', 'same' (compare). */
+/**
+ * Whether `answer` is right: a fraction's text (name), a count of topped
+ * slices (make), 'left', 'right', or 'same' (compare), or how many
+ * fractions have been joined to their pizzas (match: all 4).
+ */
 export function isRight(round, answer) {
+  if (round.kind === 'match') return answer === MATCHES;
   return round.kind === 'make' ? answer === round.topped : answer === round.answer;
 }
+
+/** In a match round: whether fraction number `fraction` goes with the pizza in place `place` (0 is the top). */
+export const goesWith = (round, fraction, place) => round.order[place] === fraction;
 
 /** Answer the current round. A miss stays on it; the third miss at making a pizza shows it. */
 export function check(state, answer) {
@@ -130,6 +151,11 @@ export function hint(round, answer) {
   }
   if (round.kind === 'make') {
     return `${fractionText(round.topped, round.slices)} means ${round.topped} of the ${round.slices} slices. You have ${answer}.`;
+  }
+  if (round.kind === 'match') {
+    // `answer` is the fraction that was joined to the wrong pizza.
+    const { topped, slices } = round.pairs[answer];
+    return `${fractionText(topped, slices)} is a pizza cut into ${slices} slices, with toppings on ${topped} of them.`;
   }
   const { left, right } = round;
   if (left.slices === right.slices) return 'The slices are the same size. Count which pizza has more with toppings.';
@@ -147,7 +173,11 @@ export function verify(puzzle) {
   rounds.forEach((round, i) => {
     const where = `round ${i + 1}`;
     if (round.kind !== spec.kinds[i]) problems.push(`${where} should be a "${spec.kinds[i]}" round`);
-    if (round.kind === 'compare') {
+    if (round.kind === 'match') {
+      if (round.pairs?.length !== MATCHES || !round.pairs.every(proper)) problems.push(`${where} needs ${MATCHES} fractions this level uses`);
+      else if (new Set(round.pairs.map((p) => p.topped / p.slices)).size !== MATCHES) problems.push(`${where}: two of the fractions are the same amount`);
+      if ([...(round.order || [])].sort().join() !== '0,1,2,3') problems.push(`${where}: the pizzas must be the 4 fractions, in some order`);
+    } else if (round.kind === 'compare') {
       if (!proper(round.left) || !proper(round.right)) problems.push(`${where}: a pizza isn't a fraction this level uses`);
       else if (round.answer !== bigger(round.left, round.right)) problems.push(`${where}: the answer is wrong`);
       if (!round.choices?.includes(round.answer)) problems.push(`${where}: the answer isn't one of the choices`);
@@ -307,6 +337,96 @@ export function render(container, puzzle, onDone, session = {}) {
         }
       }
       stage.append(row);
+    },
+
+    // Join each fraction on the left to its pizza on the right: tap one then
+    // the other, or drag a line across.
+    match(round) {
+      question.textContent = 'Join each fraction to its pizza.';
+      const board = make('div', 'fp-match');
+      const left = make('div', 'fp-match-column');
+      const right = make('div', 'fp-match-column');
+      // The lines are drawn in the space between the columns: 0 to 100 across, and 0 to 100 down.
+      const lines = shape('svg', { viewBox: '0 0 100 100', preserveAspectRatio: 'none', class: 'fp-lines', 'aria-hidden': 'true' });
+      const band = shape('line', { class: 'fp-line fp-band', x1: 0, x2: 0, y1: 0, y2: 0 }); // follows a dragging finger
+      lines.append(band);
+      const rowAt = (i) => ((i + 0.5) / MATCHES) * 100; // how far down row i's middle is
+      const joined = new Set(); // fractions already joined
+      let selected = null;
+      let dragging = false;
+
+      const fractions = round.pairs.map(({ topped, slices }, i) => {
+        const node = left.appendChild(button('lw-button fp-match-fraction', fractionText(topped, slices), () => select(i)));
+        node.addEventListener('pointerdown', () => { select(i); dragging = selected === i; });
+        return node;
+      });
+      const pizzas = round.order.map((fraction, place) => {
+        const { topped, slices } = round.pairs[fraction];
+        const node = right.appendChild(button('fp-match-pizza', '', () => join(place)));
+        node.dataset.place = place;
+        node.append(pizzaDrawing(slices, firstTopped(slices, topped), `A pizza cut into ${slices} slices. ${topped} have toppings.`).svg);
+        return node;
+      });
+
+      function select(i) {
+        if (joined.has(i) || state.round !== puzzle.rounds.indexOf(round)) return;
+        selected = i;
+        fractions.forEach((node, n) => {
+          node.classList.toggle('fp-selected', n === i);
+          node.setAttribute('aria-pressed', n === i);
+        });
+        message.textContent = `Now tap the pizza that shows ${fractions[i].textContent}.`;
+      }
+
+      /** Try joining the selected fraction to the pizza in this place. */
+      function join(place) {
+        if (state.round !== puzzle.rounds.indexOf(round) || pizzas[place].disabled) return;
+        if (selected === null) {
+          message.textContent = 'Tap a fraction first.';
+          return;
+        }
+        if (!goesWith(round, selected, place)) {
+          misses += 1;
+          message.textContent = `Not quite. ${hint(round, selected)}`;
+          wiggle(pizzas[place]);
+          return;
+        }
+        lines.append(shape('line', { class: 'fp-line', x1: 0, y1: rowAt(selected), x2: 100, y2: rowAt(place) }));
+        joined.add(selected);
+        for (const node of [fractions[selected], pizzas[place]]) {
+          node.classList.remove('fp-selected');
+          node.classList.add('fp-joined');
+          node.disabled = true;
+        }
+        message.textContent = `✓ ${fractions[selected].textContent} is joined.`;
+        selected = null;
+        if (joined.size === MATCHES) {
+          state = check(state, joined.size);
+          finishRound('✓ Every fraction has its pizza!');
+        }
+      }
+
+      // Dragging: a line follows the finger from the fraction, and letting go on a pizza joins them.
+      board.addEventListener('pointermove', (event) => {
+        if (!dragging || selected === null) return;
+        const box = lines.getBoundingClientRect();
+        const across = Math.min(Math.max(((event.clientX - box.left) / box.width) * 100, 0), 100);
+        const down = Math.min(Math.max(((event.clientY - box.top) / box.height) * 100, 0), 100);
+        for (const [name, value] of Object.entries({ x1: 0, y1: rowAt(selected), x2: across, y2: down })) band.setAttribute(name, value);
+        band.classList.add('fp-band-on');
+      });
+      const letGo = (event) => {
+        band.classList.remove('fp-band-on');
+        if (!dragging) return;
+        dragging = false;
+        const under = document.elementFromPoint(event.clientX, event.clientY)?.closest?.('[data-place]');
+        if (under) join(Number(under.dataset.place));
+      };
+      board.addEventListener('pointerup', letGo);
+      board.addEventListener('pointercancel', () => { dragging = false; band.classList.remove('fp-band-on'); });
+
+      board.append(left, lines, right);
+      stage.append(board);
     },
   };
 
