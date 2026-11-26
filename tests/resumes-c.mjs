@@ -16,6 +16,10 @@ export default {
         const slices = G.querySelectorAll('.fp-slice');
         for (let i = 0; i < round.topped; i++) slices[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
         G.querySelector('.fp-check').click(); await wait();
+      } else if (round.kind === 'match') {
+        const fractions = G.querySelectorAll('.fp-match-fraction');
+        const pizzas = G.querySelectorAll('.fp-match-pizza');
+        for (let i = 0; i < 4; i++) { fractions[i].click(); pizzas[round.order.indexOf(i)].click(); await wait(40); }
       } else await tapUntilRight(round.kind === 'name' ? '.fp-choice' : '.fp-pick');
       await next();
     };
@@ -28,6 +32,10 @@ export default {
         const slices = G.querySelectorAll('.fp-slice');
         for (let i = 0; i < round.topped; i++) slices[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
         G.querySelector('.fp-check').click(); await wait();
+      } else if (round.kind === 'match') {
+        const fractions = G.querySelectorAll('.fp-match-fraction');
+        const pizzas = G.querySelectorAll('.fp-match-pizza');
+        for (let i = 0; i < 4; i++) { fractions[i].click(); pizzas[round.order.indexOf(i)].click(); await wait(40); }
       } else await tapUntilRight(round.kind === 'name' ? '.fp-choice' : '.fp-pick');
       await next();
     };
