@@ -9,7 +9,7 @@
 // The wrong choices are the mistakes kids really make: mixing up the two
 // hands, and being an hour off.
 
-import { createRandom } from '../seed.js';
+import { createRandom, forLevel } from '../seed.js';
 import { make, button, wiggle, roundFrame, shape } from '../ui.js';
 
 export const CLOCKS = 5;
@@ -19,7 +19,7 @@ export const MINUTES = [
   [0, 15, 30, 45],
   [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
 ];
-const minutesFor = (level = 1) => MINUTES[Math.min(Math.max(level, 1), MINUTES.length) - 1];
+const minutesFor = (level) => forLevel(MINUTES, level);
 
 /** A time as text: timeText(3, 5) is "3:05". */
 export const timeText = (hour, minute) => `${hour}:${String(minute).padStart(2, '0')}`;

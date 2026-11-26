@@ -21,12 +21,12 @@ import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const ROUNDS = ['match', 'add', 'build'];
 // Level 4: quick recall. The fact comes first and the picture after, as a check.
-export const RECALL_ROUNDS = ['recall', 'recall', 'build'];
+const RECALL_ROUNDS = ['recall', 'recall', 'build'];
 const roundsFor = (level) => (level >= 4 ? RECALL_ROUNDS : ROUNDS);
-export const MIN_GROUPS = 2;
-export const MAX_GROUPS = 5;
-export const MAX_PADS = 5;  // the + button stops here when building
-export const MAX_BUGS = 10; // bugs on one pad
+const MIN_GROUPS = 2;
+const MAX_GROUPS = 5;
+const MAX_PADS = 5;  // the + button stops here when building
+const MAX_BUGS = 10; // bugs on one pad
 
 /**
  * Make today's 3 rounds. `level` picks the group sizes (1 to 3), and at

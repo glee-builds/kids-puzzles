@@ -10,14 +10,14 @@
 // Squares are named by row and column: "0-0" is the top left, "3-3" the
 // bottom right. An animal is a number from 0 to 3 (its place in ANIMALS).
 
-import { createRandom } from '../seed.js';
+import { createRandom, forLevel } from '../seed.js';
 import { make, button, liveMessage, wiggle } from '../ui.js';
 
 export const SIZE = 4;
-export const ANIMALS = [['🐸', 'frog'], ['🦆', 'duck'], ['🐢', 'turtle'], ['🐟', 'fish']];
+const ANIMALS = [['🐸', 'frog'], ['🦆', 'duck'], ['🐢', 'turtle'], ['🐟', 'fish']];
 export const BLANKS = [6, 8, 10]; // empty squares at each level
 export const MAX_TRIES = 3; // after this many misses the square fills itself in
-const blanksFor = (level = 1) => BLANKS[Math.min(Math.max(level, 1), BLANKS.length) - 1];
+const blanksFor = (level) => forLevel(BLANKS, level);
 
 // One finished pond. Every other one is made by shuffling this.
 const BASE = [[0, 1, 2, 3], [2, 3, 0, 1], [1, 0, 3, 2], [3, 2, 1, 0]];

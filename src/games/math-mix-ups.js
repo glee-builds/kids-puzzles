@@ -29,7 +29,7 @@ import { choicesFor } from '../times.js';
 import { make, button, wiggle, roundFrame } from '../ui.js';
 
 export const KINDS = ['shapes', 'scale', 'machine', 'pattern', 'missing', 'equal', 'area', 'sides'];
-export const ROUNDS_PER_DAY = 3;
+const ROUNDS_PER_DAY = 3;
 export const HEATS = ['Mild', 'Spicy'];
 const clampLevel = (level = 1) => Math.min(Math.max(level, 1), HEATS.length);
 
@@ -37,7 +37,7 @@ const clampLevel = (level = 1) => Math.min(Math.max(level, 1), HEATS.length);
 export const kindsForDay = (dayNumber = 0) => dealForDay(KINDS, ROUNDS_PER_DAY, dayNumber, 'math-mix-ups');
 
 // How many sides each shape has (for the "sides" rounds).
-export const SIDES = { triangle: 3, square: 4, pentagon: 5, hexagon: 6 };
+const SIDES = { triangle: 3, square: 4, pentagon: 5, hexagon: 6 };
 
 const BOX = '□';
 

@@ -64,7 +64,7 @@ export function progressDots(count) {
  * `container` is on screen. (Handy for testing on a laptop; phones use the
  * on-screen keys.) Returns a function that stops listening.
  */
-export function onKeys(container, onKey) {
+function onKeys(container, onKey) {
   const listener = (event) => {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
     if (container.closest('[hidden]')) return;

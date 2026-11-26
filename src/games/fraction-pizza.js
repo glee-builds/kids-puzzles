@@ -15,7 +15,7 @@
 //   level 3: comparing pizzas cut differently, and fractions that are equal
 //            (1/2 is the same as 2/4)
 
-import { createRandom } from '../seed.js';
+import { createRandom, forLevel } from '../seed.js';
 import { nextRound } from '../rounds.js';
 import { make, button, shape, wiggle, roundFrame } from '../ui.js';
 
@@ -28,7 +28,7 @@ export const LEVELS = [
   { slices: [2, 3, 4, 5, 6, 8, 10], kinds: ['name', 'make', 'compare', 'make', 'match'] },
   { slices: [2, 3, 4, 5, 6, 8, 10], kinds: ['make', 'compare', 'name', 'compare', 'match'] },
 ];
-const levelOf = (level = 1) => LEVELS[Math.min(Math.max(level, 1), LEVELS.length) - 1];
+const settingsFor = (level) => forLevel(LEVELS, level);
 // Pairs of fractions that are the same amount, as [topped, slices] twice.
 const EQUALS = [
   [1, 2, 2, 4], [1, 2, 3, 6], [1, 2, 4, 8], [1, 2, 5, 10], [1, 3, 2, 6], [2, 3, 4, 6], [1, 4, 2, 8], [3, 4, 6, 8],
@@ -104,7 +104,7 @@ const MAKERS = {
 /** Make today's 5 rounds from a seed and a level (1 to 3). */
 export function generate(seed, level = 1) {
   const random = createRandom(seed);
-  const spec = levelOf(level);
+  const spec = settingsFor(level);
   const rounds = [];
   for (const kind of spec.kinds) {
     let round;
@@ -167,7 +167,7 @@ export function hint(round, answer) {
 export function verify(puzzle) {
   const problems = [];
   const { rounds, level = 1 } = puzzle;
-  const spec = levelOf(level);
+  const spec = settingsFor(level);
   if (!Array.isArray(rounds) || rounds.length !== ROUNDS) return { ok: false, problems: [`there must be ${ROUNDS} rounds`] };
   const proper = (p) => p && spec.slices.includes(p.slices) && Number.isInteger(p.topped) && p.topped >= 1 && p.topped < p.slices;
   rounds.forEach((round, i) => {

@@ -87,8 +87,8 @@ export function currentStreak(progress, today) {
 }
 
 export const RESULTS_KEPT = 10;
-export const EASY_DAYS_TO_GO_UP = 3;
-export const HARD_DAYS_TO_GO_DOWN = 2;
+const EASY_DAYS_TO_GO_UP = 3;
+const HARD_DAYS_TO_GO_DOWN = 2;
 
 /** How a puzzle went: 'easy', 'ok', or 'hard'. */
 export function rate({ misses = 0, helped = 0 } = {}) {
@@ -137,8 +137,8 @@ export function setLevel(progress, game, level) {
   return { ...progress, levels: { ...progress.levels, [game]: { now: level, was: level, since: null } } };
 }
 
-export const REVIEW_GAPS = [2, 7]; // days until a missed item comes back, then comes back again
-export const REVIEW_KEPT = 20;     // the most items one puzzle keeps for review
+const REVIEW_GAPS = [2, 7]; // days until a missed item comes back, then comes back again
+const REVIEW_KEPT = 20;     // the most items one puzzle keeps for review
 
 /** The items of `game` that are due to come back on day number `dayNumber`, oldest first. */
 export function dueItems(progress, game, dayNumber) {

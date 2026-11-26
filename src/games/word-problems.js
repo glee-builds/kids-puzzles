@@ -112,7 +112,7 @@ export function pieces(problem) {
 }
 
 export const answerFor = (problem) => KINDS[problem.kind].answer(problem.numbers);
-export const isExtra = (problem) => problem.kind.startsWith('extra');
+const isExtra = (problem) => problem.kind.startsWith('extra');
 
 /** The number sentence that solves it, like "23 + 15 − 8 = 30". */
 export function worked(problem) {

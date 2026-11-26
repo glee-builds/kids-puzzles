@@ -15,7 +15,7 @@
 import { createRandom } from '../seed.js';
 import { make, button, liveMessage, wiggle, progressDots, letterKeyboard } from '../ui.js';
 
-export const LENGTHS = [3, 4];  // one ladder of each, in this order
+const LENGTHS = [3, 4];  // one ladder of each, in this order
 const ABC = 'abcdefghijklmnopqrstuvwxyz';
 
 /** Every accepted word that differs from `word` in exactly one letter. */
@@ -68,7 +68,7 @@ export function shortestLadder(from, to, accepted, preferred = new Set()) {
 }
 
 /** Steps still needed from `from` to `to` (Infinity if there is no way). */
-export function stepsBetween(from, to, accepted) {
+function stepsBetween(from, to, accepted) {
   const steps = distancesFrom(to, accepted).get(from);
   return steps === undefined ? Infinity : steps;
 }

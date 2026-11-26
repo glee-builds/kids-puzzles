@@ -18,11 +18,11 @@
 // until its deck is used up.
 
 import { nextRound } from '../rounds.js';
-import { createRandom, dealForDay } from '../seed.js';
+import { createRandom, dealForDay, forLevel } from '../seed.js';
 import { make, button, liveMessage, wiggle, roundFrame } from '../ui.js';
 
 export const MARKS = ['.', '?', '!'];
-export const MARK_NAMES = { '.': 'telling', '?': 'asking', '!': 'strong feeling' };
+const MARK_NAMES = { '.': 'telling', '?': 'asking', '!': 'strong feeling' };
 export const MAX_TRIES = 3; // tries at the stuck-together rounds before they're shown
 // The kinds of round at each level, in order.
 export const KINDS = [
@@ -30,7 +30,7 @@ export const KINDS = [
   ['mark', 'mark', 'breaks', 'marks', 'capitals'],
   ['mark', 'breaks', 'marks', 'capitals', 'commas'],
 ];
-const kindsFor = (level = 1) => KINDS[Math.min(Math.max(level, 1), KINDS.length) - 1];
+const kindsFor = (level) => forLevel(KINDS, level);
 
 /**
  * The three sentences of a run as one line of words in lowercase, with
@@ -74,7 +74,7 @@ export function unpunctuate(sentences) {
   return { words, ends: ends.slice(0, -1) }; // the last word always ends a sentence
 }
 
-export const markOf = (sentence) => sentence.slice(-1);
+const markOf = (sentence) => sentence.slice(-1);
 
 /** Problems with the data file. An empty list means it's fine. */
 export function dataProblems({ sentences, runs, lists = [] }) {

@@ -83,6 +83,12 @@ export function createRandom(seed) {
 }
 
 /**
+ * The item of `list` that goes with a level: level 1 gets the first item.
+ * A level below 1, or past the end of the list, gets the nearest one.
+ */
+export const forLevel = (list, level = 1) => list[Math.min(Math.max(level, 1), list.length) - 1];
+
+/**
  * Every way to choose `k` items from a list, in order, e.g.
  * combinations([a, b, c], 2) -> [[a, b], [a, c], [b, c]]. Games use it to
  * list every set of blank squares once, then keep the ones that work.

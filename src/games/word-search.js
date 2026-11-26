@@ -14,7 +14,7 @@
 // is only used if every word appears exactly once, and if the filler
 // doesn't spell anything from SKIP by accident.
 
-import { createRandom, dealForDay } from '../seed.js';
+import { createRandom, dealForDay, forLevel } from '../seed.js';
 import { make, button, liveMessage, trace } from '../ui.js';
 
 export const SIZE = 15;
@@ -24,12 +24,12 @@ export const MAX_WORD = 8;
 
 // The ways a word can run at each level, as [rows, columns] per letter:
 // across and down; then on a slant too; then backward and upward too.
-export const PLACE_BY_LEVEL = [
+const PLACE_BY_LEVEL = [
   [[0, 1], [1, 0]],
   [[0, 1], [1, 0], [1, 1]],
   [[0, 1], [1, 0], [1, 1], [0, -1], [-1, 0]],
 ];
-const placesFor = (level = 1) => PLACE_BY_LEVEL[Math.min(Math.max(level, 1), PLACE_BY_LEVEL.length) - 1];
+const placesFor = (level) => forLevel(PLACE_BY_LEVEL, level);
 // Every straight line in the grid, for checking what can be read in it.
 const LINES = [[0, 1], [0, -1], [1, 0], [-1, 0], [1, 1], [-1, -1], [1, -1], [-1, 1]];
 // Words the random filler must not spell, in any direction.

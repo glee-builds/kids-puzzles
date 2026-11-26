@@ -11,11 +11,11 @@
 // before, so the pair could have been remembered. Turning over cards that
 // haven't been seen yet is looking, not missing.
 
-import { createRandom } from '../seed.js';
+import { createRandom, forLevel } from '../seed.js';
 import { make, button, liveMessage } from '../ui.js';
 
 export const PAIRS = [6, 8, 8]; // pairs at each level
-const pairsFor = (level = 1) => PAIRS[Math.min(Math.max(level, 1), PAIRS.length) - 1];
+const pairsFor = (level) => forLevel(PAIRS, level);
 
 // The pictures a pair can be: [picture, name].
 export const PICTURES = [
