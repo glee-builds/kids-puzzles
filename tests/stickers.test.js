@@ -18,7 +18,19 @@ test('gifts never repeat until the book is full', () => {
     assert.ok(sticker && !owned.includes(sticker.id));
     owned.push(sticker.id);
   }
-  assert.equal(nextSticker(owned), null);
+  assert.equal(nextSticker(owned).shiny, true); // a full book: shiny copies come next
+});
+
+test('with a full book, each sticker comes once more as a shiny copy, then nothing', () => {
+  const owned = STICKERS.map((s) => s.id);
+  const shiny = [];
+  for (let i = 0; i < STICKERS.length; i++) {
+    const sticker = nextSticker(owned, shiny);
+    assert.ok(sticker.shiny && owned.includes(sticker.id) && !shiny.includes(sticker.id));
+    shiny.push(sticker.id);
+  }
+  assert.equal(nextSticker(owned, shiny), null);
+  assert.equal(nextSticker(owned.slice(1), shiny).shiny, undefined); // a sticker still missing comes first
 });
 
 test('the first gifts come from different pages', () => {

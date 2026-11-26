@@ -5,6 +5,8 @@
 // there is nothing to download. They are all older emoji (2019 or
 // earlier), so they show up on older phones too. A gift is never a repeat:
 // each one is a sticker the player doesn't have yet, until the book is full.
+// After that, gifts are shiny copies: each sticker once more, with a gold
+// edge and a sparkle, until every sticker is shiny.
 
 import { createRandom, hashString } from './seed.js';
 
@@ -41,8 +43,14 @@ const ORDER = createRandom(hashString('sticker-gifts')).shuffle(STICKERS.map((s)
 
 export const stickerById = (id) => STICKERS.find((s) => s.id === id);
 
-/** The next sticker for someone who owns `owned` (a list of ids), or null if the book is full. */
-export function nextSticker(owned = []) {
-  const id = ORDER.find((candidate) => !owned.includes(candidate));
-  return id ? stickerById(id) : null;
+/**
+ * The next gift for someone who owns `owned` (a list of ids) and has the
+ * shiny copies in `shiny`: a new sticker, or with a full book a shiny copy
+ * ({ ...sticker, shiny: true }), or null once every sticker is shiny.
+ */
+export function nextSticker(owned = [], shiny = []) {
+  const fresh = ORDER.find((id) => !owned.includes(id));
+  if (fresh) return stickerById(fresh);
+  const again = ORDER.find((id) => !shiny.includes(id));
+  return again ? { ...stickerById(again), shiny: true } : null;
 }
