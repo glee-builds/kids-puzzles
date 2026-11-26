@@ -44,6 +44,7 @@ const FILES = [
   'src/games/magic-square.js',
   'src/games/math-mix-ups.js',
   'src/games/maze.js',
+  'src/games/memory-match.js',
   'src/games/number-line.js',
   'src/games/number-pyramid.js',
   'src/games/pond-sudoku.js',
