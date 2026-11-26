@@ -3455,16 +3455,32 @@ button.gr-row {
     drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
 }
 
-.sb-shiny {
+/* A rainbow sticker (a third copy, won after every one is shiny): an edge
+   in four colors, and a rainbow in the corner. */
+.sb-rainbow .sticker-art,
+.sticker-rainbow {
+  filter:
+    drop-shadow(2px 0 0 var(--go)) drop-shadow(-2px 0 0 var(--here))
+    drop-shadow(0 2px 0 var(--elsewhere)) drop-shadow(0 -2px 0 var(--star))
+    drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
+}
+
+.sb-shiny,
+.sb-rainbow {
   position: relative;
 }
 
-.sb-shiny::after {
+.sb-shiny::after,
+.sb-rainbow::after {
   content: '✨';
   position: absolute;
   top: 0;
   right: 0;
   font-size: 1rem;
+}
+
+.sb-rainbow::after {
+  content: '🌈';
 }
 
 /* The newest sticker wiggles once and sits on a gold glow. */

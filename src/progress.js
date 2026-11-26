@@ -22,7 +22,8 @@
 //     goes well. Miss it again and it starts over.
 //   - seen lists the puzzles whose "How to play" card has been read.
 //   - stickers lists the stickers collected, oldest first (src/stickers.js).
-//   - shiny lists the stickers won a second time, after the book was full.
+//   - shiny lists the stickers won a second time, after the book was full;
+//     rainbow lists the ones won a third time, after every one was shiny.
 //   - plays counts how many days each game has been finished, ever (for
 //     the grown-up page). The day-by-day history keeps the last 4 weeks.
 
@@ -32,7 +33,7 @@ export const KEEP_DAYS = 28; // how many days of "finished" history to keep (4 w
 export function emptyProgress() {
   // previous: the last day and streak before lastDay, so a caught-up day
   // can join the two runs back together.
-  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [], shiny: [], results: {}, levels: {}, review: {}, seen: [] };
+  return { streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, stickers: [], shiny: [], rainbow: [], results: {}, levels: {}, review: {}, seen: [] };
 }
 
 /** Whole days from one "YYYY-MM-DD" to another (b minus a). */
@@ -209,9 +210,9 @@ export function markSeen(progress, game) {
   return seen.includes(game) ? progress : { ...progress, seen: [...seen, game] };
 }
 
-/** Add a sticker (by id) to the collection, or to the shiny ones. Returns new progress. */
-export function addSticker(progress, id, shiny = false) {
-  const list = shiny ? 'shiny' : 'stickers';
+/** Add a sticker (by id) to the collection, or to its 'shiny' or 'rainbow' copies (`tier`). Returns new progress. */
+export function addSticker(progress, id, tier) {
+  const list = tier || 'stickers';
   const have = progress[list] || [];
   return have.includes(id) ? progress : { ...progress, [list]: [...have, id] };
 }

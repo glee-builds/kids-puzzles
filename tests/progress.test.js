@@ -199,12 +199,14 @@ test('a sticker is added once and kept through later puzzles', () => {
   assert.deepEqual(p.stickers, ['0-0', '1-3']);
 });
 
-test('a shiny sticker is kept apart from the collection, once', () => {
+test('shiny and rainbow copies are kept apart from the collection, once each', () => {
   let p = addSticker(emptyProgress(), '0-0');
-  p = addSticker(p, '0-0', true);
-  p = addSticker(p, '0-0', true);
+  p = addSticker(p, '0-0', 'shiny');
+  p = addSticker(p, '0-0', 'shiny');
+  p = addSticker(p, '0-0', 'rainbow');
   assert.deepEqual(p.stickers, ['0-0']);
   assert.deepEqual(p.shiny, ['0-0']);
+  assert.deepEqual(p.rainbow, ['0-0']);
 });
 
 test('progress saved before shiny stickers existed loads with none, and keeps its stickers', () => {
@@ -212,6 +214,7 @@ test('progress saved before shiny stickers existed loads with none, and keeps it
   const p = load(storage);
   assert.deepEqual(p.stickers, ['0-0', '1-3']);
   assert.deepEqual(p.shiny, []);
+  assert.deepEqual(p.rainbow, []);
 });
 
 test('progress saved before stickers existed loads with none', () => {

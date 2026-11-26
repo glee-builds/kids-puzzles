@@ -178,7 +178,7 @@ function finishGame(game, result) {
   document.getElementById('done-title').textContent =
     firstTime && set.includes(game) && set.every(isDone) ? 'You finished today\'s 5!' : 'You did it!';
 
-  const sticker = firstTime ? nextSticker(progress.stickers, progress.shiny) : null;
+  const sticker = firstTime ? nextSticker(progress.stickers, progress) : null;
   showGift(sticker);
   if (!sticker) celebrate(); // with a gift, the stars fall when it's opened
 }
@@ -190,12 +190,15 @@ function finishGame(game, result) {
 let waitingGift = null;
 
 function keepSticker(sticker) {
-  progress = progressStore.addSticker(progress, sticker.id, sticker.shiny);
+  progress = progressStore.addSticker(progress, sticker.id, sticker.tier);
   progressStore.save(progress);
   waitingGift = null;
 }
 
-/** Show a wrapped gift on the celebration card, or no gift (a replay, or every sticker already shiny). */
+// The mark beside each kind of copy, so it isn't told apart by color alone.
+const TIER_MARKS = { shiny: '✨', rainbow: '🌈' };
+
+/** Show a wrapped gift on the celebration card, or no gift (a replay, or every sticker already rainbow). */
 function showGift(sticker) {
   const gift = document.getElementById('gift');
   const shown = document.getElementById('gift-sticker');
@@ -211,8 +214,8 @@ function showGift(sticker) {
     for (const node of buttons) node.hidden = false;
     gift.hidden = true;
     shown.replaceChildren(
-      make('span', `gift-picture sticker-art${sticker.shiny ? ' sticker-shiny' : ''}`, sticker.picture),
-      make('span', 'gift-name', sticker.shiny ? `✨ A shiny sticker: ${sticker.name}!` : `A new sticker: ${sticker.name}!`));
+      make('span', `gift-picture sticker-art${sticker.tier ? ` sticker-${sticker.tier}` : ''}`, sticker.picture),
+      make('span', 'gift-name', sticker.tier ? `${TIER_MARKS[sticker.tier]} A ${sticker.tier} sticker: ${sticker.name}!` : `A new sticker: ${sticker.name}!`));
     shown.hidden = false;
     drawStickerLink();
     celebrate();
@@ -240,12 +243,14 @@ function drawStickers() {
   const area = document.getElementById('game-stickers');
   area.replaceChildren();
   const owned = progress.stickers;
-  const shiny = progress.shiny;
-  const newest = shiny.length ? shiny[shiny.length - 1] : owned[owned.length - 1];
-  let count = `${owned.length} of ${STICKERS.length} stickers. Finish a puzzle to open a gift!`;
-  // With a full book, gifts are shiny copies (see src/stickers.js).
-  if (owned.length === STICKERS.length) count = `Your sticker book is full! ✨ ${shiny.length} of ${STICKERS.length} are shiny. Finish a puzzle to make one shine!`;
-  if (shiny.length === STICKERS.length) count = '✨ Every sticker is shiny. Wow!';
+  const { shiny, rainbow } = progress;
+  const all = STICKERS.length;
+  const newest = [rainbow, shiny, owned].find((list) => list.length)?.at(-1);
+  // With a full book, gifts are shiny copies, then rainbow ones (see src/stickers.js).
+  let count = `${owned.length} of ${all} stickers. Finish a puzzle to open a gift!`;
+  if (owned.length === all) count = `Your sticker book is full! ✨ ${shiny.length} of ${all} are shiny. Finish a puzzle to make one shine!`;
+  if (shiny.length === all) count = `✨ Every sticker is shiny! 🌈 ${rainbow.length} of ${all} are rainbow. Finish a puzzle for another!`;
+  if (rainbow.length === all) count = '🌈 Every sticker is rainbow. Wow!';
   area.append(make('p', 'sb-count', count));
   // Each page of the album is a card in its own soft color, with the
   // stickers stuck on at slightly different angles.
@@ -258,14 +263,14 @@ function drawStickers() {
     const grid = make('div', 'sb-grid');
     mine.forEach((sticker, i) => {
       const got = owned.includes(sticker.id);
-      const shines = shiny.includes(sticker.id);
-      const spot = make('span', 'sb-sticker' + (got ? '' : ' sb-empty') + (shines ? ' sb-shiny' : '') + (sticker.id === newest ? ' sb-new' : ''));
+      const tier = rainbow.includes(sticker.id) ? 'rainbow' : shiny.includes(sticker.id) ? 'shiny' : '';
+      const spot = make('span', 'sb-sticker' + (got ? '' : ' sb-empty') + (tier ? ` sb-${tier}` : '') + (sticker.id === newest ? ' sb-new' : ''));
       // A sticker not collected yet shows as a pale outline of what's coming.
       const art = make('span', 'sticker-art', sticker.picture);
       art.style.setProperty('--tilt', `${TILTS[i % TILTS.length]}deg`);
       spot.append(art);
       spot.setAttribute('role', 'img');
-      spot.setAttribute('aria-label', shines ? `${sticker.name}, shiny` : got ? sticker.name : 'A sticker you don\'t have yet');
+      spot.setAttribute('aria-label', tier ? `${sticker.name}, ${tier}` : got ? sticker.name : 'A sticker you don\'t have yet');
       grid.append(spot);
     });
     album.append(heading, grid);

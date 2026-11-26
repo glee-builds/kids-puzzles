@@ -18,19 +18,23 @@ test('gifts never repeat until the book is full', () => {
     assert.ok(sticker && !owned.includes(sticker.id));
     owned.push(sticker.id);
   }
-  assert.equal(nextSticker(owned).shiny, true); // a full book: shiny copies come next
+  assert.equal(nextSticker(owned).tier, 'shiny'); // a full book: shiny copies come next
 });
 
-test('with a full book, each sticker comes once more as a shiny copy, then nothing', () => {
+test('with a full book, each sticker comes once more as a shiny copy, then once as a rainbow copy, then nothing', () => {
   const owned = STICKERS.map((s) => s.id);
-  const shiny = [];
-  for (let i = 0; i < STICKERS.length; i++) {
-    const sticker = nextSticker(owned, shiny);
-    assert.ok(sticker.shiny && owned.includes(sticker.id) && !shiny.includes(sticker.id));
-    shiny.push(sticker.id);
+  const copies = { shiny: [], rainbow: [] };
+  for (const tier of ['shiny', 'rainbow']) {
+    for (let i = 0; i < STICKERS.length; i++) {
+      const sticker = nextSticker(owned, copies);
+      assert.equal(sticker.tier, tier);
+      assert.ok(owned.includes(sticker.id) && !copies[tier].includes(sticker.id));
+      copies[tier].push(sticker.id);
+    }
   }
-  assert.equal(nextSticker(owned, shiny), null);
-  assert.equal(nextSticker(owned.slice(1), shiny).shiny, undefined); // a sticker still missing comes first
+  assert.equal(nextSticker(owned, copies), null);
+  assert.equal(nextSticker(owned.slice(1), copies).tier, undefined); // a sticker still missing comes first
+  assert.equal(nextSticker(owned, { shiny: copies.shiny }).tier, 'rainbow'); // saved before rainbow existed
 });
 
 test('the first gifts come from different pages', () => {
