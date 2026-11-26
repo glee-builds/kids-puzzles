@@ -65,3 +65,18 @@ test('verify turns away dots that are too close, off the board, or mislabeled', 
   assert.equal(verify({ ...good, labels: good.labels.map((n) => n + 1) }).ok, false);
   assert.equal(verify({ ...good, step: 5 }).ok, false);
 });
+
+test('there are plenty of pictures: one comes back only after all the others, and the same picture with the same numbers after 100 days or more', () => {
+  const count = Object.keys(PICTURES).length;
+  assert.ok(count >= 30);
+  assert.notEqual(count % STEPS.length, 0); // otherwise a picture would always count the same way
+  const lastSeen = {};
+  const lastSame = {};
+  for (let day = 0; day < 730; day++) {
+    const { picture, step } = generate(0, day);
+    if (picture in lastSeen) assert.ok(day - lastSeen[picture] >= count - 1, `${picture} came back after ${day - lastSeen[picture]} days`);
+    if (`${picture} ${step}` in lastSame) assert.ok(day - lastSame[`${picture} ${step}`] >= 100);
+    lastSeen[picture] = day;
+    lastSame[`${picture} ${step}`] = day;
+  }
+});
