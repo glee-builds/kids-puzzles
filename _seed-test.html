@@ -1,0 +1,7 @@
+<!DOCTYPE html><meta charset="utf-8"><script type="module">
+const names = ['dot-to-dot', 'pond-sudoku', 'memory-match', 'fraction-pizza', 'pattern-train'];
+const p = JSON.parse(localStorage.getItem('kids-puzzles.progress') || '{}');
+localStorage.setItem('kids-puzzles.progress', JSON.stringify({ streak: 0, totalDays: 0, lastDay: null, previous: null, finished: {}, plays: {}, results: {}, levels: {}, review: {}, stickers: [], shiny: [], rainbow: [], ...p, seen: names }));
+localStorage.removeItem('kids-puzzles.half-done');
+location.replace('./#' + (new URLSearchParams(location.search).get('go') || 'dot-to-dot'));
+</script>

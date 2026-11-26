@@ -93,3 +93,13 @@ test('verify turns away a wrong answer, a whole pizza, and a missing choice', ()
   assert.equal(verify({ ...sample, rounds: rounds({ choices: sample.rounds[0].choices.slice(0, 2) }) }).ok, false);
   assert.equal(verify({ ...sample, rounds: sample.rounds.slice(1) }).ok, false);
 });
+
+test('every choice for naming a pizza is a real fraction: top smaller than bottom', () => {
+  for (const level of [1, 2, 3]) {
+    everyDay((key) => {
+      for (const { choices } of generate(seed(key), level).rounds.filter((round) => round.kind === 'name')) {
+        for (const [top, bottom] of choices.map((text) => text.split('/').map(Number))) assert.ok(top >= 1 && top < bottom, choices.join(' '));
+      }
+    });
+  }
+});
