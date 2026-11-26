@@ -3503,14 +3503,27 @@ button.gr-row {
     drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
 }
 
-/* A rainbow sticker (a third copy, won after every one is shiny): an edge
-   in four colors, and a rainbow in the corner. */
-.sb-rainbow .sticker-art,
+/* A rainbow sticker (a third copy, won after every one is shiny): the
+   sticker keeps its white edge and sits on a disc of rainbow colors, with
+   a rainbow in the corner. */
+.sb-rainbow::before,
+.sticker-rainbow::before {
+  content: '';
+  position: absolute;
+  inset: 4%;
+  z-index: -1;
+  border-radius: 50%;
+  background: conic-gradient(var(--go), var(--star), var(--pad), var(--here), var(--water), var(--elsewhere), var(--blush), var(--go));
+}
+
+.sb-rainbow,
 .sticker-rainbow {
-  filter:
-    drop-shadow(2px 0 0 var(--go)) drop-shadow(-2px 0 0 var(--here))
-    drop-shadow(0 2px 0 var(--elsewhere)) drop-shadow(0 -2px 0 var(--star))
-    drop-shadow(0 2px 3px rgb(0 0 0 / 0.3));
+  isolation: isolate; /* keeps the disc behind the sticker but in front of the page */
+}
+
+.sticker-rainbow {
+  position: relative;
+  padding: 14px;
 }
 
 .sb-shiny,
