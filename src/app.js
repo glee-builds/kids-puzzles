@@ -536,6 +536,11 @@ const GAMES = {
     how: ["Count the coins. Start with the biggest one and count on.", "Type how many cents, then press Check."],
     art: '<span class="coins-art"><i>10¢</i><i>5¢</i><i>1¢</i></span>',
   },
+  'dot-to-dot': {
+    title: 'Dot to Dot', kind: 'fun', legend: 'Count on to draw a picture', data: () => [DAY],
+    how: ["The dots don't count 1, 2, 3. They count by 3s, 4s, or 6s!", 'Tap each dot in order, or slide your finger from dot to dot.'],
+    art: '<svg class="dots-art" viewBox="0 0 40 40" aria-hidden="true"><polyline points="6,32 20,8 34,32"/><circle cx="6" cy="32" r="5"/><circle cx="20" cy="8" r="5"/><circle cx="34" cy="32" r="5"/></svg>',
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],

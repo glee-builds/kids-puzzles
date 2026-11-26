@@ -4381,3 +4381,90 @@ button.gr-row {
 .graph-art i:nth-child(1) { height: 16px; background: var(--words); }
 .graph-art i:nth-child(2) { height: 30px; background: var(--numbers); }
 .graph-art i:nth-child(3) { height: 22px; background: var(--here); }
+
+/* ---------- Dot to Dot ---------- */
+
+/* The board is a square. Dots sit on it by percent, so a picture's points
+   (0 to 100) land in the same places at any size. */
+.dd-board {
+  position: relative;
+  width: min(calc(100vw - 40px), calc(100dvh - 300px), 420px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  touch-action: none; /* sliding from dot to dot must not scroll the page */
+}
+
+.dd-drawing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.dd-line {
+  fill: none;
+  stroke: var(--here);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* The finished picture is colored in. */
+.dd-line-done {
+  fill: color-mix(in srgb, var(--star) 45%, transparent);
+}
+
+/* A dot: a 48px place to tap, with a smaller circle drawn inside it. */
+.dd-dot {
+  position: absolute;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.dd-dot::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  z-index: -1;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+/* A joined dot fills in (and has the line through it). */
+.dd-dot-done { color: var(--white); }
+
+.dd-dot-done::before {
+  border-color: var(--here);
+  background: var(--here);
+}
+
+/* After two misses, the dot to tap next gets a gold ring. */
+.dd-dot-glow::before {
+  box-shadow: 0 0 0 5px var(--star);
+}
+
+.dots-art {
+  width: 44px;
+  height: 44px;
+}
+
+.dots-art polyline {
+  fill: none;
+  stroke: var(--here);
+  stroke-width: 3;
+}
+
+.dots-art circle { fill: var(--fun-ink); }
