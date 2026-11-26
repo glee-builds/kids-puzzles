@@ -16,7 +16,7 @@
 
 import { createRandom, forLevel } from '../seed.js';
 import { nextRound } from '../rounds.js';
-import { make, button, wiggle, roundFrame } from '../ui.js';
+import { make, button, wiggle, roundFrame, markRight } from '../ui.js';
 
 export const ROUNDS = 4;
 // Shapes that differ in shape as well as color.
@@ -192,8 +192,7 @@ export function render(container, puzzle, onDone, session = {}) {
             wiggle(choice);
             return;
           }
-          choice.classList.add('grp-right');
-          for (const other of row.children) other.disabled = true;
+          markRight(choice);
           cars[round.hidden].textContent = String(value);
           cars[round.hidden].classList.replace('pt-empty', 'pt-filled');
           keep();

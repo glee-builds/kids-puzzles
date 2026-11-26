@@ -14,7 +14,7 @@
 import { nextRound } from '../rounds.js';
 import { createRandom } from '../seed.js';
 import { choicesFor } from '../times.js';
-import { make, button, wiggle, roundFrame, shape } from '../ui.js';
+import { make, button, wiggle, roundFrame, shape, markRight } from '../ui.js';
 
 export const ROUNDS = ['read', 'build', 'line', 'spot'];
 export const MAX_TRIES = 3; // tries at building a graph before it's shown
@@ -340,8 +340,7 @@ export function render(container, puzzle, onDone, session = {}) {
     for (const n of round.choices) {
       const choice = button('lw-button gi-choice', String(n), () => {
         if (!answer(round, n, choice)?.correct) return;
-        choice.classList.add('grp-right');
-        for (const other of row.children) other.disabled = true;
+        markRight(choice);
         finishRound(done);
       });
       row.append(choice);
