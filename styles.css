@@ -4468,3 +4468,80 @@ button.gr-row {
 }
 
 .dots-art circle { fill: var(--fun-ink); }
+
+/* ---------- Pond Sudoku ---------- */
+
+/* 4 by 4 squares. A wider space after the 2nd column and the 2nd row shows
+   the four boxes. */
+.ps-grid {
+  --cell: min(76px, calc((100vw - 60px) / 4));
+  display: grid;
+  grid-template-columns: repeat(4, var(--cell));
+  grid-auto-rows: var(--cell);
+  gap: 4px;
+  justify-content: center;
+  margin: 4px 0 14px;
+}
+
+.ps-cell {
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--water) 55%, var(--surface));
+  color: var(--text);
+  font: inherit;
+  font-size: calc(var(--cell) * 0.55);
+  line-height: 1;
+}
+
+.ps-cell:nth-child(4n + 2) { margin-right: 8px; }
+.ps-cell:nth-child(n + 5):nth-child(-n + 8) { margin-bottom: 8px; }
+
+/* An empty square is white with a dashed edge; the one picked has an orange ring. */
+.ps-empty {
+  border-style: dashed;
+  border-color: var(--muted);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.ps-selected {
+  border-style: solid;
+  border-color: var(--go);
+  box-shadow: 0 0 0 3px var(--go);
+}
+
+/* Filled in by the player (teal edge), or shown after 3 misses (purple, dashed). */
+.ps-found { border-color: var(--here); background: var(--surface); }
+.ps-shown { border-color: var(--elsewhere); border-style: dashed; background: var(--surface); }
+
+.ps-picks {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.ps-pick {
+  width: 68px;
+  min-height: 60px;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.sudoku-art {
+  display: grid;
+  grid-template-columns: 20px 20px;
+  grid-auto-rows: 20px;
+  gap: 2px;
+}
+
+.sudoku-art i {
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--fun-ink);
+  border-radius: 4px;
+  background: var(--surface);
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1;
+}

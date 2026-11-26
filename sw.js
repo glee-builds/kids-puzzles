@@ -46,6 +46,7 @@ const FILES = [
   'src/games/maze.js',
   'src/games/number-line.js',
   'src/games/number-pyramid.js',
+  'src/games/pond-sudoku.js',
   'src/games/spell-it.js',
   'src/games/story-order.js',
   'src/games/word-clues.js',

@@ -541,6 +541,11 @@ const GAMES = {
     how: ["The dots don't count 1, 2, 3. They count by 3s, 4s, or 6s!", 'Tap each dot in order, or slide your finger from dot to dot.'],
     art: '<svg class="dots-art" viewBox="0 0 40 40" aria-hidden="true"><polyline points="6,32 20,8 34,32"/><circle cx="6" cy="32" r="5"/><circle cx="20" cy="8" r="5"/><circle cx="34" cy="32" r="5"/></svg>',
   },
+  'pond-sudoku': {
+    title: 'Pond Sudoku', kind: 'fun', legend: 'One of each in every row, column, and box', levels: 3, data: () => [levelFor('pond-sudoku')],
+    how: ['Every row, every column, and every box of 4 needs each animal once.', 'Tap an empty square, then tap the animal that goes there.'],
+    art: '<span class="sudoku-art"><i>🐸</i><i></i><i></i><i>🐟</i></span>',
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
