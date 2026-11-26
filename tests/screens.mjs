@@ -426,7 +426,21 @@ try {
       await checkScreen(label, `${day}#${game}`, { ready, fits: true, play: !day && PLAYS[game] ? game : null, poke: day ? null : game, tip: !day });
     }
   }
-  await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-sticker").length > 100' });
+  await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-cover").length === 16' });
+  // Tap a cover to open its page of 15 stickers, then go back to the covers.
+  {
+    checked++;
+    const result = await evaluate(`(async () => {
+      const count = (selector) => document.querySelectorAll('#game-stickers ' + selector).length;
+      document.querySelectorAll('.sb-cover')[9].click();
+      const page = [count('.sb-sticker'), count('.sb-cover'), document.querySelector('.sb-page').textContent];
+      document.querySelector('.sb-back').click();
+      return JSON.stringify({ page, covers: count('.sb-cover'), stickers: count('.sb-sticker') });
+    })()`);
+    const ok = result === JSON.stringify({ page: [15, 0, 'Dinosaurs and Magic0 of 15'], covers: 16, stickers: 0 });
+    if (!ok) problems.push(`Sticker book page: tapping a cover and going back gave ${result}`);
+    console.log(`${ok ? '✓' : '✗'} Sticker book (open a page, then back to the covers)`);
+  }
   await checkScreen('For grown-ups', '#grown-ups', { ready: 'document.querySelectorAll(".gu-day").length === 28' });
   await checkScreen('Yesterday home', '?day=yesterday', { ready: 'document.getElementById("today-title").textContent.includes("Yesterday")' });
   // A week ago (the fixed date is a Friday, so 7 days back is a Friday too).
@@ -583,7 +597,7 @@ try {
     const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
     await checkScreen(`${game} (offline)`, `#${game}`, { ready });
   }
-  await checkScreen('Sticker book (offline)', '#stickers', { ready: 'document.querySelectorAll(".sb-sticker").length > 100' });
+  await checkScreen('Sticker book (offline)', '#stickers', { ready: 'document.querySelectorAll(".sb-cover").length === 16' });
 
   // More days, if asked for: does each puzzle still fit the screen?
   // (They are served from what the service worker saved, since the server is off.)
