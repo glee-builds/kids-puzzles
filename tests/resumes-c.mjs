@@ -3,6 +3,11 @@
 // it) and `check` (a JavaScript expression that is true if, after the page
 // is loaded again, the puzzle picked up where it left off).
 export default {
+  'pattern-train': {
+    play: `for (let train = 0; train < 2; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
+    check: `doneDots(2)`,
+    finish: `for (let train = 0; train < 2; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
+  },
   'fraction-pizza': {
     play: `const game = await import('/src/games/fraction-pizza.js');
     const { rounds } = game.generate(seed.seedFor(today, 'fraction-pizza'));
