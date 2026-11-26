@@ -546,6 +546,11 @@ const GAMES = {
     how: ['Every row, every column, and every box of 4 needs each animal once.', 'Tap an empty square, then tap the animal that goes there.'],
     art: '<span class="sudoku-art"><i>🐸</i><i></i><i></i><i>🐟</i></span>',
   },
+  'memory-match': {
+    title: 'Memory Match', kind: 'fun', legend: 'Turn over two cards to find a pair', levels: 3, data: () => [levelFor('memory-match')],
+    how: ['The cards are face down. Turn over two at a time.', 'A pair stays up. If they don\'t match, remember where they are!'],
+    art: '<span class="memory-art"><i></i><i>🐸</i><i>🐸</i><i></i></span>',
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],

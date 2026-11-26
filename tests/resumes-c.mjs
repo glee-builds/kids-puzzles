@@ -3,6 +3,21 @@
 // it) and `check` (a JavaScript expression that is true if, after the page
 // is loaded again, the puzzle picked up where it left off).
 export default {
+  'memory-match': {
+    play: `const game = await import('/src/games/memory-match.js');
+    const { cards } = game.generate(seed.seedFor(today, 'memory-match'));
+    const nodes = G.querySelectorAll('.mem-card');
+    const of = (pair) => cards.map((card, i) => (card.pair === pair ? i : -1)).filter((i) => i >= 0);
+    const turn = async (i) => { nodes[i].click(); await wait(50); };
+      for (const pair of [0, 1]) { await turn(of(pair)[0]); await turn(of(pair)[1]); }`,
+    check: `G.querySelectorAll('.mem-matched').length === 4 && G.querySelectorAll('.mem-up').length === 4`,
+    finish: `const game = await import('/src/games/memory-match.js');
+    const { cards } = game.generate(seed.seedFor(today, 'memory-match'));
+    const nodes = G.querySelectorAll('.mem-card');
+    const of = (pair) => cards.map((card, i) => (card.pair === pair ? i : -1)).filter((i) => i >= 0);
+    const turn = async (i) => { nodes[i].click(); await wait(50); };
+      for (let pair = 2; pair < cards.length / 2; pair++) { await turn(of(pair)[0]); await turn(of(pair)[1]); }`,
+  },
   'pond-sudoku': {
     play: `const game = await import('/src/games/pond-sudoku.js');
       const puzzle = game.generate(seed.seedFor(today, 'pond-sudoku'));

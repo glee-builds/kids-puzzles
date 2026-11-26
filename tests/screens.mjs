@@ -201,6 +201,14 @@ const fillAll = (name) => `
       state = game.check(state, { cell, value });
     }`;
 const PLAYS = {
+  'memory-match': `
+    const game = await import('/src/games/memory-match.js');
+    const { cards } = game.generate(seed.seedFor(today, 'memory-match'));
+    const nodes = G.querySelectorAll('.mem-card');
+    const of = (pair) => cards.map((card, i) => (card.pair === pair ? i : -1)).filter((i) => i >= 0);
+    const turn = async (i) => { nodes[i].click(); await wait(50); };
+    await turn(of(0)[0]); await turn(of(1)[0]); // two that don't match first
+    for (let pair = 0; pair < cards.length / 2; pair++) { await turn(of(pair)[0]); await turn(of(pair)[1]); }`,
   'pond-sudoku': `
     const game = await import('/src/games/pond-sudoku.js');
     const puzzle = game.generate(seed.seedFor(today, 'pond-sudoku'));
@@ -307,7 +315,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
+const TOP_LEVELS = ['memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
 
 // Half-done puzzles: `play` plays part of a puzzle; then the page is
 // loaded again and `check` must be true: the puzzle picked up where it

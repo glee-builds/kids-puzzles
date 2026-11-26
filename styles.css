@@ -4545,3 +4545,77 @@ button.gr-row {
   font-style: normal;
   line-height: 1;
 }
+
+/* ---------- Memory Match ---------- */
+
+.mem-grid {
+  --card: min(82px, calc((100vw - 64px) / 4));
+  display: grid;
+  grid-template-columns: repeat(4, var(--card));
+  grid-auto-rows: var(--card);
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Face down: a green card with a round lily pad on it. */
+.mem-card {
+  padding: 0;
+  border: 2px solid var(--fun-ink);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle, var(--fun-ink) 0 26%, transparent 27%),
+    var(--pad);
+  color: var(--text);
+  font: inherit;
+  font-size: calc(var(--card) * 0.52);
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Face up: white, showing its picture or number. */
+.mem-up {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.mem-facts .mem-card { font-size: calc(var(--card) * 0.3); }
+
+/* A found pair: a teal edge and a check mark in the corner. */
+.mem-matched {
+  position: relative;
+  border-color: var(--here);
+  box-shadow: 0 0 0 2px var(--here);
+  cursor: default;
+}
+
+.mem-matched::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  color: var(--here);
+  font-size: 0.9rem;
+}
+
+.memory-art {
+  display: grid;
+  grid-template-columns: 20px 20px;
+  grid-auto-rows: 20px;
+  gap: 2px;
+}
+
+.memory-art i {
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--pad);
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1;
+}
+
+.memory-art i:not(:empty) {
+  background: var(--surface);
+  box-shadow: 0 0 0 1.5px var(--here);
+}
