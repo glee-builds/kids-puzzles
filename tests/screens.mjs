@@ -201,6 +201,19 @@ const fillAll = (name) => `
       state = game.check(state, { cell, value });
     }`;
 const PLAYS = {
+  'fraction-pizza': `
+    const game = await import('/src/games/fraction-pizza.js');
+    const { rounds } = game.generate(seed.seedFor(today, 'fraction-pizza'));
+    const playRound = async (round) => {
+      if (round.kind === 'make') {
+        const slices = G.querySelectorAll('.fp-slice');
+        for (let i = 0; i < round.topped; i++) slices[i].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        G.querySelector('.fp-check').click(); await wait();
+      } else await tapUntilRight(round.kind === 'name' ? '.fp-choice' : '.fp-pick');
+      await next();
+    };
+    G.querySelector('.fp-check')?.click(); await wait(); // a wrong answer first, if round 1 is a "make" round
+    for (const round of rounds) await playRound(round);`,
   'memory-match': `
     const game = await import('/src/games/memory-match.js');
     const { cards } = game.generate(seed.seedFor(today, 'memory-match'));
@@ -315,7 +328,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
+const TOP_LEVELS = ['fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
 
 // Half-done puzzles: `play` plays part of a puzzle; then the page is
 // loaded again and `check` must be true: the puzzle picked up where it
