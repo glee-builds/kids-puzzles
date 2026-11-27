@@ -4,6 +4,10 @@
 // snippet only says what to play. `G`, `seed`, `today`, `wait`, `next`, and
 // `tapUntilRight` come from HELPERS in tests/screens.mjs.
 export default {
+  'shop-change': `
+        const game = await import('/src/games/shop-change.js');
+    const rounds = game.generate(seed.seedFor(today, 'shop-change')).rounds;
+    const pick = async (cents) => { [...G.querySelectorAll('.sc-choice')].find((choice) => choice.textContent === game.money(cents)).click(); await wait(); };`,
   'place-value': `
         const playRound = async () => {
       if (G.querySelector('.pv-check')) {
