@@ -211,7 +211,7 @@ const PLAYS = {
     for (let round = 0; round < 4; round++) { await tapUntilRight('.wb-choice'); await next(); }`,
   'shop-change': `
         await pick(rounds[0].choices.find((cents) => cents !== rounds[0].answer)); // a wrong pick first
-    for (const round of rounds) { await pick(round.answer); await next(); }`,
+    for (const round of rounds) { await play(round); await next(); }`,
   'number-detective': `
         const game = await import('/src/games/number-detective.js');
     const rounds = game.generate(seed.seedFor(today, 'number-detective')).rounds;
