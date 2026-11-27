@@ -11,7 +11,8 @@
 // The check always plays the same date (2026-11-13), so it gives the same
 // result every day. To look at other days too (only whether each puzzle
 // fits the screen), add how many:  node tests/screens.mjs --days=30
-// and, to look at one puzzle only on those days:  --only=maze
+// To check one puzzle only (its screens, play, half-done and offline checks,
+// with or without --days):  node tests/screens.mjs --only=maze
 //
 // Run it with:  node tests/screens.mjs
 // It needs Google Chrome (GitHub's test computers have it) and nothing else.
@@ -32,7 +33,8 @@ import SETUP, { fillBlanks } from './play-setups.mjs';
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const PHONE = { width: 375, height: 667 };
 const FIRST_DAY = [2026, 10, 13]; // year, month (0 = January), day
-const ONLY = process.argv.find((arg) => arg.startsWith('--only='))?.split('=')[1]; // with --days: just this puzzle
+const ONLY = process.argv.find((arg) => arg.startsWith('--only='))?.split('=')[1]; // just this puzzle
+const wanted = (game) => !ONLY || game === ONLY;
 const DAYS = Number(process.argv.find((arg) => arg.startsWith('--days='))?.split('=')[1] || 1);
 const TYPES = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
@@ -490,8 +492,10 @@ async function checkScreen(label, address, { ready, fits, play, poke, tip }) {
 try {
   // The home screen lists every puzzle, so the list of puzzles comes from it.
   await checkScreen('Home', '', { ready: 'document.querySelectorAll("#today-list a").length === 5' });
-  const games = await evaluate('[...document.querySelectorAll("a.card-play")].map((card) => card.getAttribute("href").slice(1))');
-  if (games.length < 10) problems.push(`Home: only ${games.length} puzzle cards`);
+  const allGames = await evaluate('[...document.querySelectorAll("a.card-play")].map((card) => card.getAttribute("href").slice(1))');
+  if (allGames.length < 10) problems.push(`Home: only ${allGames.length} puzzle cards`);
+  const games = allGames.filter(wanted);
+  if (!games.length) problems.push(`--only=${ONLY}: there is no puzzle called that`);
 
   for (const day of ['', '?day=yesterday']) {
     for (const game of games) {
@@ -501,20 +505,22 @@ try {
       await checkScreen(label, `${day}#${game}`, { ready, fits: true, play: !day && PLAYS[game] ? game : null, poke: day ? null : game, tip: !day });
     }
   }
-  await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-cover").length === 32' });
-  // Tap a cover to open its page of 15 stickers, then go back to the covers.
-  {
-    checked++;
-    const result = await evaluate(`(async () => {
-      const count = (selector) => document.querySelectorAll('#game-stickers ' + selector).length;
-      document.querySelectorAll('.sb-cover')[9].click();
-      const page = [count('.sb-sticker'), count('.sb-cover'), document.querySelector('.sb-page').textContent];
-      document.querySelector('.sb-back').click();
-      return JSON.stringify({ page, covers: count('.sb-cover'), stickers: count('.sb-sticker') });
-    })()`);
-    const ok = result === JSON.stringify({ page: [15, 0, 'Dinosaurs and Magic0 of 15'], covers: 32, stickers: 0 });
-    if (!ok) problems.push(`Sticker book page: tapping a cover and going back gave ${result}`);
-    console.log(`${ok ? '✓' : '✗'} Sticker book (open a page, then back to the covers)`);
+  // The app's other screens; --only skips them.
+  if (!ONLY) {
+    await checkScreen('Sticker book', '#stickers', { ready: 'document.querySelectorAll(".sb-cover").length === 32' });
+    // Tap a cover to open its page of 15 stickers, then go back to the covers.
+    {
+      checked++;
+      const result = await evaluate(`(async () => {
+        const count = (selector) => document.querySelectorAll('#game-stickers ' + selector).length;
+        document.querySelectorAll('.sb-cover')[9].click();
+        const page = [count('.sb-sticker'), count('.sb-cover'), document.querySelector('.sb-page').textContent];
+        document.querySelector('.sb-back').click();
+        return JSON.stringify({ page, covers: count('.sb-cover'), stickers: count('.sb-sticker') });
+      })()`);
+      const ok = result === JSON.stringify({ page: [15, 0, 'Dinosaurs and Magic0 of 15'], covers: 32, stickers: 0 });
+      if (!ok) problems.push(`Sticker book page: tapping a cover and going back gave ${result}`);
+      console.log(`${ok ? '✓' : '✗'} Sticker book (open a page, then back to the covers)`);
   }
   await checkScreen('For grown-ups', '#grown-ups', { ready: 'document.querySelectorAll(".gu-day").length === 28' });
   await checkScreen('Yesterday home', '?day=yesterday', { ready: 'document.getElementById("today-title").textContent.includes("Yesterday")' });
@@ -522,14 +528,15 @@ try {
   await checkScreen('A week ago home', '?day=2026-11-06', { ready: 'document.getElementById("today-title").textContent === "Friday\'s 5" && document.querySelectorAll("#past-days a").length === 7' });
   await checkScreen('A week ago puzzle', '?day=2026-11-06#maze', { ready: 'Boolean(document.querySelector("#game-maze .mz-grid")) && document.querySelector(".yesterday-tag")?.textContent === "Friday\'s puzzle"', fits: true });
   await checkScreen('Too long ago home', '?day=2026-11-05', { ready: 'document.getElementById("today-title").textContent === "Today\'s 5"' });
+  }
 
   // Puzzles with levels, at their top level: do they still draw and fit?
-  const levels = Object.fromEntries(TOP_LEVELS.map((game) => [game, { now: 9, was: 9, since: null }]));
+  const levels = Object.fromEntries(TOP_LEVELS.filter(wanted).map((game) => [game, { now: 9, was: 9, since: null }]));
   await evaluate(`(() => {
     const progress = JSON.parse(localStorage.getItem('kids-puzzles.progress'));
     localStorage.setItem('kids-puzzles.progress', JSON.stringify({ ...progress, levels: ${JSON.stringify(levels)} }));
   })()`);
-  for (const game of TOP_LEVELS) {
+  for (const game of TOP_LEVELS.filter(wanted)) {
     const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
     await checkScreen(`${game} (top level)`, `#${game}`, { ready, fits: true });
   }
@@ -538,56 +545,58 @@ try {
     localStorage.setItem('kids-puzzles.progress', JSON.stringify({ ...progress, levels: {} }));
   })()`);
 
-  // A new day: the app is left open on a puzzle (as a home-screen app is),
-  // the date changes, and the app comes back to the front. It should go
-  // to the home screen with the new day's puzzles.
-  checked++;
-  {
-    await open('#maze', `document.querySelector('#game-maze').children.length > 0`);
-    const before = await evaluate('document.querySelector("#today-list").innerText');
-    await setDay(1); // from the next page load on, it's tomorrow...
-    await evaluate(`(() => {           // ...and for the page that's open now, too
-      const Real = Date;
-      const shift = 24 * 60 * 60 * 1000;
-      window.Date = class extends Real {
-        constructor(...args) { if (args.length) super(...args); else super(Real.now() + shift); }
-        static now() { return Real.now() + shift; }
-      };
-      window.leftOpen = true;
-      window.dispatchEvent(new Event('focus'));
-    })()`);
-    let problem = 'did not start the new day when the app came back to the front';
-    for (let tries = 0; tries < 50 && problem; tries++) {
-      await sleep(100);
-      try {
-        const now = await evaluate(`window.lilyPadStarted && !window.leftOpen && !location.hash && !document.getElementById('home').hidden
-          ? document.querySelector('#today-list').innerText : ''`);
-        if (now) problem = now === before ? 'started again, but still shows the old day\'s puzzles' : '';
-      } catch { /* the page is loading */ }
-    }
-    await setDay(0);
-    if (problem) problems.push(`New day: ${problem}`);
-    console.log(`${problem ? '✗' : '✓'} New day (left open overnight, then brought back)`);
+  if (!ONLY) { // the new day and Refresh checks are not about one puzzle
+    // A new day: the app is left open on a puzzle (as a home-screen app is),
+    // the date changes, and the app comes back to the front. It should go
+    // to the home screen with the new day's puzzles.
+    checked++;
+    {
+      await open('#maze', `document.querySelector('#game-maze').children.length > 0`);
+      const before = await evaluate('document.querySelector("#today-list").innerText');
+      await setDay(1); // from the next page load on, it's tomorrow...
+      await evaluate(`(() => {           // ...and for the page that's open now, too
+        const Real = Date;
+        const shift = 24 * 60 * 60 * 1000;
+        window.Date = class extends Real {
+          constructor(...args) { if (args.length) super(...args); else super(Real.now() + shift); }
+          static now() { return Real.now() + shift; }
+        };
+        window.leftOpen = true;
+        window.dispatchEvent(new Event('focus'));
+      })()`);
+      let problem = 'did not start the new day when the app came back to the front';
+      for (let tries = 0; tries < 50 && problem; tries++) {
+        await sleep(100);
+        try {
+          const now = await evaluate(`window.lilyPadStarted && !window.leftOpen && !location.hash && !document.getElementById('home').hidden
+            ? document.querySelector('#today-list').innerText : ''`);
+          if (now) problem = now === before ? 'started again, but still shows the old day\'s puzzles' : '';
+        } catch { /* the page is loading */ }
+      }
+      await setDay(0);
+      if (problem) problems.push(`New day: ${problem}`);
+      console.log(`${problem ? '✗' : '✓'} New day (left open overnight, then brought back)`);
   }
 
-  // The Refresh button: from yesterday's puzzles, it should load the app again on today's home screen.
-  checked++;
-  {
-    await open('?day=yesterday', 'document.getElementById("today-title").textContent.includes("Yesterday")');
-    await evaluate(`(() => { window.leftOpen = true; document.getElementById('refresh').click(); })()`);
-    let problem = 'the Refresh button did not load the app again';
-    for (let tries = 0; tries < 50 && problem; tries++) {
-      await sleep(100);
-      try {
-        if (await evaluate(`Boolean(window.lilyPadStarted) && !window.leftOpen && !location.search && document.getElementById('today-title').textContent === "Today's 5"`)) problem = '';
-      } catch { /* the page is loading */ }
+    // The Refresh button: from yesterday's puzzles, it should load the app again on today's home screen.
+    checked++;
+    {
+      await open('?day=yesterday', 'document.getElementById("today-title").textContent.includes("Yesterday")');
+      await evaluate(`(() => { window.leftOpen = true; document.getElementById('refresh').click(); })()`);
+      let problem = 'the Refresh button did not load the app again';
+      for (let tries = 0; tries < 50 && problem; tries++) {
+        await sleep(100);
+        try {
+          if (await evaluate(`Boolean(window.lilyPadStarted) && !window.leftOpen && !location.search && document.getElementById('today-title').textContent === "Today's 5"`)) problem = '';
+        } catch { /* the page is loading */ }
+      }
+      if (problem) problems.push(`Refresh: ${problem}`);
+      console.log(`${problem ? '✗' : '✓'} Refresh button`);
     }
-    if (problem) problems.push(`Refresh: ${problem}`);
-    console.log(`${problem ? '✗' : '✓'} Refresh button`);
   }
 
   // Half-done puzzles: play part of one, load the page again, and see that it picked up.
-  for (const [game, { play, check, finish }] of Object.entries(RESUMES)) {
+  for (const [game, { play, check, finish }] of Object.entries(RESUMES).filter(([game]) => wanted(game))) {
     checked++;
     const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
     const inPage = (code) => evaluate(`(async () => { const G = document.getElementById('game-${game}'); ${HELPERS} ${DONE_DOTS} ${SETUP[game] || ''} ${code} })()`);
@@ -626,7 +635,7 @@ try {
 
   // Turning the device: a maze opened on an upright screen is made again,
   // wide, when the screen turns sideways (and does not sit small in the middle).
-  {
+  if (wanted('maze-2')) {
     checked++;
     let problem = '';
     const grid = () => evaluate(`(() => { const style = getComputedStyle(document.querySelector('#game-maze-2 .mz-grid')); return [Number(style.getPropertyValue('--cols')), Number(style.getPropertyValue('--rows'))]; })()`);
@@ -672,14 +681,13 @@ try {
     const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
     await checkScreen(`${game} (offline)`, `#${game}`, { ready });
   }
-  await checkScreen('Sticker book (offline)', '#stickers', { ready: 'document.querySelectorAll(".sb-cover").length === 32' });
+  if (!ONLY) await checkScreen('Sticker book (offline)', '#stickers', { ready: 'document.querySelectorAll(".sb-cover").length === 32' });
 
   // More days, if asked for: does each puzzle still fit the screen?
   // (They are served from what the service worker saved, since the server is off.)
   for (let offset = 1; offset < DAYS; offset++) {
     await setDay(offset);
     for (const game of games) {
-      if (ONLY && game !== ONLY) continue;
       const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
       await checkScreen(`${game} (day +${offset})`, `#${game}`, { ready, fits: true, tip: false });
     }
