@@ -347,10 +347,13 @@ test('a backup code brings back the same progress, and a bad code brings back no
   let progress = recordFinish(emptyProgress(), '2026-11-20', 'maze');
   progress = { ...progress, stickers: [[0, 1], [3, 7]], levels: { 'word-search': { now: 2, was: 1, since: '2026-11-19' } } };
   const code = toBackup(progress);
-  assert.match(code, /^lilypad:[A-Za-z0-9+/=]+$/);
+  assert.match(code, /^lilypad2:[A-Za-z0-9+/=]+$/);
   assert.deepEqual(fromBackup(code), progress);
   assert.deepEqual(fromBackup(`  ${code}\n`), progress); // spaces around a pasted code are fine
+  // A longer code from before the codes were shortened still works.
+  assert.deepEqual(fromBackup(`lilypad:${btoa(encodeURIComponent(JSON.stringify(progress)))}`), progress);
   assert.equal(fromBackup('lilypad:nonsense'), null);
+  assert.equal(fromBackup('lilypad2:nonsense'), null);
   assert.equal(fromBackup(''), null);
   assert.equal(fromBackup(toBackup({ hello: 1 })), null); // not progress
   // An older backup without the newer parts gets them filled in.
