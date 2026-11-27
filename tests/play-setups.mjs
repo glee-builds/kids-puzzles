@@ -4,6 +4,12 @@
 // snippet only says what to play. `G`, `seed`, `today`, `wait`, `next`, and
 // `tapUntilRight` come from HELPERS in tests/screens.mjs.
 export default {
+  'lily-pad-paths': `
+        const game = await import('/src/games/lily-pad-paths.js');
+    const puzzle = game.generate(seed.seedFor(today, 'lily-pad-paths'), 1);
+    const cell = ([r, c]) => G.querySelector('.lp-cell[data-r="' + r + '"][data-c="' + c + '"]');
+    // join(pair) taps the squares of the stored path for one pair, in order.
+    const join = async (pair) => { for (const square of puzzle.solution[pair]) { cell(square).click(); await wait(30); } };`,
   'tangram-pond': `
         const game = await import("/src/games/tangram-pond.js");
     const puzzle = game.generate(seed.seedFor(today, "tangram-pond"), dayNumber);

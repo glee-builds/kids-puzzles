@@ -191,6 +191,10 @@ const HELPERS = `
   const dayNumber = Math.round((new Date(today) - new Date('2026-01-01')) / 86400000);
 `;
 const PLAYS = {
+  'lily-pad-paths': `
+        cell(puzzle.solution[0][1]).click(); await wait(30); // no animal is picked yet, so nothing happens
+    if (G.querySelector('.lp-path')) throw new Error('a path started away from an animal');
+    for (let pair = 0; pair < puzzle.pairs.length; pair++) await join(pair);`,
   'tangram-pond': `
         await put(0, order.find((j) => !game.fits(puzzle.pieces[0], puzzle.pieces[j]))); // a wrong place first
     if (G.querySelector(".tp-place-done")) throw new Error("a piece in the wrong place should stay in the tray");
@@ -356,7 +360,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['word-kinds', 'word-builder', 'shop-change', 'number-detective', 'share-it-out', 'place-value', 'pattern-train', 'fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
+const TOP_LEVELS = ['lily-pad-paths', 'word-kinds', 'word-builder', 'shop-change', 'number-detective', 'share-it-out', 'place-value', 'pattern-train', 'fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
 
 // Half-done puzzles: `play` plays part of a puzzle; then the page is
 // loaded again and `check` must be true: the puzzle picked up where it

@@ -44,6 +44,7 @@ const FILES = [
   'src/games/graph-it.js',
   'src/games/hoop-shots.js',
   'src/games/letter-scramble.js',
+  'src/games/lily-pad-paths.js',
   'src/games/magic-square.js',
   'src/games/math-mix-ups.js',
   'src/games/maze.js',

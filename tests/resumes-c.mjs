@@ -4,6 +4,11 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'lily-pad-paths': {
+    play: `await join(0);`,
+    check: `G.querySelectorAll('.lp-end.lp-joined').length === 2 && G.querySelectorAll('.lp-joined').length >= 3`,
+    finish: `for (let pair = 1; pair < puzzle.pairs.length; pair++) await join(pair);`,
+  },
   'tangram-pond': {
     play: `await put(0, 0); await put(1, 1);`,
     check: `G.querySelectorAll(".tp-place-done").length === 2 && G.querySelectorAll(".tp-piece-used").length === 2`,
