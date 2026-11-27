@@ -1027,9 +1027,9 @@ button {
 
 /* 15 squares across: as wide as the screen allows, up to 34px each. */
 .ws-grid {
-  --cell: min(calc((min(100vw, 440px) - 24px) / 15), calc(50dvh / 15), 34px);
+  --cell: min(calc((min(100vw, 440px) - 24px) / 12), calc(50dvh / 12), 36px);
   display: grid;
-  grid-template-columns: repeat(15, var(--cell));
+  grid-template-columns: repeat(12, var(--cell));
   grid-auto-rows: var(--cell);
   justify-content: center;
   touch-action: none; /* tracing must not scroll the page */
