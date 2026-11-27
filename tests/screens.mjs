@@ -191,6 +191,24 @@ const HELPERS = `
   const dayNumber = Math.round((new Date(today) - new Date('2026-01-01')) / 86400000);
 `;
 const PLAYS = {
+  'hoop-shots': `
+        const ball = G.querySelector('.hs-ball');
+    const press = (name) => ball.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true }));
+    // A miss first: slide the ball off to the side and shoot straight up.
+    for (let i = 0; i < 3; i++) press('ArrowRight');
+    ball.click(); await wait(900);
+    if (G.querySelector('.hs-score').textContent !== '0 of 20') throw new Error('a shot from the side should miss');
+    for (let i = 0; i < 3; i++) press('ArrowLeft');
+    // One swipe: finger down on the ball, then up 150px, straight.
+    const box = ball.getBoundingClientRect();
+    const at = { clientX: box.left + 28, clientY: box.top + 28, pointerId: 1, bubbles: true };
+    ball.dispatchEvent(new PointerEvent('pointerdown', at));
+    ball.dispatchEvent(new PointerEvent('pointerup', { ...at, clientY: at.clientY - 150 }));
+    await wait(900);
+    if (G.querySelector('.hs-score').textContent !== '2 of 20') throw new Error('a straight swipe should score 2');
+    // The rest as 3 points, with the keyboard.
+    G.querySelector('.hs-pick:last-child').click(); await wait();
+    for (let shot = 0; shot < 12 && !ball.disabled; shot++) { ball.click(); await wait(900); }`,
   'pattern-train': `
     for (let train = 0; train < 4; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
   'fraction-pizza': `

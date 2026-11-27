@@ -42,6 +42,7 @@ const FILES = [
   'src/games/fix-sentence.js',
   'src/games/fraction-pizza.js',
   'src/games/graph-it.js',
+  'src/games/hoop-shots.js',
   'src/games/letter-scramble.js',
   'src/games/magic-square.js',
   'src/games/math-mix-ups.js',

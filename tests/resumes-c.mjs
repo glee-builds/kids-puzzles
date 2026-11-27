@@ -4,6 +4,11 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'hoop-shots': {
+    play: `const ball = G.querySelector('.hs-ball'); for (let shot = 0; shot < 2; shot++) { ball.click(); await wait(900); }`,
+    check: `G.querySelector('.hs-score').textContent === '4 of 20'`,
+    finish: `const ball = G.querySelector('.hs-ball'); for (let shot = 0; shot < 12 && !ball.disabled; shot++) { ball.click(); await wait(900); }`,
+  },
   'pattern-train': {
     play: `for (let train = 0; train < 2; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
     check: `doneDots(2)`,
