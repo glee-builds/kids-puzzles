@@ -53,6 +53,7 @@ const FILES = [
   'src/games/pattern-train.js',
   'src/games/place-value.js',
   'src/games/pond-sudoku.js',
+  'src/games/share-it-out.js',
   'src/games/spell-it.js',
   'src/games/story-order.js',
   'src/games/word-clues.js',

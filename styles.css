@@ -5070,3 +5070,90 @@ button.gr-row {
 .place-value-art i:nth-child(1) { width: 24px; height: 24px; background: var(--elsewhere); }
 .place-value-art i:nth-child(2) { width: 7px; height: 36px; background: var(--here); }
 .place-value-art i:nth-child(3) { width: 9px; height: 9px; background: var(--go); }
+
+/* ---------- Share It Out ---------- */
+
+.sh-question {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.sh-stage { gap: 6px; }
+.sh-message { margin: 6px 0; }
+
+/* The berries not shared yet: a few pictures and the number. */
+.sh-pile {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--numbers-ink);
+}
+
+/* One spot per frog: the lily pad on top, its berries underneath. */
+.sh-pads {
+  display: grid;
+  grid-template-columns: repeat(var(--sh-across), 60px);
+  justify-content: center;
+  gap: 6px 5px;
+}
+
+.sh-spot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sh-pad {
+  height: 50px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--pad);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sh-berries {
+  height: 48px;
+  padding: 0;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sh-berries:disabled { color: var(--muted); cursor: default; }
+.sh-pad:disabled { cursor: default; }
+
+/* Under the pads: One each and Check, then the fact and its 3 choices. */
+.sh-below,
+.sh-choices {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.sh-all,
+.sh-check { min-width: 130px; }
+.sh-all:disabled { color: var(--muted); }
+
+.sh-fact {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.sh-choice { min-width: 56px; font-size: 1.3rem; }
+
+/* Home card art: a frog and a berry. */
+.share-it-out-art {
+  font-size: 1.4rem;
+  white-space: nowrap;
+}
