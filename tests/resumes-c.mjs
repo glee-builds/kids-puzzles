@@ -4,6 +4,11 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'place-value': {
+    play: `for (let round = 0; round < 2; round++) await playRound();`,
+    check: `doneDots(2)`,
+    finish: `for (let round = 0; round < 2; round++) await playRound();`,
+  },
   'hoop-shots': {
     play: `const ball = G.querySelector('.hs-ball'); for (let shot = 0; shot < 2; shot++) { ball.click(); await wait(900); }`,
     check: `G.querySelector('.hs-score').textContent === '4 of 20'`,

@@ -4955,3 +4955,118 @@ button.gr-row {
     transition: none;
   }
 }
+
+/* ---------- Place Value Builder ---------- */
+/* Right answers use .grp-right (a teal ring and a check mark). */
+
+.pv-question {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.pv-number {
+  font-size: 1.3em;
+  color: var(--numbers-ink);
+}
+
+.pv-stage { gap: 8px; }
+
+/* A long hint has to fit under the blocks on a phone. */
+.pv-message {
+  margin: 6px 0;
+  font-size: 1rem;
+}
+
+/* The columns side by side: hundreds, tens, ones. */
+.pv-board {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pv-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100px;
+}
+
+/* The blocks stand on a line, like a shelf. Every pile is the same height,
+   so the screen doesn't jump as blocks are added. */
+.pv-pile {
+  display: grid;
+  place-content: center;
+  gap: 3px;
+  width: 100%;
+  height: 96px;
+  border-bottom: 2px solid var(--border);
+}
+
+/* A hundred is a big square, a ten is a tall bar, a one is a small square:
+   the shape tells them apart, and the color too. */
+.pv-hundreds .pv-pile { grid-template-columns: repeat(3, 28px); }
+.pv-tens .pv-pile { grid-template-columns: repeat(9, 7px); }
+.pv-ones .pv-pile { grid-template-columns: repeat(3, 12px); }
+
+.pv-block { border-radius: 2px; }
+.pv-hundreds .pv-block { height: 28px; background: var(--elsewhere); }
+/* Thin lines cut a ten into its 10 ones. */
+.pv-tens .pv-block {
+  height: 60px;
+  background: repeating-linear-gradient(var(--here) 0 5px, var(--surface) 5px 6px);
+}
+.pv-ones .pv-block { height: 12px; background: var(--go); }
+
+.pv-label {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* The − and + under a pile. */
+.pv-steps {
+  display: flex;
+  gap: 4px;
+}
+
+.pv-step {
+  width: 48px;
+  min-height: 48px;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+.pv-check { min-width: 150px; }
+
+.pv-choices {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pv-choice {
+  min-width: 88px;
+  font-size: 1.3rem;
+}
+
+/* The two numbers to compare are big buttons. */
+.pv-big {
+  min-width: 130px;
+  min-height: 96px;
+  font-size: 2.2rem;
+}
+
+/* The home card's picture: one of each block. */
+.place-value-art {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.place-value-art i { border-radius: 2px; }
+.place-value-art i:nth-child(1) { width: 24px; height: 24px; background: var(--elsewhere); }
+.place-value-art i:nth-child(2) { width: 7px; height: 36px; background: var(--here); }
+.place-value-art i:nth-child(3) { width: 9px; height: 9px; background: var(--go); }

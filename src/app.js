@@ -465,6 +465,11 @@ const GAMES = {
     how: ["Swipe up on the ball to shoot it at the hoop. Get to 20 points!", "Tap \"3 points\" to shoot from farther back. It is harder, but each basket counts for more."],
     art: "<svg class=\"hs-art\" viewBox=\"0 0 40 40\" aria-hidden=\"true\"><circle class=\"hs-skin\" cx=\"20\" cy=\"13\" r=\"10\"/><path class=\"hs-seams\" d=\"M20 3 L20 23 M10 13 L30 13\"/><path class=\"hs-net\" d=\"M8 28 L13 39 L27 39 L32 28 M20 28 L20 39\"/><ellipse class=\"hs-art-rim\" cx=\"20\" cy=\"28\" rx=\"13\" ry=\"3.5\"/></svg>",
   },
+  'place-value': {
+    title: "Place Value", kind: 'numbers', legend: "Hundreds, tens, and ones", levels: 3, data: () => [levelFor('place-value')],
+    how: ["Tap + and − to build the number out of blocks, then press Check.", "A big square is a hundred, a tall bar is a ten, and a small square is a one."],
+    art: "<span class=\"place-value-art\" aria-hidden=\"true\"><i></i><i></i><i></i></span>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],

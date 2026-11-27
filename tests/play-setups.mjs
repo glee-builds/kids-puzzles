@@ -4,6 +4,17 @@
 // snippet only says what to play. `G`, `seed`, `today`, `wait`, `next`, and
 // `tapUntilRight` come from HELPERS in tests/screens.mjs.
 export default {
+  'place-value': `
+        const playRound = async () => {
+      if (G.querySelector('.pv-check')) {
+        const digits = G.querySelector('.pv-number').textContent.padStart(3, '0');
+        ['hundreds', 'tens', 'ones'].forEach((place, i) => {
+          for (let n = 0; n < Number(digits[i]); n++) G.querySelector('.pv-' + place + ' .pv-plus').click();
+        });
+        G.querySelector('.pv-check').click(); await wait();
+      } else await tapUntilRight('.pv-choice');
+      await next();
+    };`,
   // rounds: today's 5 rounds. playRound(round) plays one and presses Next.
   'fraction-pizza': `
     const game = await import('/src/games/fraction-pizza.js');
