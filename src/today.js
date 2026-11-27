@@ -2,14 +2,14 @@
 //
 // The puzzles are in five groups (see GROUPS in src/app.js). Each day's set
 // has one puzzle from Spelling, one from Reading, one from Everyday Math,
-// and two from Numbers, the biggest group. Every third day the Maze (Just
-// for Fun) takes the place of the second Numbers puzzle. Each group's
+// and two from Numbers, the biggest group. Every second day a Just for Fun
+// puzzle takes the place of the second Numbers puzzle. Each group's
 // puzzles come around in a fixed shuffled order, so none is left out.
 
 import { createRandom, hashString } from './seed.js';
 
 export const SET_SIZE = 5;
-export const FUN_EVERY = 3; // the fun puzzle is in the set every 3rd day
+export const FUN_EVERY = 2; // a fun puzzle is in the set every 2nd day
 
 /** A group's puzzles in its fixed shuffled order. */
 const deck = (names, group) => createRandom(hashString(`${group}-set`)).shuffle(names);
