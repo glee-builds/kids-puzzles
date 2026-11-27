@@ -14,6 +14,8 @@
 // A switch picks the shot: "2 points" from close in, or "3 points" from
 // farther back. A miss costs nothing: the ball just comes back.
 //
+// Make 3 in a row and the ball is on fire: it burns until a shot misses.
+//
 // Without swiping: with the court picked (Tab), Left and Right make the shot
 // softer or harder, Up and Down make the arc higher or flatter (the dots
 // show it), and Enter or Space shoots.
@@ -25,6 +27,7 @@
 import { make, button, shape, liveMessage } from '../ui.js';
 
 export const TARGET = 20;
+export const ON_FIRE = 3; // baskets in a row that set the ball on fire
 export const BALL_R = 4;
 export const RIM = { front: 77, back: 91, y: 42 }; // the rim's two ends, seen from the side
 const RIM_R = 0.8; // how thick the rim is
@@ -94,6 +97,17 @@ export function fly(spot, { vx, vy }) {
   return { path, made };
 }
 
+/**
+ * True if a missed shot was too soft: it never got up as high as the rim
+ * (from close in, a soft shot can pass under the hoop), or it came down to
+ * the floor in front of the hoop.
+ */
+export function fellShort(path) {
+  const peak = Math.max(...path.map(([, y]) => y));
+  const landing = path.find(([, y], i) => i > 0 && y <= BALL_R + 0.01) || path.at(-1);
+  return peak < RIM.y + BALL_R || landing[0] < RIM.front;
+}
+
 /** The puzzle is the same every day: play to 20 points. */
 export function generate() {
   return { target: TARGET };
@@ -101,16 +115,23 @@ export function generate() {
 
 /** The starting state: no points yet. */
 export function start(puzzle) {
-  return { target: puzzle.target, score: 0, status: 'playing', last: null };
+  return { target: puzzle.target, score: 0, streak: 0, status: 'playing', last: null };
 }
 
-/** Count one shot: a made basket adds 2 or 3 points. A miss changes nothing (no penalty). */
+/**
+ * Count one shot: a made basket adds 2 or 3 points and one to the streak
+ * (baskets in a row). A miss takes no points away; it only ends the streak.
+ */
 export function check(state, { made, three }) {
   if (state.status !== 'playing') throw new Error('The game is done.');
   const points = made ? (three ? 3 : 2) : 0;
   const score = state.score + points;
-  return { ...state, score, status: score >= state.target ? 'won' : 'playing', last: { made, points } };
+  const streak = made ? (state.streak || 0) + 1 : 0;
+  return { ...state, score, streak, status: score >= state.target ? 'won' : 'playing', last: { made, points } };
 }
+
+/** True when the ball is on fire: 3 or more baskets in a row. */
+export const onFire = (state) => (state.streak || 0) >= ON_FIRE;
 
 /** Confirm a puzzle is valid. Returns { ok, problems }. */
 export function verify(puzzle) {
@@ -223,7 +244,15 @@ export function render(container, puzzle, onDone, session = {}) {
     shape('path', { d: `M0 ${-BALL_R} V${BALL_R} M${-BALL_R} 0 H${BALL_R} M-2.8 -2.8 Q0 0 -2.8 2.8 M2.8 -2.8 Q0 0 2.8 2.8`, class: 'hs-seams' }),
     shape('circle', { cx: -1.3, cy: -1.5, r: 1.3, class: 'hs-shine' }),
   );
-  ball.append(spin);
+  // Flames, behind the ball. They don't spin; they point away from where the ball is going.
+  const flames = shape('g', { class: 'hs-flames' });
+  const fire = shape('g', { class: 'hs-fire-shape' });
+  fire.append(
+    shape('path', { d: 'M-4.6 0 C-5 -5 -2 -7 -1.5 -11 C0 -8 1 -9.5 1.2 -13 C3 -9 5.2 -6 4.6 0 Z', class: 'hs-flame-outer' }),
+    shape('path', { d: 'M-2.8 0 C-3 -3.5 -1 -4.5 -0.6 -7.5 C0.6 -5.5 1.4 -6.5 1.6 -8.5 C2.6 -6 3.2 -3.5 2.8 0 Z', class: 'hs-flame-inner' }),
+  );
+  flames.append(fire);
+  ball.append(flames, spin);
   // The rim, then the ball, then the net in front: a ball dropping through shows through the net.
   const net = netPicture();
   const points = shape('text', { x: 84, y: NET_TOP - 8, class: 'hs-points' });
@@ -272,6 +301,8 @@ export function render(container, puzzle, onDone, session = {}) {
     board.textContent = `${state.score} of ${state.target}`;
     dots.replaceChildren();
     turn = 0;
+    flames.removeAttribute('transform'); // flames point up while the ball waits
+    container.classList.toggle('hs-on-fire', onFire(state));
     put([spot().x, spot().y]);
   }
 
@@ -283,18 +314,22 @@ export function render(container, puzzle, onDone, session = {}) {
 
     function land() {
       flying = false;
+      const wasOnFire = onFire(state);
       state = check(state, { made, three });
       if (!made) {
-        const [x] = path.at(-1);
-        message.textContent = x < RIM.front - 4 ? 'Not far enough. Try a longer swipe!' : 'Too far! Try a shorter swipe.';
+        message.textContent = fellShort(path) ? 'Not far enough. Try a longer swipe!' : 'Too far! Try a shorter swipe.';
       } else if (state.status === 'won') {
         message.textContent = `✓ ${state.score} points! Nothing but net!`;
         container.classList.add('finished');
         onDone({ status: 'won', misses: 0, helped: 0 });
+      } else if (state.streak === ON_FIRE) {
+        message.textContent = `🔥 ${ON_FIRE} in a row! You're on fire!`;
+        session.save?.({ score: state.score });
       } else {
-        message.textContent = `✓ Swish! ${state.last.points} points!`;
+        message.textContent = onFire(state) ? `🔥 ${state.streak} in a row! Still on fire!` : `✓ Swish! ${state.last.points} points!`;
         session.save?.({ score: state.score });
       }
+      if (wasOnFire && !made) message.textContent += ' The fire went out.';
       draw();
       if (made) play(board, 'hs-bump');
       play(ball, 'hs-back'); // the ball drops gently back into place
@@ -312,6 +347,9 @@ export function render(container, puzzle, onDone, session = {}) {
       // It turns as far as it travels, like a ball rolling with backspin.
       turn -= ((now[0] - was[0]) / BALL_R) * (180 / Math.PI);
       put(now);
+      // The flames trail behind: they point the opposite way to the ball's motion.
+      const heading = Math.atan2(-(now[1] - was[1]), now[0] - was[0]) * (180 / Math.PI); // in drawing units, y down
+      flames.setAttribute('transform', `rotate(${heading + 90 + 180})`);
       // Dropping through the hoop: the net swishes and the points float up.
       if (made && !swished && now[1] < RIM.y && now[0] > RIM.front && now[0] < RIM.back) {
         swished = true;

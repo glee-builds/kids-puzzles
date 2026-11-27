@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFor } from '../src/seed.js';
 import { everyDay, assertValid } from './helpers.js';
-import { generate, verify, start, check, launch, fly, SPOTS, TARGET } from '../src/games/hoop-shots.js';
+import { generate, verify, start, check, onFire, fellShort, launch, fly, SPOTS, TARGET, ON_FIRE } from '../src/games/hoop-shots.js';
 
 const seed = (key) => seedFor(key, 'hoop-shots');
 const LENGTHS = Array.from({ length: 121 }, (_, i) => i / 2); // swipes of 0 to 60 court units
@@ -84,4 +84,28 @@ test('verify turns away a game that is not played to 20', () => {
   assert.equal(verify({ target: 10 }).ok, false);
   assert.equal(verify({}).ok, false);
   assert.equal(verify(null).ok, false);
+});
+
+test('3 baskets in a row set the ball on fire, and a miss puts it out', () => {
+  let state = start(generate(1));
+  for (let i = 1; i < ON_FIRE; i++) {
+    state = check(state, { made: true, three: false });
+    assert.equal(onFire(state), false);
+  }
+  state = check(state, { made: true, three: false });
+  assert.deepEqual([state.streak, onFire(state)], [3, true]);
+  state = check(state, { made: true, three: true });
+  assert.deepEqual([state.streak, onFire(state)], [4, true]); // still burning
+  state = check(state, { made: false, three: true });
+  assert.deepEqual([state.streak, onFire(state), state.score], [0, false, 9]); // out, but no points lost (2 + 2 + 2 + 3)
+  state = check(state, { made: true, three: false });
+  assert.equal(onFire(state), false); // it takes 3 in a row again
+});
+
+test('a miss says the right thing: short shots fall short, hard ones go too far', () => {
+  for (const spot of SPOTS) {
+    const lengths = scoring(spot);
+    assert.equal(fellShort(fly(spot, launch({ up: 8, toward: 0 })).path), true);
+    assert.equal(fellShort(fly(spot, launch({ up: lengths.at(-1) + 15, toward: 0 })).path), false);
+  }
 });
