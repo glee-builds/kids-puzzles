@@ -48,6 +48,7 @@ const FILES = [
   'src/games/math-mix-ups.js',
   'src/games/maze.js',
   'src/games/memory-match.js',
+  'src/games/number-detective.js',
   'src/games/number-line.js',
   'src/games/number-pyramid.js',
   'src/games/pattern-train.js',

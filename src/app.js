@@ -475,6 +475,11 @@ const GAMES = {
     how: ["Tap a frog's lily pad to give it a berry. Every frog must get the same number.", "When the pile is empty, press Check. Then pick the dividing fact."],
     art: "<span class=\"share-it-out-art\">🐸🍓</span>",
   },
+  'number-detective': {
+    title: "Number Detective", kind: 'numbers', legend: "Use the clues to find the number", levels: 3, data: () => [levelFor('number-detective')],
+    how: ["Read the clues. Only one number fits every clue.", "Tap that number. A wrong tap tells you which clue it breaks."],
+    art: "<span class=\"number-detective-art\"><i>45</i><b>46</b><i>48</i></span>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
