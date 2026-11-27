@@ -4,6 +4,19 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'share-it-out': {
+    play: `const all = G.querySelector('.sh-all');
+      while (!all.disabled) all.click();
+      G.querySelector('.sh-check').click(); await wait();`,
+    check: `doneDots(0) && G.querySelectorAll('.sh-choice').length === 3 && !G.querySelector('.sh-check')`,
+    finish: `await tapUntilRight('.sh-choice'); await next();
+    for (let round = 1; round < 3; round++) {
+      const all = G.querySelector('.sh-all');
+      while (!all.disabled) all.click();
+      G.querySelector('.sh-check').click(); await wait();
+      await tapUntilRight('.sh-choice'); await next();
+    }`,
+  },
   'place-value': {
     play: `for (let round = 0; round < 2; round++) await playRound();`,
     check: `doneDots(2)`,

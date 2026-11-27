@@ -470,6 +470,11 @@ const GAMES = {
     how: ["Tap + and − to build the number out of blocks, then press Check.", "A big square is a hundred, a tall bar is a ten, and a small square is a one."],
     art: "<span class=\"place-value-art\" aria-hidden=\"true\"><i></i><i></i><i></i></span>",
   },
+  'share-it-out': {
+    title: "Share It Out", kind: 'numbers', legend: "Share berries equally among frogs", levels: 3, data: () => [levelFor('share-it-out')],
+    how: ["Tap a frog's lily pad to give it a berry. Every frog must get the same number.", "When the pile is empty, press Check. Then pick the dividing fact."],
+    art: "<span class=\"share-it-out-art\">🐸🍓</span>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
