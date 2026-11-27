@@ -4854,15 +4854,14 @@ button.gr-row {
   font-weight: 800;
 }
 
-/* The court from the side, 100 by 70 drawing units, as wide as the screen allows. */
+/* The gym from the side, 100 by 78 drawing units, as wide as the screen allows. */
 .hs-court {
   width: min(100%, 420px);
-  aspect-ratio: 100 / 70;
+  aspect-ratio: 100 / 78;
   margin: 0 auto;
   overflow: hidden;
   border: 2px solid var(--border);
   border-radius: 12px;
-  background: linear-gradient(var(--water), color-mix(in srgb, var(--water) 40%, var(--surface)));
   touch-action: none; /* a swipe shoots the ball; it must not scroll the page */
   cursor: grab;
 }
@@ -4878,22 +4877,47 @@ button.gr-row {
   height: 100%;
 }
 
-.hs-floor { fill: var(--bank); }
+.hs-wall { fill: color-mix(in srgb, var(--water) 55%, var(--surface)); }
+.hs-pad { fill: color-mix(in srgb, var(--water) 70%, var(--muted)); opacity: 0.55; }
+.hs-floor { fill: color-mix(in srgb, var(--star) 45%, var(--bank)); }
+.hs-plank { stroke: color-mix(in srgb, var(--numbers-ink) 25%, transparent); stroke-width: 0.25; }
 .hs-mark { fill: var(--white); }
 .hs-pole { fill: var(--muted); }
-.hs-board { fill: var(--white); stroke: var(--muted); stroke-width: 0.5; }
+.hs-arm { stroke: var(--muted); stroke-width: 1.4; }
+.hs-board { fill: var(--white); stroke: var(--muted); stroke-width: 0.5; stroke-linejoin: round; }
+.hs-target { fill: none; stroke: var(--go); stroke-width: 0.6; }
+.hs-bracket { fill: var(--numbers-ink); }
 
+/* The rim: an orange ring. Its back half is a little darker, being farther away. */
 .hs-rim {
-  stroke: var(--numbers-ink);
-  stroke-width: 1.6;
+  fill: none;
+  stroke: var(--go);
+  stroke-width: 1.1;
   stroke-linecap: round;
 }
 
+.hs-rim-back { stroke: var(--numbers-ink); }
+
+/* The net hangs from the rim. When a shot goes in, it stretches down and springs back. */
 .hs-net {
   fill: none;
-  stroke: var(--muted);
-  stroke-width: 0.5;
+  stroke: var(--white);
+  stroke-width: 0.4;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: top center;
 }
+
+.hs-net path { filter: drop-shadow(0 0 0.3px var(--muted)); }
+
+.hs-swish { animation: hs-swish 450ms ease-out; }
+
+@keyframes hs-swish {
+  30% { transform: scaleY(1.35) scaleX(0.9); }
+  65% { transform: scaleY(0.92); }
+}
+
+.hs-shadow { fill: var(--text); }
 
 .hs-skin {
   fill: var(--go);
@@ -4907,10 +4931,45 @@ button.gr-row {
   stroke-width: 0.5;
 }
 
-/* Where the shot will start to go, while a finger is down. */
-.hs-dot {
-  fill: var(--text);
-  opacity: 0.45;
+.hs-shine {
+  fill: var(--white);
+  opacity: 0.35;
+}
+
+/* After a shot the ball drops gently back into place. */
+.hs-back { animation: hs-back 320ms ease-out; }
+
+@keyframes hs-back {
+  from { opacity: 0; translate: 0 -6px; }
+}
+
+/* "+2" floats up from the hoop. */
+.hs-points {
+  fill: var(--fun-ink);
+  font-size: 5px;
+  font-weight: 800;
+  text-anchor: middle;
+  opacity: 0;
+}
+
+.hs-float { animation: hs-float 900ms ease-out; }
+
+@keyframes hs-float {
+  15% { opacity: 1; }
+  to { opacity: 0; translate: 0 -8px; }
+}
+
+/* The score gives a little bounce when it goes up. */
+.hs-bump { animation: hs-bump 400ms ease-out; }
+
+@keyframes hs-bump {
+  40% { scale: 1.25; }
+}
+
+.hs-dot { fill: var(--text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-swish, .hs-back, .hs-float, .hs-bump { animation: none; }
 }
 
 .hs.finished .hs-picks {

@@ -122,16 +122,68 @@ export function verify(puzzle) {
 
 const sy = (y) => 70 - y; // court units (y up) to drawing units (y down)
 
-/** The court from the side: floor, 3-point mark, pole, backboard, rim, and net. */
+const NET_TOP = sy(RIM.y);
+const NET_DEPTH = 11;
+const MIDDLE = (RIM.front + RIM.back) / 2;
+const RING = { rx: (RIM.back - RIM.front) / 2, ry: 1.6 }; // the rim, seen a little from above
+
+/** Half of the rim's ring: the back half sits behind the ball, the front half in front of it. */
+const ringHalf = (front) => shape('path', {
+  d: `M${RIM.front} ${NET_TOP} A${RING.rx} ${RING.ry} 0 0 ${front ? 0 : 1} ${RIM.back} ${NET_TOP}`,
+  class: `hs-rim ${front ? 'hs-rim-front' : 'hs-rim-back'}`,
+});
+
+/**
+ * The net: a diamond mesh hanging from the ring, narrowing toward the
+ * bottom. Each row has knots; each knot is tied to the two below it.
+ */
+function netPicture() {
+  const net = shape('g', { class: 'hs-net' });
+  const rows = 5;
+  const knots = Array.from({ length: rows + 1 }, (_, row) => {
+    const down = row / rows;
+    const half = RING.rx * (1 - 0.38 * down); // narrower toward the bottom
+    const sag = RING.ry * (1 - down); // the top row follows the ring's front curve
+    return Array.from({ length: 7 }, (_, i) => {
+      const across = (i - 3) / 3; // -1 to 1
+      return [MIDDLE + across * half, NET_TOP + down * NET_DEPTH + sag * Math.sqrt(1 - across * across) * 0.9];
+    });
+  });
+  const lines = [];
+  for (let row = 0; row < rows; row++) {
+    for (let i = 0; i < 7; i++) {
+      const [x, y] = knots[row][i];
+      for (const j of [i - 1, i + 1]) {
+        if (j >= 0 && j < 7) lines.push(`M${x} ${y} L${knots[row + 1][j][0]} ${knots[row + 1][j][1]}`);
+      }
+    }
+  }
+  const [first, last] = [knots[rows][0], knots[rows][6]];
+  lines.push(`M${first[0]} ${first[1]} L${last[0]} ${last[1]}`); // the hem along the bottom
+  net.append(shape('path', { d: lines.join(' ') }));
+  return net;
+}
+
+/**
+ * The gym from the side: a wall, a wooden floor with the 3-point line, and
+ * the hoop (pole, arm, backboard, rim). The drawing reaches 8 units below
+ * the floor's surface, to show the floorboards.
+ */
 function courtPicture() {
-  const picture = shape('svg', { viewBox: '0 0 100 70', class: 'hs-picture', 'aria-hidden': 'true' });
+  const picture = shape('svg', { viewBox: '0 0 100 78', class: 'hs-picture', 'aria-hidden': 'true' });
+  const boards = [72, 74.6, 77].map((y) => shape('line', { x1: 0, y1: y, x2: 100, y2: y, class: 'hs-plank' }));
   picture.append(
-    shape('rect', { x: 0, y: sy(1.5), width: 100, height: 1.5, class: 'hs-floor' }),
-    shape('rect', { x: SPOTS[1].x - 5, y: sy(1.5), width: 10, height: 0.7, class: 'hs-mark' }), // the 3-point line
-    shape('rect', { x: 95, y: sy(BOARD.bottom), width: 2, height: BOARD.bottom - 1.5, class: 'hs-pole' }),
-    shape('rect', { x: BOARD.x, y: sy(BOARD.top), width: 2, height: BOARD.top - BOARD.bottom, class: 'hs-board' }),
-    shape('path', { d: `M${RIM.front} ${sy(RIM.y)} L${RIM.front + 3} ${sy(RIM.y - 9)} L${RIM.back - 3} ${sy(RIM.y - 9)} L${RIM.back} ${sy(RIM.y)} M${(RIM.front + RIM.back) / 2} ${sy(RIM.y)} L${(RIM.front + RIM.back) / 2} ${sy(RIM.y - 9)}`, class: 'hs-net' }),
-    shape('line', { x1: RIM.front, y1: sy(RIM.y), x2: BOARD.x, y2: sy(RIM.y), class: 'hs-rim' }),
+    shape('rect', { x: 0, y: 0, width: 100, height: 70, class: 'hs-wall' }),
+    shape('rect', { x: 0, y: 62, width: 100, height: 8, class: 'hs-pad' }), // the padded strip along the bottom of the wall
+    shape('rect', { x: 0, y: 70, width: 100, height: 8, class: 'hs-floor' }),
+    ...boards,
+    shape('rect', { x: SPOTS[1].x - 1, y: 70, width: 2, height: 8, class: 'hs-mark' }), // the 3-point line
+    shape('rect', { x: 96, y: sy(38), width: 2.4, height: 38, class: 'hs-pole' }),
+    shape('path', { d: `M97.2 ${sy(37.5)} L${BOARD.x + 1.4} ${sy(BOARD.bottom + 3)}`, class: 'hs-arm' }), // the arm from the pole to the backboard
+    // The backboard, turned a little toward us so its face and target square show.
+    shape('path', { d: `M${BOARD.x - 3} ${sy(BOARD.top) + 1.5} L${BOARD.x + 1.5} ${sy(BOARD.top)} L${BOARD.x + 1.5} ${sy(BOARD.bottom)} L${BOARD.x - 3} ${sy(BOARD.bottom) + 1.5} Z`, class: 'hs-board' }),
+    shape('path', { d: `M${BOARD.x - 2.2} ${sy(RIM.y + 6) + 1} L${BOARD.x + 0.6} ${sy(RIM.y + 6) + 0.3} L${BOARD.x + 0.6} ${sy(RIM.y + 0.5) + 0.3} L${BOARD.x - 2.2} ${sy(RIM.y + 0.5) + 1}`, class: 'hs-target' }),
+    shape('rect', { x: RIM.back - 0.4, y: NET_TOP - 0.6, width: BOARD.x - RIM.back - 1.6, height: 1.2, class: 'hs-bracket' }),
   );
   return picture;
 }
@@ -162,12 +214,20 @@ export function render(container, puzzle, onDone, session = {}) {
   const board = make('p', 'hs-score');
   const picture = courtPicture();
   const dots = shape('g', { class: 'hs-dots' });
+  const shadow = shape('ellipse', { cy: 70.2, rx: BALL_R, ry: 0.9, class: 'hs-shadow' });
+  // The ball: `ball` moves it, `spin` turns it as it rolls through the air.
   const ball = shape('g', { class: 'hs-ball' });
-  ball.append(
+  const spin = shape('g', {});
+  spin.append(
     shape('circle', { r: BALL_R, class: 'hs-skin' }),
     shape('path', { d: `M0 ${-BALL_R} V${BALL_R} M${-BALL_R} 0 H${BALL_R} M-2.8 -2.8 Q0 0 -2.8 2.8 M2.8 -2.8 Q0 0 2.8 2.8`, class: 'hs-seams' }),
+    shape('circle', { cx: -1.3, cy: -1.5, r: 1.3, class: 'hs-shine' }),
   );
-  picture.append(dots, ball);
+  ball.append(spin);
+  // The rim, then the ball, then the net in front: a ball dropping through shows through the net.
+  const net = netPicture();
+  const points = shape('text', { x: 84, y: NET_TOP - 8, class: 'hs-points' });
+  picture.append(shadow, dots, ringHalf(false), ball, net, ringHalf(true), points);
   const court = make('div', 'hs-court');
   court.tabIndex = 0;
   court.setAttribute('role', 'application');
@@ -177,13 +237,30 @@ export function render(container, puzzle, onDone, session = {}) {
   container.append(picks, board, court, message);
 
   const spot = () => SPOTS[three ? 1 : 0];
-  const put = ([x, y]) => ball.setAttribute('transform', `translate(${x} ${sy(y)})`);
+  let turn = 0; // how far the ball has turned, in degrees
+  /** Put the ball at [x, y], turned `turn` degrees, with its shadow on the floor below. */
+  const put = ([x, y]) => {
+    ball.setAttribute('transform', `translate(${x} ${sy(y)})`);
+    spin.setAttribute('transform', `rotate(${turn})`);
+    // The higher the ball, the smaller and fainter its shadow.
+    const high = Math.min(Math.max((y - BALL_R) / 50, 0), 1);
+    shadow.setAttribute('cx', x);
+    shadow.setAttribute('rx', BALL_R * (1 - 0.6 * high));
+    shadow.style.opacity = 0.35 * (1 - 0.8 * high);
+  };
+  /** Play a short CSS animation on a node (named by a class), even if it just played. */
+  const play = (node, name) => {
+    node.classList.remove(name);
+    void node.getBoundingClientRect(); // makes the browser notice the class was removed
+    node.classList.add(name);
+  };
 
   /** Show where a shot starts to go: the first part of its flight, as dots. */
   function showAim(swipe) {
     const { path } = fly(spot(), launch(swipe));
-    dots.replaceChildren(...path.slice(6, 54).filter((_, i) => i % 8 === 0)
-      .map(([x, y]) => shape('circle', { cx: x, cy: sy(y), r: 1, class: 'hs-dot' })));
+    // Each dot a little smaller and fainter than the one before.
+    dots.replaceChildren(...path.slice(6, 62).filter((_, i) => i % 8 === 0)
+      .map(([x, y], i) => shape('circle', { cx: x, cy: sy(y), r: 1.1 - i * 0.1, class: 'hs-dot', style: `opacity: ${0.6 - i * 0.07}` })));
   }
 
   function draw() {
@@ -194,6 +271,7 @@ export function render(container, puzzle, onDone, session = {}) {
     });
     board.textContent = `${state.score} of ${state.target}`;
     dots.replaceChildren();
+    turn = 0;
     put([spot().x, spot().y]);
   }
 
@@ -218,15 +296,29 @@ export function render(container, puzzle, onDone, session = {}) {
         session.save?.({ score: state.score });
       }
       draw();
+      if (made) play(board, 'hs-bump');
+      play(ball, 'hs-back'); // the ball drops gently back into place
     }
 
     // Some players ask their device for less motion: show the result with no flight.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return land();
     flying = true;
     let at = 0;
+    let swished = false;
     const frame = () => {
+      const was = path[at];
       at = Math.min(at + 2, path.length - 1); // the path has 120 points a second; the screen shows 60
-      put(path[at]);
+      const now = path[at];
+      // It turns as far as it travels, like a ball rolling with backspin.
+      turn -= ((now[0] - was[0]) / BALL_R) * (180 / Math.PI);
+      put(now);
+      // Dropping through the hoop: the net swishes and the points float up.
+      if (made && !swished && now[1] < RIM.y && now[0] > RIM.front && now[0] < RIM.back) {
+        swished = true;
+        play(net, 'hs-swish');
+        points.textContent = `+${three ? 3 : 2}`;
+        play(points, 'hs-float');
+      }
       if (at < path.length - 1) requestAnimationFrame(frame);
       else setTimeout(land, 250);
     };
@@ -236,7 +328,8 @@ export function render(container, puzzle, onDone, session = {}) {
   // Swiping: a finger anywhere on the court, moved up, then lifted.
   const units = (event) => {
     const box = court.getBoundingClientRect();
-    return { x: ((event.clientX - box.left) / box.width) * 100, y: ((box.bottom - event.clientY) / box.height) * 70 };
+    // The drawing is 78 units tall and its bottom 8 are below the floor.
+    return { x: ((event.clientX - box.left) / box.width) * 100, y: ((box.bottom - event.clientY) / box.height) * 78 - 8 };
   };
   const swipeTo = (event) => {
     const now = units(event);
