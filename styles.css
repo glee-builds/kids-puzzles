@@ -5651,3 +5651,108 @@ button.gr-row {
 }
 
 .tp-art polygon { stroke-width: 0.15; }
+
+/* ---------- Lily Pad Paths ---------- */
+
+.lp-message {
+  min-height: 2.6em;
+  margin: 4px 0 8px;
+}
+
+/* Squares are as big as a phone allows (53px for 6 across on a 375px screen) and never over 64px. */
+.lp-grid {
+  --cell: min(calc((100vw - 56px) / var(--n)), 64px);
+  display: grid;
+  grid-template-columns: repeat(var(--n), var(--cell));
+  grid-auto-rows: var(--cell);
+  gap: 2px;
+  justify-content: center;
+  touch-action: none; /* tracing must not scroll the page */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.lp-cell {
+  position: relative;
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--water) 55%, var(--surface));
+  color: var(--text);
+  font: inherit;
+  font-size: calc(var(--cell) * 0.4);
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Each pair has its own color; its path squares also show its own mark. */
+.lp-p0 { --ink: var(--here); }
+.lp-p1 { --ink: var(--go); }
+.lp-p2 { --ink: var(--elsewhere); }
+.lp-p3 { --ink: var(--star); }
+.lp-p4 { --ink: var(--blush); }
+
+/* An animal sits on a round pad with its pair's color around it. */
+.lp-end {
+  border-color: var(--ink);
+  border-radius: 50%;
+  font-size: calc(var(--cell) * 0.58);
+}
+
+/* A path being drawn: a light fill and a dashed edge. */
+.lp-path {
+  border: 2px dashed var(--ink);
+  background: color-mix(in srgb, var(--ink) 30%, var(--surface));
+}
+
+/* A joined pair: a solid look, and a check mark on both animals. */
+.lp-joined {
+  border-style: solid;
+  background: color-mix(in srgb, var(--ink) 65%, var(--surface));
+}
+
+.lp-end.lp-joined::after {
+  content: "✓";
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--surface);
+  font-size: 12px;
+}
+
+/* The end of the path being drawn: a dark ring. */
+.lp-tip {
+  outline: 3px solid var(--text);
+  outline-offset: -3px;
+}
+
+/* A hint: a gold ring inside each square of the way. */
+.lp-glow {
+  box-shadow: inset 0 0 0 5px var(--star);
+}
+
+.lily-pad-paths-art {
+  display: grid;
+  grid-template-columns: repeat(3, 18px);
+  grid-auto-rows: 18px;
+  gap: 2px;
+}
+
+.lily-pad-paths-art i {
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--fun-ink);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--fun-ink);
+  font-size: 10px;
+  font-style: normal;
+  line-height: 1;
+}

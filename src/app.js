@@ -500,6 +500,11 @@ const GAMES = {
     how: ["Tap a piece, then tap the place with the same shape.", "Fill every place to see the picture!"],
     art: "<svg class=\"tp-art\" viewBox=\"0 0 6 6\" aria-hidden=\"true\"><polygon class=\"tp-go\" points=\"1,3 3,1 5,3\"/><polygon class=\"tp-here\" points=\"1,3 3,3 3,5 1,5\"/><polygon class=\"tp-star\" points=\"3,3 5,3 5,5 3,5\"/></svg>",
   },
+  'lily-pad-paths': {
+    title: "Lily Pad Paths", kind: 'fun', legend: "Join each pair of animals with a path", levels: 3, data: () => [levelFor('lily-pad-paths')],
+    how: ["Put your finger on an animal and trace across the pads to its match.", "Paths go up, down, left or right, and may not cross or share a pad."],
+    art: "<span class=\"lily-pad-paths-art\"><i>🐸</i><i>●</i><i>🐸</i><i>🦆</i><i>▲</i><i>🦆</i></span>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
