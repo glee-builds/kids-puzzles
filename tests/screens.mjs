@@ -191,6 +191,9 @@ const HELPERS = `
   const dayNumber = Math.round((new Date(today) - new Date('2026-01-01')) / 86400000);
 `;
 const PLAYS = {
+  'place-value': `
+        G.querySelector('.pv-check')?.click(); await wait(); // a wrong answer first: no blocks yet (level 1 starts with a "build" round)
+    for (let round = 0; round < 4; round++) await playRound();`,
   'hoop-shots': `
         const ball = G.querySelector('.hs-ball');
     const press = (name) => ball.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true }));
@@ -320,7 +323,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['pattern-train', 'fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
+const TOP_LEVELS = ['place-value', 'pattern-train', 'fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
 
 // Half-done puzzles: `play` plays part of a puzzle; then the page is
 // loaded again and `check` must be true: the puzzle picked up where it

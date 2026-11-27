@@ -51,6 +51,7 @@ const FILES = [
   'src/games/number-line.js',
   'src/games/number-pyramid.js',
   'src/games/pattern-train.js',
+  'src/games/place-value.js',
   'src/games/pond-sudoku.js',
   'src/games/spell-it.js',
   'src/games/story-order.js',
