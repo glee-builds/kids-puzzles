@@ -3,7 +3,7 @@
 // A customer buys something and pays with 2 quarters or a dollar bill.
 // Each day has 4 rounds.
 //   level 1: prices in 5s, paid with 50¢ or $1.00; pick the change from 3
-//            choices
+//            choices, then give it in coins (2 customers, 2 rounds each)
 //   level 2: any price, paid with $1.00; make the change by tapping coins
 //   level 3: two things bought together; first pick what both cost, then
 //            make the change (2 customers, 2 rounds each)
@@ -21,7 +21,7 @@ export const HAND_FULL = 10; // more coins than this won't fit on a phone
 // For each level: what the customer can pay with, how many things they
 // buy, what prices count by, and the kinds of round each customer gives.
 export const LEVELS = [
-  { paid: [50, 100], items: 1, step: 5, kinds: ['change'] },
+  { paid: [50, 100], items: 1, step: 5, kinds: ['change', 'make'] },
   { paid: [100], items: 1, step: 1, kinds: ['make'] },
   { paid: [100], items: 2, step: 1, kinds: ['total', 'make'] },
 ];
@@ -150,6 +150,8 @@ export function verify(puzzle) {
 // ---------- The screen ----------
 
 const QUESTIONS = { change: 'How much change?', total: 'How much for both?', make: 'Make the change with coins.' };
+// After picking the change, the same customer's coin round says how much to give.
+const giveCoins = (round) => `Give ${money(round.answer)} change in coins.`;
 
 /** One coin button: a circle with its value written on it. */
 function coinButton(coin, label, onClick) {
@@ -180,7 +182,7 @@ export function render(container, puzzle, onDone, session = {}) {
     draw(i) {
       const round = puzzle.rounds[i];
       const open = () => state.round === i; // false once this round is finished
-      question.textContent = QUESTIONS[round.kind];
+      question.textContent = round.kind === 'make' && puzzle.rounds[i - 1]?.kind === 'change' ? giveCoins(round) : QUESTIONS[round.kind];
       const counter = make('div', 'sc-counter');
       for (const item of round.items) {
         const card = counter.appendChild(make('div', 'sc-item'));

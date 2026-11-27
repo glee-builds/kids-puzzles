@@ -29,7 +29,13 @@ export default {
   'shop-change': `
         const game = await import('/src/games/shop-change.js');
     const rounds = game.generate(seed.seedFor(today, 'shop-change')).rounds;
-    const pick = async (cents) => { [...G.querySelectorAll('.sc-choice')].find((choice) => choice.textContent === game.money(cents)).click(); await wait(); };`,
+    const pick = async (cents) => { [...G.querySelectorAll('.sc-choice')].find((choice) => choice.textContent === game.money(cents)).click(); await wait(); };
+    // A coin round: tap the counting-up coins from the tray, then Check.
+    const give = async (round) => {
+      for (const { coin } of game.countUp(round.price, round.paid)) G.querySelector('.sc-tray .sc-' + coin).click();
+      G.querySelector('.sc-check').click(); await wait();
+    };
+    const play = (round) => (round.kind === 'make' ? give(round) : pick(round.answer));`,
   'place-value': `
         const playRound = async () => {
       if (G.querySelector('.pv-check')) {

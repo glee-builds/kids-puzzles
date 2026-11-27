@@ -35,9 +35,11 @@ test('the rounds vary from day to day', () => {
   }
 });
 
-test('level 1 prices count by 5s; level 3 makes the change for the two things just added up', () => {
+test('level 1 prices count by 5s and gives the change just picked in coins; level 3 makes the change for the two things just added up', () => {
   everyDay((key) => {
-    for (const round of generate(seed(key), 1).rounds) assert.equal(round.price % 5, 0);
+    const [change, coins, change2, coins2] = generate(seed(key), 1).rounds;
+    for (const round of [change, coins, change2, coins2]) assert.equal(round.price % 5, 0);
+    assert.deepEqual([coins.items, coins2.items, coins.answer, coins2.answer], [change.items, change2.items, change.answer, change2.answer]);
     const [total, make, total2, make2] = generate(seed(key), 3).rounds;
     assert.deepEqual([make.items, make2.items], [total.items, total2.items]);
     assert.ok(total.price < 100 && total2.price < 100);

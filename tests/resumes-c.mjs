@@ -25,9 +25,9 @@ export default {
     finish: `for (let round = 0; round < 2; round++) { await tapUntilRight('.wb-choice'); await next(); }`,
   },
   'shop-change': {
-    play: `for (const round of rounds.slice(0, 2)) { await pick(round.answer); await next(); }`,
+    play: `for (const round of rounds.slice(0, 2)) { await play(round); await next(); }`,
     check: `doneDots(2) && G.querySelectorAll('.sc-choice').length === 3`,
-    finish: `for (const round of rounds.slice(2)) { await pick(round.answer); await next(); }`,
+    finish: `for (const round of rounds.slice(2)) { await play(round); await next(); }`,
   },
   'number-detective': {
     play: `const game = await import('/src/games/number-detective.js');
