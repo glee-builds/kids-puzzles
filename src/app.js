@@ -774,7 +774,7 @@ function drawGrownUps() {
   const restore = button('lw-button gu-restore', 'Restore from this code', () => {
     const restored = progressStore.fromBackup(code.value);
     if (!restored) {
-      backupNote.textContent = 'That is not a backup code. Paste the whole code, starting with lilypad:';
+      backupNote.textContent = 'That is not a backup code. Paste the whole code, starting with lilypad';
       return;
     }
     progressStore.save(restored);

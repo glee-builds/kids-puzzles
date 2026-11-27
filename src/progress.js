@@ -249,15 +249,22 @@ export function load(storage = globalThis.localStorage) {
 
 // A backup is the saved progress as one line of letters and numbers, so it
 // survives being pasted into a note or a message (quotes there can turn curly).
-const BACKUP_START = 'lilypad:';
+const BACKUP_START = 'lilypad2:';
+const OLD_BACKUP_START = 'lilypad:'; // codes made before 2026-11-27 were about twice as long
 
 /** The progress as a backup code to keep somewhere safe. */
-export const toBackup = (progress) => BACKUP_START + btoa(encodeURIComponent(JSON.stringify(progress)));
+export function toBackup(progress) {
+  const bytes = new TextEncoder().encode(JSON.stringify(progress));
+  return BACKUP_START + btoa(Array.from(bytes, (byte) => String.fromCharCode(byte)).join(''));
+}
 
 /** The progress in a backup code, or null if the code isn't one (or is damaged). */
 export function fromBackup(code) {
   try {
-    const json = decodeURIComponent(atob(String(code).trim().replace(BACKUP_START, '')));
+    const text = String(code).trim();
+    const old = !text.startsWith(BACKUP_START);
+    const raw = atob(text.replace(old ? OLD_BACKUP_START : BACKUP_START, ''));
+    const json = old ? decodeURIComponent(raw) : new TextDecoder().decode(Uint8Array.from(raw, (c) => c.charCodeAt(0)));
     const saved = JSON.parse(json);
     if (!saved || typeof saved.streak !== 'number' || typeof saved.finished !== 'object') return null;
     return load({ getItem: () => json }); // fills in anything an older backup is missing
