@@ -4,6 +4,11 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'tangram-pond': {
+    play: `await put(0, 0); await put(1, 1);`,
+    check: `G.querySelectorAll(".tp-place-done").length === 2 && G.querySelectorAll(".tp-piece-used").length === 2`,
+    finish: `for (const i of order.slice(2)) await put(i, i);`,
+  },
   'word-kinds': {
     play: `for (const round of rounds.slice(0, 2)) await playRound(round);`,
     check: `doneDots(2) && G.querySelectorAll('.wk-choice').length === 3`,

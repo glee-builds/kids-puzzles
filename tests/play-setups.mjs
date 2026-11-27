@@ -4,6 +4,15 @@
 // snippet only says what to play. `G`, `seed`, `today`, `wait`, `next`, and
 // `tapUntilRight` come from HELPERS in tests/screens.mjs.
 export default {
+  'tangram-pond': `
+        const game = await import("/src/games/tangram-pond.js");
+    const puzzle = game.generate(seed.seedFor(today, "tangram-pond"), dayNumber);
+    const order = puzzle.pieces.map((_, i) => i);
+    // Tap a piece in the tray, then a place on the board.
+    const put = async (piece, place) => {
+      G.querySelector(\`[data-piece="\${piece}"]\`).click(); await wait(60);
+      G.querySelector(\`[data-place="\${place}"]\`).dispatchEvent(new MouseEvent("click", { bubbles: true })); await wait(60);
+    };`,
   'word-kinds': `
         const game = await import('/src/games/word-kinds.js');
     const { items } = await (await fetch('/data/word-kinds.json')).json();

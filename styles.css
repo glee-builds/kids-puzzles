@@ -5550,3 +5550,104 @@ button.gr-row {
   gap: 3px;
   font-size: 1.3rem;
 }
+
+/* ---------- Tangram Pond ---------- */
+
+/* The board is 6 squares wide, so one square is about 50px: big enough to tap. */
+.tp-board {
+  display: block;
+  width: min(300px, calc(100vw - 48px));
+  margin: 0 auto 10px;
+  overflow: visible;
+  touch-action: manipulation;
+}
+
+/* The pale picture under the places. */
+.tp-outline {
+  fill: var(--water);
+  stroke: var(--water);
+  stroke-width: 0.06;
+  stroke-linejoin: round;
+}
+
+/* An empty place has a dashed edge; a filled one has a solid dark edge. */
+.tp-place {
+  fill: transparent;
+  stroke: var(--muted);
+  stroke-width: 0.04;
+  stroke-dasharray: 0.14 0.1;
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.tp-place:focus-visible {
+  outline: none;
+  stroke: var(--text);
+  stroke-width: 0.08;
+}
+
+/* The hint after two misses: a thick orange edge and a gold fill. */
+.tp-glow {
+  fill: color-mix(in srgb, var(--star) 45%, transparent);
+  stroke: var(--go);
+  stroke-width: 0.12;
+  stroke-dasharray: 0.22 0.1;
+}
+
+.tp-place-done,
+.tp-piece polygon,
+.tp-art polygon {
+  stroke: var(--text);
+  stroke-width: 0.05;
+  stroke-linejoin: round;
+}
+
+.tp-go { fill: var(--go); }
+.tp-here { fill: var(--here); }
+.tp-star { fill: var(--star); }
+.tp-elsewhere { fill: var(--elsewhere); }
+.tp-pad { fill: var(--pad); }
+.tp-blush { fill: var(--blush); }
+
+.tp-tray {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+.tp-piece {
+  display: grid;
+  place-items: center;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 6px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.tp-piece svg {
+  display: block;
+  overflow: visible;
+}
+
+.tp-piece polygon { stroke-width: 0.08; }
+
+/* The piece picked up: an orange ring. */
+.tp-selected {
+  border-color: var(--go);
+  box-shadow: 0 0 0 3px var(--go);
+}
+
+/* A placed piece leaves its spot in the tray empty, so the others stay put. */
+.tp-piece-used { visibility: hidden; }
+
+.tp-art {
+  width: 44px;
+  height: 44px;
+}
+
+.tp-art polygon { stroke-width: 0.15; }
