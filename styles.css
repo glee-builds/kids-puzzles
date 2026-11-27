@@ -4854,17 +4854,22 @@ button.gr-row {
   font-weight: 800;
 }
 
-/* The court is a fixed size, so the ball's spots (parts of its width and height) line up with the drawing. */
+/* The court from the side, 100 by 70 drawing units, as wide as the screen allows. */
 .hs-court {
-  position: relative;
-  width: 300px;
-  height: 290px;
+  width: min(100%, 420px);
+  aspect-ratio: 100 / 70;
   margin: 0 auto;
   overflow: hidden;
   border: 2px solid var(--border);
   border-radius: 12px;
-  background: var(--bank);
+  background: linear-gradient(var(--water), color-mix(in srgb, var(--water) 40%, var(--surface)));
   touch-action: none; /* a swipe shoots the ball; it must not scroll the page */
+  cursor: grab;
+}
+
+.hs-court:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
 }
 
 .hs-picture {
@@ -4873,87 +4878,44 @@ button.gr-row {
   height: 100%;
 }
 
-.hs-lines {
-  fill: none;
-  stroke: var(--white);
-  stroke-width: 3;
-}
+.hs-floor { fill: var(--bank); }
+.hs-mark { fill: var(--white); }
+.hs-pole { fill: var(--muted); }
+.hs-board { fill: var(--white); stroke: var(--muted); stroke-width: 0.5; }
 
-.hs-board {
-  fill: var(--white);
-  stroke: var(--muted);
-  stroke-width: 3;
-}
-
-.hs-square,
 .hs-rim {
-  fill: none;
   stroke: var(--numbers-ink);
-  stroke-width: 2;
-}
-
-.hs-rim {
-  stroke-width: 5;
+  stroke-width: 1.6;
+  stroke-linecap: round;
 }
 
 .hs-net {
   fill: none;
   stroke: var(--muted);
-  stroke-width: 1.5;
-}
-
-/* From farther back the hoop looks smaller. It shrinks around the middle of the rim. */
-.hs-hoop {
-  transform-origin: 150px 58px;
-  transition: transform 200ms;
-}
-
-.hs-far .hs-hoop {
-  transform: scale(0.6);
-}
-
-.hs-ball {
-  position: absolute;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  touch-action: none;
-}
-
-.hs-ball:focus-visible {
-  outline: 3px solid var(--text);
-  outline-offset: 2px;
-}
-
-.hs-ball svg {
-  display: block;
-  pointer-events: none;
+  stroke-width: 0.5;
 }
 
 .hs-skin {
   fill: var(--go);
   stroke: var(--numbers-ink);
-  stroke-width: 2;
+  stroke-width: 0.6;
 }
 
 .hs-seams {
   fill: none;
   stroke: var(--numbers-ink);
-  stroke-width: 2;
+  stroke-width: 0.5;
+}
+
+/* Where the shot will start to go, while a finger is down. */
+.hs-dot {
+  fill: var(--text);
+  opacity: 0.45;
 }
 
 .hs.finished .hs-picks {
   opacity: 0.5;
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hs-hoop {
-    transition: none;
-  }
 }
 
 /* ---------- Place Value Builder ---------- */

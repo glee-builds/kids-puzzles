@@ -61,9 +61,21 @@ export default {
     finish: `for (let round = 0; round < 2; round++) await playRound();`,
   },
   'hoop-shots': {
-    play: `const ball = G.querySelector('.hs-ball'); for (let shot = 0; shot < 2; shot++) { ball.click(); await wait(900); }`,
+    play: `const court = G.querySelector('.hs-court');
+    const score = () => G.querySelector('.hs-score').textContent;
+    const said = () => G.querySelector('.hs-message').textContent;
+    // Shoot, then wait until the ball has landed (the score or the message changes).
+    const shoot = async (go) => { const before = score() + said(); go(); for (let i = 0; i < 80 && score() + said() === before; i++) await wait(100); };
+    const enter = () => court.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await shoot(enter); await shoot(enter);`,
     check: `G.querySelector('.hs-score').textContent === '4 of 20'`,
-    finish: `const ball = G.querySelector('.hs-ball'); for (let shot = 0; shot < 12 && !ball.disabled; shot++) { ball.click(); await wait(900); }`,
+    finish: `const court = G.querySelector('.hs-court');
+    const score = () => G.querySelector('.hs-score').textContent;
+    const said = () => G.querySelector('.hs-message').textContent;
+    // Shoot, then wait until the ball has landed (the score or the message changes).
+    const shoot = async (go) => { const before = score() + said(); go(); for (let i = 0; i < 80 && score() + said() === before; i++) await wait(100); };
+    const enter = () => court.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      for (let shot = 0; shot < 12 && !G.classList.contains('finished'); shot++) await shoot(enter);`,
   },
   'pattern-train': {
     play: `for (let train = 0; train < 2; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
