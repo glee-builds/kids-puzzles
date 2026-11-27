@@ -1,5 +1,5 @@
 {
-  "about": "Themes for Word Search, at about a 2nd to 3rd grade reading level. Each theme has 16 words of 3 to 8 letters. Each day uses one theme and 10 of its words.",
+  "about": "Themes for Word Search, at about a 2nd to 3rd grade reading level. Each theme has 16 words of 3 to 8 letters. Each day uses one theme and 8 of its words.",
   "themes": [
     { "name": "On the Farm", "words": ["cow", "pig", "horse", "sheep", "goat", "duck", "hen", "chick", "barn", "mule", "lamb", "goose", "pony", "rooster", "turkey", "calf"] },
     { "name": "In the Ocean", "words": ["fish", "shark", "whale", "crab", "seal", "wave", "shell", "squid", "eel", "coral", "starfish", "octopus", "dolphin", "boat", "tide", "clam"] },
@@ -60,6 +60,26 @@
     { "name": "Sports Gear", "words": ["helmet", "glove", "cleats", "jersey", "racket", "puck", "stick", "goggles", "pads", "skates", "whistle", "mitt", "hoop", "cone", "bat", "base"] },
     { "name": "Animal Sounds", "words": ["moo", "oink", "quack", "neigh", "woof", "meow", "hiss", "roar", "tweet", "honk", "buzz", "cluck", "purr", "howl", "chirp", "croak"] },
     { "name": "At Night", "words": ["moon", "owl", "dark", "dream", "sleep", "pajamas", "pillow", "bat", "cricket", "yawn", "firefly", "bedtime", "lullaby", "hug", "story", "snore"] },
-    { "name": "The Sky", "words": ["cloud", "rainbow", "kite", "bird", "plane", "blue", "sunset", "dawn", "balloon", "jet", "air", "sky", "wind", "star", "moon", "glider"] }
+    { "name": "The Sky", "words": ["cloud", "rainbow", "kite", "bird", "plane", "blue", "sunset", "dawn", "balloon", "jet", "air", "sky", "wind", "star", "moon", "glider"] },
+    { "name": "Ice Cream Shop", "words": ["cone", "scoop", "cherry", "sprinkle", "fudge", "cup", "spoon", "mint", "vanilla", "sundae", "nuts", "banana", "syrup", "melt", "shake", "straw"] },
+    { "name": "Grocery Store", "words": ["cart", "aisle", "cashier", "bag", "milk", "eggs", "bread", "coupon", "list", "basket", "scale", "receipt", "shelf", "price", "freezer", "apple"] },
+    { "name": "Fairy Tales", "words": ["castle", "dragon", "king", "queen", "prince", "crown", "wand", "fairy", "giant", "knight", "tower", "magic", "frog", "unicorn", "wizard", "gold"] },
+    { "name": "Toy Box", "words": ["doll", "ball", "blocks", "puzzle", "robot", "yoyo", "kite", "top", "train", "teddy", "puppet", "marbles", "wagon", "drum", "truck", "rocket"] },
+    { "name": "Pirate Ship", "words": ["pirate", "ship", "map", "treasure", "gold", "parrot", "sail", "anchor", "flag", "deck", "island", "chest", "coin", "captain", "hook", "mast"] },
+    { "name": "Bike Ride", "words": ["helmet", "pedal", "wheel", "bell", "chain", "seat", "brake", "tire", "spoke", "path", "ride", "gear", "basket", "horn", "light", "pump"] },
+    { "name": "Picnic Day", "words": ["blanket", "basket", "ants", "sandwich", "lemonade", "juice", "cooler", "napkin", "sun", "plate", "cup", "fruit", "cookie", "chips", "shade", "park"] },
+    { "name": "Robot Lab", "words": ["robot", "gear", "wire", "screen", "motor", "battery", "beep", "metal", "bolt", "switch", "lever", "wheel", "laser", "spring", "magnet", "arm"] },
+    { "name": "Hair Salon", "words": ["comb", "brush", "scissors", "mirror", "chair", "wash", "curl", "braid", "bangs", "gel", "dryer", "spray", "bow", "clip", "trim", "cape"] },
+    { "name": "Movie Night", "words": ["popcorn", "screen", "seat", "ticket", "snack", "show", "dark", "couch", "remote", "blanket", "laugh", "candy", "cartoon", "movie", "drink", "theater"] },
+    { "name": "Dance Class", "words": ["twirl", "tap", "hop", "leap", "clap", "music", "step", "ballet", "tutu", "shoes", "stage", "bow", "skip", "slide", "jazz", "beat"] },
+    { "name": "Swimming Pool", "words": ["pool", "swim", "dive", "splash", "float", "goggles", "towel", "slide", "whistle", "kick", "cap", "flippers", "noodle", "deep", "ladder", "lane"] },
+    { "name": "Road Trip", "words": ["map", "car", "road", "gas", "snack", "seat", "belt", "sign", "bridge", "tunnel", "motel", "highway", "mile", "radio", "trunk", "wheel"] },
+    { "name": "Baby Animals", "words": ["calf", "lamb", "chick", "puppy", "kitten", "foal", "cub", "joey", "fawn", "piglet", "duckling", "bunny", "owlet", "gosling", "eaglet", "tadpole"] },
+    { "name": "Clean Up Time", "words": ["broom", "mop", "dust", "soap", "sponge", "bucket", "vacuum", "trash", "tidy", "wipe", "scrub", "sweep", "rag", "spray", "wash", "bin"] },
+    { "name": "Game Night", "words": ["dice", "cards", "board", "spinner", "turn", "win", "lose", "team", "puzzle", "chess", "checkers", "pawn", "timer", "score", "tie", "prize"] },
+    { "name": "Boats", "words": ["canoe", "kayak", "raft", "sail", "ferry", "tugboat", "barge", "ship", "oar", "dock", "anchor", "paddle", "harbor", "rowboat", "wave", "lake"] },
+    { "name": "Reptiles", "words": ["snake", "skin", "turtle", "tortoise", "gecko", "iguana", "croc", "boa", "scales", "egg", "tail", "tongue", "claw", "rock", "nest", "hiss"] },
+    { "name": "Superheroes", "words": ["cape", "mask", "hero", "fly", "costume", "strong", "shield", "power", "speed", "rescue", "team", "boots", "belt", "secret", "city", "logo"] },
+    { "name": "At the Diner", "words": ["menu", "server", "table", "booth", "order", "tip", "plate", "fork", "check", "cook", "pie", "shake", "fries", "burger", "ketchup", "straw"] }
   ]
 }
