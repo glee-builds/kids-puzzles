@@ -1,8 +1,8 @@
 // word-search.js: find hidden words in a grid of letters.
 //
 // Each day has one theme from data/search-themes.json (dealt in a fixed
-// shuffled order, so none repeats until all have been used) and 10 of its
-// words, hidden in a 15x15 grid. At level 1, words run across (left to
+// shuffled order, so none repeats until all have been used) and 8 of its
+// words, hidden in a 12x12 grid. At level 1, words run across (left to
 // right) or down (top to bottom). Level 2 adds words on a slant, and level
 // 3 adds words written backward or upward. At level 4 the word list is
 // replaced by clues from data/search-clues.json ("A baby sheep. (4
@@ -17,8 +17,8 @@
 import { createRandom, dealForDay, forLevel } from '../seed.js';
 import { make, button, liveMessage, trace } from '../ui.js';
 
-export const SIZE = 15;
-export const WORDS_PER_DAY = 10;
+export const SIZE = 12;
+export const WORDS_PER_DAY = 8;
 export const MIN_WORD = 3;
 export const MAX_WORD = 8;
 
@@ -115,10 +115,10 @@ export function generate(seed, themes, dayNumber, level = 1, clues = {}) {
   const random = createRandom(seed);
   const theme = themeForDay(themes, dayNumber);
 
-  // Laying out words always works on a 15x15 grid; the loop is for the
+  // Laying out words always works on a 12x12 grid; the loop is for the
   // rare filler that spells a word by accident (verify catches it).
   for (let round = 0; round < 100; round++) {
-    // Pick 10 words, none hiding inside another.
+    // Pick 8 words, none hiding inside another.
     const words = [];
     for (const word of random.shuffle(theme.words)) {
       if (words.length < WORDS_PER_DAY && !words.some((w) => overlaps(w, word))) words.push(word);

@@ -36,7 +36,7 @@ test('no theme repeats until every theme has been used', () => {
 
 // --- making puzzles ---
 
-test('every day for two years makes a valid 15x15 grid with 10 words', () => {
+test('every day for two years makes a valid 12x12 grid with 8 words', () => {
   everyDay((key, day) => {
     const puzzle = generate(seedForDay(key), THEMES, day);
     assertValid(verify(puzzle), key);
@@ -138,7 +138,7 @@ test('lineBetween snaps to a slant only when asked, and stays in the grid', () =
   assert.deepEqual(lineBetween([2, 2], [5, 4], true), [[2, 2], [3, 3], [4, 4], [5, 5]]); // nearly a slant
   assert.deepEqual(lineBetween([2, 2], [5, 5]), [[2, 2], [2, 3], [2, 4], [2, 5]]);         // level 1: across
   assert.deepEqual(lineBetween([2, 2], [2, 6], true), [[2, 2], [2, 3], [2, 4], [2, 5], [2, 6]]);
-  assert.deepEqual(lineBetween([13, 13], [14, 14], true), [[13, 13], [14, 14]]);
+  assert.deepEqual(lineBetween([SIZE - 2, SIZE - 2], [SIZE - 1, SIZE - 1], true), [[SIZE - 2, SIZE - 2], [SIZE - 1, SIZE - 1]]);
 });
 
 test('a backward word at level 3 is found by tracing from either end', () => {
@@ -170,7 +170,7 @@ test('every word of every theme has a short clue that does not give it away', ()
   }
 });
 
-test('level 4 has the level 3 directions and a clue for each of the 10 words, every day for a year', () => {
+test('level 4 has the level 3 directions and a clue for each of the 8 words, every day for a year', () => {
   everyDay((key, day) => {
     const puzzle = generate(seedForDay(key), THEMES, day, 4, CLUES);
     assertValid(verify(puzzle), key);
