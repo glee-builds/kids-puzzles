@@ -5239,3 +5239,137 @@ button.gr-row {
 
 .number-detective-art i { border-style: dashed; color: var(--muted); text-decoration: line-through; }
 .number-detective-art b { border-color: var(--here); box-shadow: 0 0 0 1px var(--here); }
+
+/* ---------- Shop Change ---------- */
+/* Right choices use .grp-right (a teal ring and a check mark). */
+
+.sc-question {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.sc-stage { gap: 8px; }
+
+/* The counter: each thing for sale on a card with its price tag. */
+.sc-counter,
+.sc-choices,
+.sc-tray {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.sc-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 12px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.sc-emoji { font-size: 2rem; line-height: 1.15; }
+.sc-tag { font-weight: 800; }
+
+.sc-paid {
+  margin: 0;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.sc-choice {
+  min-width: 92px;
+  font-size: 1.4rem;
+}
+
+/* The hand: a dashed box that holds up to two rows of coins. */
+.sc-hand {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 116px;
+  padding: 4px;
+  border: 3px dashed var(--muted);
+  border-radius: 12px;
+}
+
+.sc-empty {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* The right change: a solid teal box with a check. A shown answer: a solid muted box. */
+.sc-hand-right,
+.sc-hand-shown { border-style: solid; }
+
+.sc-hand-right { border-color: var(--here); }
+
+.sc-hand-right::after {
+  content: "✓";
+  color: var(--here);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+/* A coin you can tap: a circle with its value written on it. The penny has
+   an orange edge. In the tray, coins worth more are bigger, except the
+   dime, which really is the smallest. */
+.sc-coin {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 3px solid var(--muted);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sc-penny { border-color: var(--numbers-ink); }
+.sc-tray .sc-quarter { width: 58px; height: 58px; font-size: 0.95rem; }
+.sc-tray .sc-nickel { width: 52px; height: 52px; }
+.sc-tray .sc-penny { width: 50px; height: 50px; }
+
+.sc-check { padding: 0 16px; }
+
+/* Counting-up hints are long, so the message is a little smaller here. */
+.sc-message {
+  margin: 6px 0;
+  font-size: 0.95rem;
+}
+
+/* Home card art: an apple and a coin. */
+.shop-change-art {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 1.5rem;
+}
+
+.shop-change-art i {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  font-style: normal;
+  font-size: 0.5rem;
+  font-weight: 800;
+}

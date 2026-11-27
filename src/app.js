@@ -480,6 +480,11 @@ const GAMES = {
     how: ["Read the clues. Only one number fits every clue.", "Tap that number. A wrong tap tells you which clue it breaks."],
     art: "<span class=\"number-detective-art\"><i>45</i><b>46</b><i>48</i></span>",
   },
+  'shop-change': {
+    title: "Shop Change", kind: 'everyday', legend: "Give the right change", levels: 3, data: () => [levelFor('shop-change')],
+    how: ["A customer buys something. Count up from the price to what they paid.", "Pick the change, or tap coins to make it and press Check."],
+    art: "<span class=\"shop-change-art\">🍎<i>5¢</i></span>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],

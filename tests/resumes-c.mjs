@@ -4,6 +4,11 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'shop-change': {
+    play: `for (const round of rounds.slice(0, 2)) { await pick(round.answer); await next(); }`,
+    check: `doneDots(2) && G.querySelectorAll('.sc-choice').length === 3`,
+    finish: `for (const round of rounds.slice(2)) { await pick(round.answer); await next(); }`,
+  },
   'number-detective': {
     play: `const game = await import('/src/games/number-detective.js');
     const rounds = game.generate(seed.seedFor(today, 'number-detective')).rounds;
