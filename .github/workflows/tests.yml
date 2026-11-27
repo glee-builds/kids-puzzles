@@ -20,6 +20,8 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # A normal run takes about 5 minutes; stop one that is stuck instead of letting it run for hours.
+    timeout-minutes: 20
     steps:
       - name: Get the code
         uses: actions/checkout@v4

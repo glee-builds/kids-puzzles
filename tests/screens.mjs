@@ -69,20 +69,36 @@ if (!chromePath) {
 }
 
 const profile = mkdtempSync(join(tmpdir(), 'lily-pad-screens-'));
-const chrome = spawn(chromePath, [
-  '--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
-  '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--no-sandbox', 'about:blank',
-]);
-const wsUrl = await new Promise((resolve, reject) => {
-  let text = '';
-  chrome.stderr.on('data', (chunk) => {
-    text += chunk;
-    const found = text.match(/DevTools listening on (ws:\/\/\S+)/);
-    if (found) resolve(found[1]);
+/** Start Chrome and wait for the address to talk to it on. */
+function startChrome() {
+  const chrome = spawn(chromePath, [
+    '--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
+    '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--no-sandbox', 'about:blank',
+  ]);
+  return new Promise((resolve, reject) => {
+    let text = '';
+    const tooSlow = setTimeout(() => { chrome.kill(); reject(new Error('Chrome did not start in 60 seconds')); }, 60000);
+    chrome.stderr.on('data', (chunk) => {
+      text += chunk;
+      const found = text.match(/DevTools listening on (ws:\/\/\S+)/);
+      if (found) {
+        clearTimeout(tooSlow); // started: Chrome must keep running for the whole check
+        resolve({ chrome, wsUrl: found[1] });
+      }
+    });
+    chrome.on('exit', () => { clearTimeout(tooSlow); reject(new Error(`Chrome stopped early:\n${text}`)); });
   });
-  chrome.on('exit', () => reject(new Error(`Chrome stopped early:\n${text}`)));
-  setTimeout(() => reject(new Error('Chrome did not start in 20 seconds')), 20000);
-});
+}
+// A busy test computer is sometimes slow to start Chrome, so try 3 times before failing.
+let chrome, wsUrl;
+for (let attempt = 1; !chrome; attempt++) {
+  try {
+    ({ chrome, wsUrl } = await startChrome());
+  } catch (error) {
+    if (attempt === 3) throw error;
+    console.log(`${error.message.split('\n')[0]}; trying again.`);
+  }
+}
 
 const socket = new WebSocket(wsUrl);
 await new Promise((resolve, reject) => { socket.onopen = resolve; socket.onerror = reject; });
