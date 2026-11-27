@@ -143,7 +143,11 @@ button {
 .ct-choices,
 .fp-choices,
 .pt-choices,
-.gi-choices {
+.gi-choices,
+.ls-boxes,
+.ls-tray,
+.ps-picks,
+.pv-choices {
   display: flex;
   justify-content: center;
   gap: 10px;
@@ -164,7 +168,13 @@ button {
 .ct-question,
 .fp-question,
 .pt-question,
-.cc-question {
+.cc-question,
+.mm-ask,
+.gi-ask,
+.pv-question,
+.sh-question,
+.sc-question,
+.wb-question {
   margin: 4px 0 6px;
   text-align: center;
   font-size: 1.15rem;
@@ -810,13 +820,6 @@ button {
   border-color: var(--here);
   background: var(--here);
   color: var(--white);
-}
-
-.ls-boxes,
-.ls-tray {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
 }
 
 .ls-boxes {
@@ -3946,14 +3949,6 @@ button.gr-row {
 /* ---------- Math Mix-Ups ---------- */
 /* Right answers use .grp-right (a teal ring and a check mark). */
 
-.mm-ask,
-.gi-ask {
-  margin: 4px 0 6px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
 /* The three shapes: each has its own color and its own outline. */
 .mm-shape {
   display: inline-block;
@@ -4066,7 +4061,8 @@ button.gr-row {
   margin: 0 0 4px;
 }
 
-.mm-heat {
+.mm-heat,
+.hs-pick {
   min-width: 120px;
   min-height: 48px;
   padding: 4px 12px;
@@ -4507,12 +4503,6 @@ button.gr-row {
 .ps-found { border-color: var(--here); background: var(--surface); }
 .ps-shown { border-color: var(--elsewhere); border-style: dashed; background: var(--surface); }
 
-.ps-picks {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
 .ps-pick {
   width: 68px;
   min-height: 60px;
@@ -4845,19 +4835,6 @@ button.gr-row {
   margin: 0 0 4px;
 }
 
-.hs-pick {
-  min-width: 120px;
-  min-height: 48px;
-  padding: 4px 12px;
-  border: 2px solid var(--border);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
 .hs-pick-on {
   border-color: var(--fun-ink);
   background: var(--fun-ink);
@@ -5025,13 +5002,6 @@ button.gr-row {
 /* ---------- Place Value Builder ---------- */
 /* Right answers use .grp-right (a teal ring and a check mark). */
 
-.pv-question {
-  margin: 4px 0 6px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
 .pv-number {
   font-size: 1.3em;
   color: var(--numbers-ink);
@@ -5107,12 +5077,6 @@ button.gr-row {
 
 .pv-check { min-width: 150px; }
 
-.pv-choices {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-}
-
 .pv-choice {
   min-width: 88px;
   font-size: 1.3rem;
@@ -5138,13 +5102,6 @@ button.gr-row {
 .place-value-art i:nth-child(3) { width: 9px; height: 9px; background: var(--go); }
 
 /* ---------- Share It Out ---------- */
-
-.sh-question {
-  margin: 4px 0 6px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
 
 .sh-stage { gap: 6px; }
 .sh-message { margin: 6px 0; }
@@ -5309,13 +5266,6 @@ button.gr-row {
 /* ---------- Shop Change ---------- */
 /* Right choices use .grp-right (a teal ring and a check mark). */
 
-.sc-question {
-  margin: 4px 0 6px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
 .sc-stage { gap: 8px; }
 
 /* The counter: each thing for sale on a card with its price tag. */
@@ -5442,13 +5392,6 @@ button.gr-row {
 
 /* ---------- Word Builder ---------- */
 /* Right answers use .grp-right (a teal ring and a check mark). */
-
-.wb-question {
-  margin: 4px 0 6px;
-  text-align: center;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
 
 .wb-word { color: var(--words-ink); }
 
