@@ -5795,3 +5795,18 @@ button.gr-row {
   font-style: normal;
   line-height: 1;
 }
+
+/* The backup code on the grown-up page. */
+.gu-code {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 8px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.gu-restore { width: 100%; }
