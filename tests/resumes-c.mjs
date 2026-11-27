@@ -4,6 +4,19 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'number-detective': {
+    play: `const game = await import('/src/games/number-detective.js');
+    const rounds = game.generate(seed.seedFor(today, 'number-detective')).rounds;
+    const tap = async (n) => { [...G.querySelectorAll('.nd-suspect')].find((suspect) => suspect.textContent === String(n)).click(); await wait(); };
+    const wrong = (round) => round.suspects.find((n) => n !== round.answer);
+      await tap(rounds[0].answer); await next(); await tap(wrong(rounds[1]));`,
+    check: `doneDots(1) && G.querySelectorAll('.nd-crossed:disabled').length === 1`,
+    finish: `const game = await import('/src/games/number-detective.js');
+    const rounds = game.generate(seed.seedFor(today, 'number-detective')).rounds;
+    const tap = async (n) => { [...G.querySelectorAll('.nd-suspect')].find((suspect) => suspect.textContent === String(n)).click(); await wait(); };
+    const wrong = (round) => round.suspects.find((n) => n !== round.answer);
+      for (const round of rounds.slice(1)) { await tap(round.answer); await next(); }`,
+  },
   'share-it-out': {
     play: `const all = G.querySelector('.sh-all');
       while (!all.disabled) all.click();
