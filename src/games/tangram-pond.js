@@ -1,8 +1,9 @@
 // tangram-pond.js: fit the pieces into an outline to make a picture.
 //
 // A picture is made of 5 to 7 pieces on a 6 by 6 grid of squares. The board
-// shows the pale outline of the whole picture, with a dashed place for each
-// piece. The player taps a piece in the tray, then taps its place. Nothing
+// shows only the pale shape of the whole picture: the places for the pieces
+// are not drawn, so the player works out where each one fits. The player taps
+// a piece in the tray, then taps where it goes. Nothing
 // turns: every piece is already the right way up. Two pieces with the same
 // shape can swap places; either place is right. After two misses in a row
 // with the same piece, a place that fits it glows.
@@ -265,7 +266,7 @@ export function render(container, puzzle, onDone, session = {}) {
       selected = null;
       message.textContent = '✓ It fits!';
     } else {
-      message.textContent = state.last.hinted ? 'Not quite. Try the glowing place!' : 'Not quite. Look for a place with the same shape.';
+      message.textContent = state.last.hinted ? 'Not quite. Try the glowing place!' : 'Not quite. Look for a spot with the same shape.';
       wiggle(tiles[tried]);
     }
     if (state.status === 'playing') keep();
