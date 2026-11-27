@@ -4968,8 +4968,28 @@ button.gr-row {
 
 .hs-dot { fill: var(--text); }
 
+/* On fire (3 baskets in a row): flames flicker behind the ball until a miss. */
+.hs-flames { display: none; }
+.hs-on-fire .hs-flames { display: inline; }
+.hs-flame-outer { fill: var(--go); }
+.hs-flame-inner { fill: var(--star); }
+
+.hs-fire-shape {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  animation: hs-flicker 180ms ease-in-out infinite alternate;
+}
+
+@keyframes hs-flicker {
+  from { transform: scale(0.92, 0.85) skewX(-4deg); }
+  to { transform: scale(1.06, 1.12) skewX(4deg); }
+}
+
+/* A warm glow on the ball while it burns. */
+.hs-on-fire .hs-skin { filter: drop-shadow(0 0 1.2px var(--star)); }
+
 @media (prefers-reduced-motion: reduce) {
-  .hs-swish, .hs-back, .hs-float, .hs-bump { animation: none; }
+  .hs-swish, .hs-back, .hs-float, .hs-bump, .hs-fire-shape { animation: none; }
 }
 
 .hs.finished .hs-picks {
