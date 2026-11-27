@@ -29,6 +29,15 @@ test('every file in the sw.js list exists', () => {
   assert.deepEqual(gone, [], `these are in FILES in sw.js but don't exist: ${gone.join(', ')}`);
 });
 
+// Other apps on glee-builds.github.io share this browser storage, so the
+// service worker may only delete caches that start with this app's prefix.
+test('sw.js deletes only old caches with this app\'s prefix', () => {
+  assert.match(sw, /const PREFIX = 'lily-pad-';/, 'sw.js should define PREFIX');
+  assert.match(sw, /const CACHE = PREFIX \+ 'v\d+';/, 'CACHE should be built from PREFIX');
+  assert.match(sw, /names\.filter\(\(name\) => name\.startsWith\(PREFIX\) && name !== CACHE\)/,
+    'the activate step should delete only this app\'s old caches');
+});
+
 test('the list has no file twice, and includes the app itself', () => {
   assert.equal(new Set(listed).size, listed.length);
   assert.ok(listed.includes('./'));

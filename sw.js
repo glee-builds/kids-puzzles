@@ -12,7 +12,9 @@
 // When you add a file the app needs (a new game, a data file, an image),
 // add it to FILES. tests/offline.test.js fails if one is missing.
 
-const CACHE = 'lily-pad-v1';
+// Other apps on the same web address keep their own caches with other prefixes.
+const PREFIX = 'lily-pad-';
+const CACHE = PREFIX + 'v1';
 
 // Every file the app needs, relative to this file. './' is the app itself.
 const FILES = [
@@ -105,7 +107,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((names) => Promise.all(names.filter((name) => name !== CACHE).map((name) => caches.delete(name))))
+      .then((names) => Promise.all(names.filter((name) => name.startsWith(PREFIX) && name !== CACHE).map((name) => caches.delete(name))))
       .then(() => self.clients.claim()),
   );
 });
