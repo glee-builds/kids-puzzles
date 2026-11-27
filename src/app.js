@@ -495,6 +495,11 @@ const GAMES = {
     how: ["A noun is a person, animal, place, or thing. A verb is an action.", "A describing word tells what something is like. Pick the kind of each word."],
     art: "<span class=\"word-kinds-art\"><span>📦</span><span>🏃</span><span>🎨</span></span>",
   },
+  'tangram-pond': {
+    title: "Tangram Pond", kind: 'fun', legend: "Fit the shapes to make a picture", data: () => [DAY],
+    how: ["Tap a piece, then tap the place with the same shape.", "Fill every place to see the picture!"],
+    art: "<svg class=\"tp-art\" viewBox=\"0 0 6 6\" aria-hidden=\"true\"><polygon class=\"tp-go\" points=\"1,3 3,1 5,3\"/><polygon class=\"tp-here\" points=\"1,3 3,3 3,5 1,5\"/><polygon class=\"tp-star\" points=\"3,3 5,3 5,5 3,5\"/></svg>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],

@@ -58,6 +58,7 @@ const FILES = [
   'src/games/shop-change.js',
   'src/games/spell-it.js',
   'src/games/story-order.js',
+  'src/games/tangram-pond.js',
   'src/games/word-builder.js',
   'src/games/word-clues.js',
   'src/games/word-guess.js',

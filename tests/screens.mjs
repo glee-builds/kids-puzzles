@@ -191,6 +191,10 @@ const HELPERS = `
   const dayNumber = Math.round((new Date(today) - new Date('2026-01-01')) / 86400000);
 `;
 const PLAYS = {
+  'tangram-pond': `
+        await put(0, order.find((j) => !game.fits(puzzle.pieces[0], puzzle.pieces[j]))); // a wrong place first
+    if (G.querySelector(".tp-place-done")) throw new Error("a piece in the wrong place should stay in the tray");
+    for (const i of order) await put(i, i);`,
   'word-kinds': `
         await pick(game.KINDS.find((kind) => kind !== rounds[0].tags[rounds[0].target])); // one wrong answer first
     for (const round of rounds) await playRound(round);`,
