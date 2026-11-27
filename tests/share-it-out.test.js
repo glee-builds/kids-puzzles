@@ -58,7 +58,7 @@ test('isRight, turned around: the right number of pads each have the full share'
 });
 
 test('hints say what is wrong', () => {
-  assert.equal(hint(twelve, [5, 4, 3]), 'One frog has 5 and another has 3. Equal means the same for everyone.');
+  assert.equal(hint(twelve, [5, 4, 3]), 'One frog has 5 and another has 3. Equal means the same for everyone. Tap a frog\'s berries to take one back.');
   assert.match(hint(twelve, [4, 4, 3]), /still 1 berry in the pile/);
   assert.match(hint(twelve, [1, 1, 1]), /still 9 berries/);
   assert.match(hint(turned, [5, 5, 5, 5, 0, 0, 0, 0, 0]), /exactly 4/);

@@ -66,8 +66,10 @@ export function solution(round) {
 export function hint(round, counts) {
   const left = total(round) - sum(counts);
   if (left > 0) return `There ${left === 1 ? 'is still 1 berry' : `are still ${left} berries`} in the pile. Share them all.`;
-  if (round.ask === 'frogs') return `Every frog that gets berries needs exactly ${round.each}.`;
-  return `One frog has ${Math.max(...counts)} and another has ${Math.min(...counts)}. Equal means the same for everyone.`;
+  // The pads stop taking berries when the pile is empty, so say how to fix a share.
+  const back = "Tap a frog's berries to take one back.";
+  if (round.ask === 'frogs') return `Every frog that gets berries needs exactly ${round.each}. ${back}`;
+  return `One frog has ${Math.max(...counts)} and another has ${Math.min(...counts)}. Equal means the same for everyone. ${back}`;
 }
 
 /** The fact a round teaches: "3 × 4 = 12, so 12 ÷ 3 = 4." */
