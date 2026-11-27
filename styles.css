@@ -4803,3 +4803,155 @@ button.gr-row {
 }
 
 .fp-band-on { display: inline; }
+
+/* ---------- Hoop Shots ---------- */
+
+.hs-art {
+  width: 48px;
+  height: 48px;
+}
+
+.hs-art-rim {
+  fill: none;
+  stroke: var(--numbers-ink);
+  stroke-width: 3;
+}
+
+.hs-picks {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 4px;
+}
+
+.hs-pick {
+  min-width: 120px;
+  min-height: 48px;
+  padding: 4px 12px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.hs-pick-on {
+  border-color: var(--fun-ink);
+  background: var(--fun-ink);
+  color: var(--white);
+}
+
+.hs-pick-on::after {
+  content: ' ✓';
+}
+
+.hs-score {
+  margin: 4px 0;
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+/* The court is a fixed size, so the ball's spots (parts of its width and height) line up with the drawing. */
+.hs-court {
+  position: relative;
+  width: 300px;
+  height: 290px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bank);
+  touch-action: none; /* a swipe shoots the ball; it must not scroll the page */
+}
+
+.hs-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hs-lines {
+  fill: none;
+  stroke: var(--white);
+  stroke-width: 3;
+}
+
+.hs-board {
+  fill: var(--white);
+  stroke: var(--muted);
+  stroke-width: 3;
+}
+
+.hs-square,
+.hs-rim {
+  fill: none;
+  stroke: var(--numbers-ink);
+  stroke-width: 2;
+}
+
+.hs-rim {
+  stroke-width: 5;
+}
+
+.hs-net {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+/* From farther back the hoop looks smaller. It shrinks around the middle of the rim. */
+.hs-hoop {
+  transform-origin: 150px 58px;
+  transition: transform 200ms;
+}
+
+.hs-far .hs-hoop {
+  transform: scale(0.6);
+}
+
+.hs-ball {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  touch-action: none;
+}
+
+.hs-ball:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
+}
+
+.hs-ball svg {
+  display: block;
+  pointer-events: none;
+}
+
+.hs-skin {
+  fill: var(--go);
+  stroke: var(--numbers-ink);
+  stroke-width: 2;
+}
+
+.hs-seams {
+  fill: none;
+  stroke: var(--numbers-ink);
+  stroke-width: 2;
+}
+
+.hs.finished .hs-picks {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-hoop {
+    transition: none;
+  }
+}

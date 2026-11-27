@@ -460,6 +460,11 @@ const GAMES = {
     how: ['The cards are face down. Turn over two at a time.', 'A pair stays up. If they don\'t match, remember where they are!'],
     art: '<span class="memory-art"><i></i><i>🐸</i><i>🐸</i><i></i></span>',
   },
+  'hoop-shots': {
+    title: "Hoop Shots", kind: 'fun', legend: "Swipe the ball up to score 20 points", data: () => [],
+    how: ["Swipe up on the ball to shoot it at the hoop. Get to 20 points!", "Tap \"3 points\" to shoot from farther back. It is harder, but each basket counts for more."],
+    art: "<svg class=\"hs-art\" viewBox=\"0 0 40 40\" aria-hidden=\"true\"><circle class=\"hs-skin\" cx=\"20\" cy=\"13\" r=\"10\"/><path class=\"hs-seams\" d=\"M20 3 L20 23 M10 13 L30 13\"/><path class=\"hs-net\" d=\"M8 28 L13 39 L27 39 L32 28 M20 28 L20 39\"/><ellipse class=\"hs-art-rim\" cx=\"20\" cy=\"28\" rx=\"13\" ry=\"3.5\"/></svg>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
