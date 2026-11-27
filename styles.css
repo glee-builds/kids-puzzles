@@ -5373,3 +5373,84 @@ button.gr-row {
   font-size: 0.5rem;
   font-weight: 800;
 }
+
+/* ---------- Word Builder ---------- */
+/* Right answers use .grp-right (a teal ring and a check mark). */
+
+.wb-question {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.wb-word { color: var(--words-ink); }
+
+.wb-stage { gap: 16px; }
+
+/* The pieces joining: un + kind = unkind. */
+.wb-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.wb-tile {
+  padding: 8px 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.wb-part {
+  border-color: var(--words-ink);
+  color: var(--words-ink);
+}
+
+/* The gap in a part round: a dashed box with a "?" until the right part is picked. */
+.wb-gap {
+  border-style: dashed;
+  border-color: var(--go);
+  color: var(--muted);
+}
+
+.wb-choices {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Meanings are longer than parts, so they stack. */
+.wb-meanings {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wb-choice {
+  min-width: 84px;
+  padding: 6px 14px;
+  font-size: 1.15rem;
+}
+
+.word-builder-art {
+  display: flex;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.word-builder-art i,
+.word-builder-art b {
+  padding: 2px 3px;
+  border: 2px solid var(--words-ink);
+  border-radius: 3px;
+  background: var(--surface);
+  font-style: normal;
+}
+
+.word-builder-art i { border-style: dashed; border-color: var(--go); }

@@ -191,6 +191,13 @@ const HELPERS = `
   const dayNumber = Math.round((new Date(today) - new Date('2026-01-01')) / 86400000);
 `;
 const PLAYS = {
+  'word-builder': `
+        const game = await import('/src/games/word-builder.js');
+    const items = (await (await fetch('/data/word-builder.json')).json()).items;
+    const { rounds } = game.generate(seed.seedFor(today, 'word-builder'), items, dayNumber, 1);
+    // One wrong meaning first (round 1 is a meaning round), then every round to the end.
+    [...G.querySelectorAll('.wb-choice')].find((choice) => choice.textContent !== rounds[0].answer).click(); await wait();
+    for (let round = 0; round < 4; round++) { await tapUntilRight('.wb-choice'); await next(); }`,
   'shop-change': `
         await pick(rounds[0].choices.find((cents) => cents !== rounds[0].answer)); // a wrong pick first
     for (const round of rounds) { await pick(round.answer); await next(); }`,
@@ -342,7 +349,7 @@ const POKES = {
 
 // The puzzles that have levels. Each is also opened at its top level.
 // (A saved level above a puzzle's top is treated as its top.)
-const TOP_LEVELS = ['shop-change', 'number-detective', 'share-it-out', 'place-value', 'pattern-train', 'fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
+const TOP_LEVELS = ['word-builder', 'shop-change', 'number-detective', 'share-it-out', 'place-value', 'pattern-train', 'fraction-pizza', 'memory-match', 'pond-sudoku', 'math-mix-ups', 'graph-it', 'clock-time', 'coin-count', 'letter-scramble', 'word-search', 'spell-it', 'end-marks', 'number-pyramid', 'magic-square', 'fact-families', 'bug-groups', 'garden-rows'];
 
 // Half-done puzzles: `play` plays part of a puzzle; then the page is
 // loaded again and `check` must be true: the puzzle picked up where it

@@ -4,6 +4,11 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'word-builder': {
+    play: `for (let round = 0; round < 2; round++) { await tapUntilRight('.wb-choice'); await next(); }`,
+    check: `doneDots(2)`,
+    finish: `for (let round = 0; round < 2; round++) { await tapUntilRight('.wb-choice'); await next(); }`,
+  },
   'shop-change': {
     play: `for (const round of rounds.slice(0, 2)) { await pick(round.answer); await next(); }`,
     check: `doneDots(2) && G.querySelectorAll('.sc-choice').length === 3`,

@@ -485,6 +485,11 @@ const GAMES = {
     how: ["A customer buys something. Count up from the price to what they paid.", "Pick the change, or tap coins to make it and press Check."],
     art: "<span class=\"shop-change-art\">🍎<i>5¢</i></span>",
   },
+  'word-builder': {
+    title: "Word Builder", kind: 'reading', legend: "Beginnings and endings change a word", levels: 3, data: () => [part('word-builder', 'items'), DAY, levelFor('word-builder')],
+    how: ["A small part at the start or end of a word changes what it means: un + kind is unkind, which means not kind.", "Pick what the new word means, or pick the part that makes the meaning."],
+    art: "<span class=\"word-builder-art\"><i>un</i><b>kind</b></span>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],
