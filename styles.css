@@ -5454,3 +5454,99 @@ button.gr-row {
 }
 
 .word-builder-art i { border-style: dashed; border-color: var(--go); }
+
+/* ---------- Word Kinds ---------- */
+/* Right answers use .grp-right (a teal ring and a check mark). */
+
+.wk-question {
+  margin: 4px 0 6px;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.wk-stage { gap: 10px; }
+
+.wk-sentence {
+  margin: 4px 0;
+  font-size: 1.4rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* The word being asked about: bold, with a thick line under it. */
+.wk-target {
+  padding: 0 3px;
+  border-bottom: 4px solid var(--here);
+  font-weight: 800;
+}
+
+.wk-choices {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* A choice: its mark on the left, then its name with what it means under it. */
+.wk-choice {
+  min-height: 60px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.wk-mark { font-size: 1.7rem; }
+
+.wk-choice-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.wk-choice small {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Find rounds: every word is a button. A picked word gets a solid, thicker
+   edge and bold letters (not only a color). */
+.wk-words {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.wk-word {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 4px 10px;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.wk-word[aria-pressed="true"] {
+  border: 2px solid var(--here);
+  box-shadow: 0 0 0 2px var(--here);
+  font-weight: 800;
+}
+
+.wk-word:disabled { cursor: default; }
+
+.wk-check { width: 100%; }
+
+/* Home card art: the three marks. */
+.word-kinds-art {
+  display: flex;
+  gap: 3px;
+  font-size: 1.3rem;
+}

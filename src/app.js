@@ -490,6 +490,11 @@ const GAMES = {
     how: ["A small part at the start or end of a word changes what it means: un + kind is unkind, which means not kind.", "Pick what the new word means, or pick the part that makes the meaning."],
     art: "<span class=\"word-builder-art\"><i>un</i><b>kind</b></span>",
   },
+  'word-kinds': {
+    title: "Word Kinds", kind: 'reading', legend: "Noun, verb, or describing word?", levels: 3, data: () => [part('word-kinds', 'items'), DAY, levelFor('word-kinds')],
+    how: ["A noun is a person, animal, place, or thing. A verb is an action.", "A describing word tells what something is like. Pick the kind of each word."],
+    art: "<span class=\"word-kinds-art\"><span>📦</span><span>🏃</span><span>🎨</span></span>",
+  },
   maze: {
     title: 'Maze 1', kind: 'fun', legend: 'Trace from the green dot to the star', data: () => [20, undefined, mazeRoom()],
     how: ["Find the way through the maze.", "Put your finger on the green dot and trace the path."],

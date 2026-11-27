@@ -4,6 +4,11 @@
 // is loaded again, the puzzle picked up where it left off). Some puzzles
 // have setup code that runs first: see tests/play-setups.mjs.
 export default {
+  'word-kinds': {
+    play: `for (const round of rounds.slice(0, 2)) await playRound(round);`,
+    check: `doneDots(2) && G.querySelectorAll('.wk-choice').length === 3`,
+    finish: `for (const round of rounds.slice(2)) await playRound(round);`,
+  },
   'word-builder': {
     play: `for (let round = 0; round < 2; round++) { await tapUntilRight('.wb-choice'); await next(); }`,
     check: `doneDots(2)`,

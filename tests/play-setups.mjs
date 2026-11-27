@@ -4,6 +4,13 @@
 // snippet only says what to play. `G`, `seed`, `today`, `wait`, `next`, and
 // `tapUntilRight` come from HELPERS in tests/screens.mjs.
 export default {
+  'word-kinds': `
+        const game = await import('/src/games/word-kinds.js');
+    const { items } = await (await fetch('/data/word-kinds.json')).json();
+    const { rounds } = game.generate(seed.seedFor(today, 'word-kinds'), items, dayNumber);
+    // pick(kind) taps that kind's button. playRound(round) answers a "name" round right and presses Next.
+    const pick = async (kind) => { G.querySelectorAll('.wk-choice')[game.KINDS.indexOf(kind)].click(); await wait(); };
+    const playRound = async (round) => { await pick(round.tags[round.target]); await next(); };`,
   'shop-change': `
         const game = await import('/src/games/shop-change.js');
     const rounds = game.generate(seed.seedFor(today, 'shop-change')).rounds;
