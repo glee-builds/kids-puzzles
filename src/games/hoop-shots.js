@@ -1,39 +1,98 @@
-// hoop-shots.js: a just-for-fun game of basketball. Swipe up on the ball to
-// shoot; reach 20 points and the game is done.
+// hoop-shots.js: a just-for-fun game of basketball, seen from the side.
+// Swipe up on the court to shoot; reach 20 points and the game is done.
+//
+// The ball really flies: it starts with the speed and slope the swipe gives
+// it, gravity pulls it down, and it can bounce off the rim, the backboard,
+// and the floor. It scores when it drops down through the hoop, so a shot
+// that hits the backboard or rolls around the rim can still go in.
+//
+// How a swipe aims (it always shoots toward the hoop):
+//   longer swipe = harder shot
+//   straight up = a high arc (the easiest); slanted toward the hoop = flatter
+// While a finger is down, dots show where the ball will start to go.
 //
 // A switch picks the shot: "2 points" from close in, or "3 points" from
-// farther back, where the hoop looks smaller and the swipe has to be longer
-// and straighter. A miss costs nothing: the ball just comes back.
+// farther back. A miss costs nothing: the ball just comes back.
 //
-// Without swiping: with the ball picked (Tab), the left and right arrow keys
-// slide it sideways, and Enter or Space takes a straight shot. So a keyboard
-// shot goes in when the ball is under the hoop.
+// Without swiping: with the court picked (Tab), Left and Right make the shot
+// softer or harder, Up and Down make the arc higher or flatter (the dots
+// show it), and Enter or Space shoots.
 //
-// A shot is { dx, dy }: how far the swipe went sideways and up, as parts of
-// the court's width and height (so 0.5 up is half the court). `judge` is the
-// whole of the "physics", and it needs no screen, so the tests can check it.
+// Units: the court is 100 wide and 70 tall, with y counted up from the floor.
+// `fly` is the whole of the physics, needs no screen, and moves in fixed
+// steps, so the same shot always flies the same way and the tests can check it.
 
-import { make, button, shape, liveMessage, wiggle } from '../ui.js';
+import { make, button, shape, liveMessage } from '../ui.js';
 
 export const TARGET = 20;
-// What a shot needs: at least `long` up, and at most `wide` off to the side.
-// The hoop is drawn `wide` across on each side, so what you see is what counts.
-const NEEDS = [{ long: 0.2, wide: 0.12 }, { long: 0.35, wide: 0.07 }]; // 2 points, 3 points
-const HOOP = { x: 0.5, y: 0.2 }; // the middle of the rim, as parts of the court
-const BALL_Y = [0.68, 0.86]; // where the ball waits: close in, farther back
-const SLIDE = 0.05; // one arrow-key press moves the ball this far
-const MOST_SLIDES = 6;
-const FLIGHT_MS = 420; // up to the hoop; the drop after it takes half as long
+export const BALL_R = 4;
+export const RIM = { front: 77, back: 91, y: 42 }; // the rim's two ends, seen from the side
+const RIM_R = 0.8; // how thick the rim is
+const BOARD = { x: 93, bottom: 38, top: 58 }; // the backboard: a wall just behind the rim
+export const SPOTS = [{ x: 46, y: 16 }, { x: 16, y: 16 }]; // where the ball starts: 2 points, 3 points
+const GRAVITY = 60;
+const STEP = 1 / 120; // seconds per step of the flight
+const BOUNCE = 0.55; // how much speed a bounce keeps
 
-/** How a shot ends: 'in', 'short' (not a long enough swipe), or 'wide' (off to the side). */
-export function judge({ dx, dy }, three) {
-  const needs = NEEDS[three ? 1 : 0];
-  if (dy < needs.long) return 'short';
-  return Math.abs(dx) <= needs.wide ? 'in' : 'wide';
+/**
+ * A swipe as a shot: `up` and `toward` are how far the finger moved up and
+ * toward the hoop, in court units. Returns the starting speed { vx, vy }.
+ */
+export function launch({ up, toward }) {
+  const slant = Math.atan2(Math.max(up, 0), toward); // 90° is straight up
+  const angle = Math.min(Math.max(35 + (slant / (Math.PI / 2)) * 30, 35), 75) * (Math.PI / 180);
+  const speed = Math.min(Math.max(40 + Math.hypot(up, toward) * 1.4, 40), 120);
+  return { vx: speed * Math.cos(angle), vy: speed * Math.sin(angle) };
 }
 
-/** True if a shot drops through the hoop. */
-export const shotGoesIn = (shot, three) => judge(shot, three) === 'in';
+/** Fly a shot from `spot` with starting speed { vx, vy }. Returns { path: [[x, y], ...], made }. */
+export function fly(spot, { vx, vy }) {
+  let x = spot.x;
+  let y = spot.y;
+  const path = [[x, y]];
+  let made = false;
+  for (let i = 0; i < 480 && x > -BALL_R && x < 100 + BALL_R; i++) {
+    const before = y;
+    vy -= GRAVITY * STEP;
+    x += vx * STEP;
+    y += vy * STEP;
+    // Through the hoop: the middle of the ball drops past rim height between the rim's ends.
+    if (!made && before >= RIM.y && y < RIM.y && x > RIM.front + 0.5 && x < RIM.back - 0.5) made = true;
+    // The rim's two ends are round: the ball bounces off them the way it hits them.
+    for (const end of [RIM.front, RIM.back]) {
+      const dx = x - end;
+      const dy = y - RIM.y;
+      const apart = Math.hypot(dx, dy);
+      const reach = BALL_R + RIM_R;
+      if (apart < reach) {
+        const nx = dx / apart;
+        const ny = dy / apart;
+        const into = vx * nx + vy * ny;
+        if (into < 0) {
+          vx -= (1 + BOUNCE) * into * nx;
+          vy -= (1 + BOUNCE) * into * ny;
+        }
+        x = end + nx * reach;
+        y = RIM.y + ny * reach;
+      }
+    }
+    // The backboard.
+    if (vx > 0 && x + BALL_R > BOARD.x && y > BOARD.bottom && y < BOARD.top) {
+      x = BOARD.x - BALL_R;
+      vx = -vx * BOUNCE;
+    }
+    // The floor: bounce lower each time, and stop when the bounce is tiny.
+    if (vy < 0 && y < BALL_R) {
+      y = BALL_R;
+      vy = -vy * BOUNCE;
+      vx *= 0.8;
+      if (vy < 6) break;
+    }
+    path.push([x, y]);
+    if (made && y < RIM.y - 14) break; // dropped through the net
+  }
+  return { path, made };
+}
 
 /** The puzzle is the same every day: play to 20 points. */
 export function generate() {
@@ -61,30 +120,18 @@ export function verify(puzzle) {
 
 // ---------- The screen ----------
 
-/** The court's picture: floor lines, and the hoop (backboard, rim, net) as one group so it can shrink. */
-function courtPicture() {
-  const picture = shape('svg', { viewBox: '0 0 300 290', class: 'hs-picture', 'aria-hidden': 'true' });
-  const hoop = shape('g', { class: 'hs-hoop' });
-  hoop.append(
-    shape('rect', { x: 108, y: 8, width: 84, height: 44, rx: 4, class: 'hs-board' }),
-    shape('rect', { x: 136, y: 24, width: 28, height: 22, class: 'hs-square' }),
-    shape('path', { d: 'M116 58 L130 96 L170 96 L184 58 M133 58 L140 96 M150 58 L150 96 M167 58 L160 96 M123 77 L177 77', class: 'hs-net' }),
-    shape('ellipse', { cx: 150, cy: 58, rx: 36, ry: 9, class: 'hs-rim' }),
-  );
-  picture.append(
-    shape('path', { d: 'M100 290 L100 170 L200 170 L200 290 M100 170 A50 22 0 0 1 200 170', class: 'hs-lines' }),
-    shape('path', { d: 'M14 290 L14 250 A136 120 0 0 1 286 250 L286 290', class: 'hs-lines' }),
-    hoop,
-  );
-  return picture;
-}
+const sy = (y) => 70 - y; // court units (y up) to drawing units (y down)
 
-/** The ball's picture: an orange circle with its dark seams. */
-function ballPicture() {
-  const picture = shape('svg', { viewBox: '0 0 56 56', 'aria-hidden': 'true' });
+/** The court from the side: floor, 3-point mark, pole, backboard, rim, and net. */
+function courtPicture() {
+  const picture = shape('svg', { viewBox: '0 0 100 70', class: 'hs-picture', 'aria-hidden': 'true' });
   picture.append(
-    shape('circle', { cx: 28, cy: 28, r: 26, class: 'hs-skin' }),
-    shape('path', { d: 'M28 2 L28 54 M2 28 L54 28 M9 10 Q24 28 9 46 M47 10 Q32 28 47 46', class: 'hs-seams' }),
+    shape('rect', { x: 0, y: sy(1.5), width: 100, height: 1.5, class: 'hs-floor' }),
+    shape('rect', { x: SPOTS[1].x - 5, y: sy(1.5), width: 10, height: 0.7, class: 'hs-mark' }), // the 3-point line
+    shape('rect', { x: 95, y: sy(BOARD.bottom), width: 2, height: BOARD.bottom - 1.5, class: 'hs-pole' }),
+    shape('rect', { x: BOARD.x, y: sy(BOARD.top), width: 2, height: BOARD.top - BOARD.bottom, class: 'hs-board' }),
+    shape('path', { d: `M${RIM.front} ${sy(RIM.y)} L${RIM.front + 3} ${sy(RIM.y - 9)} L${RIM.back - 3} ${sy(RIM.y - 9)} L${RIM.back} ${sy(RIM.y)} M${(RIM.front + RIM.back) / 2} ${sy(RIM.y)} L${(RIM.front + RIM.back) / 2} ${sy(RIM.y - 9)}`, class: 'hs-net' }),
+    shape('line', { x1: RIM.front, y1: sy(RIM.y), x2: BOARD.x, y2: sy(RIM.y), class: 'hs-rim' }),
   );
   return picture;
 }
@@ -98,13 +145,12 @@ export function render(container, puzzle, onDone, session = {}) {
   // Pick up a half-done game: put the points back.
   if (session.saved) state = { ...state, score: session.saved.score };
   let three = false;
-  let slides = 0; // how many arrow-key steps the ball sits to the side
   let flying = false;
-  let grab = null; // where a finger went down on the ball
+  let grab = null; // where a finger went down, in court units
+  let aim = { up: 20, toward: 0 }; // the keyboard's shot, changed with the arrow keys
 
   container.replaceChildren();
   container.classList.add('hs');
-
   const picks = make('div', 'hs-picks');
   picks.setAttribute('role', 'group');
   picks.setAttribute('aria-label', 'Which shot?');
@@ -114,22 +160,31 @@ export function render(container, puzzle, onDone, session = {}) {
     draw();
   })));
   const board = make('p', 'hs-score');
+  const picture = courtPicture();
+  const dots = shape('g', { class: 'hs-dots' });
+  const ball = shape('g', { class: 'hs-ball' });
+  ball.append(
+    shape('circle', { r: BALL_R, class: 'hs-skin' }),
+    shape('path', { d: `M0 ${-BALL_R} V${BALL_R} M${-BALL_R} 0 H${BALL_R} M-2.8 -2.8 Q0 0 -2.8 2.8 M2.8 -2.8 Q0 0 2.8 2.8`, class: 'hs-seams' }),
+  );
+  picture.append(dots, ball);
   const court = make('div', 'hs-court');
-  const ball = button('hs-ball');
-  ball.setAttribute('aria-label', 'Basketball. Swipe up to shoot. Or use the arrow keys to slide it, and Enter to shoot.');
-  ball.append(ballPicture());
-  court.append(courtPicture(), ball);
-  const message = liveMessage('hs-message', 'Swipe up on the ball to shoot!');
+  court.tabIndex = 0;
+  court.setAttribute('role', 'application');
+  court.setAttribute('aria-label', 'Basketball court. Swipe up to shoot. Or use Left and Right for softer or harder, Up and Down for a higher or flatter arc, and Enter to shoot.');
+  court.append(picture);
+  const message = liveMessage('hs-message', 'Swipe up on the court to shoot!');
   container.append(picks, board, court, message);
 
-  /** Put the ball at a spot on the court (parts of its width and height) at a size (1 is full size). */
-  function place(x, y, size = 1) {
-    ball.style.left = `${x * 100}%`;
-    ball.style.top = `${y * 100}%`;
-    ball.style.transform = `translate(-50%, -50%) scale(${size})`;
-  }
+  const spot = () => SPOTS[three ? 1 : 0];
+  const put = ([x, y]) => ball.setAttribute('transform', `translate(${x} ${sy(y)})`);
 
-  const home = () => ({ x: HOOP.x + slides * SLIDE, y: BALL_Y[three ? 1 : 0] });
+  /** Show where a shot starts to go: the first part of its flight, as dots. */
+  function showAim(swipe) {
+    const { path } = fly(spot(), launch(swipe));
+    dots.replaceChildren(...path.slice(6, 54).filter((_, i) => i % 8 === 0)
+      .map(([x, y]) => shape('circle', { cx: x, cy: sy(y), r: 1, class: 'hs-dot' })));
+  }
 
   function draw() {
     pickButtons.forEach((pick, i) => {
@@ -137,87 +192,91 @@ export function render(container, puzzle, onDone, session = {}) {
       pick.classList.toggle('hs-pick-on', on);
       pick.setAttribute('aria-pressed', String(on));
     });
-    court.classList.toggle('hs-far', three);
     board.textContent = `${state.score} of ${state.target}`;
-    const { x, y } = home();
-    place(x, y);
+    dots.replaceChildren();
+    put([spot().x, spot().y]);
   }
 
-  /** Take a shot: judge it, show the ball's flight, then count it. */
+  /** Take a shot: fly it, show the flight, then count it. */
   function shoot(swipe) {
     if (flying || state.status !== 'playing') return;
-    const from = home();
-    // Where the ball comes down is where it started plus the swipe's sideways push.
-    const shot = { dx: from.x - HOOP.x + swipe.dx, dy: swipe.dy };
-    const result = judge(shot, three);
-    const side = shot.dx < 0 ? -1 : 1;
-    // A made shot ends in the hoop; a wide one beside it; a short one below it.
-    const to = {
-      x: result === 'in' ? HOOP.x : Math.min(Math.max(HOOP.x + shot.dx, 0.08), 0.92),
-      y: result === 'short' ? HOOP.y + 0.2 : HOOP.y,
-    };
+    const { path, made } = fly(spot(), launch(swipe));
+    dots.replaceChildren();
 
     function land() {
       flying = false;
-      state = check(state, { made: result === 'in', three });
-      draw();
-      if (result !== 'in') {
-        message.textContent = result === 'short' ? 'Not far enough. Try a longer swipe!' : 'Off to the side. Aim straight at the hoop!';
-        wiggle(ball.firstChild); // the picture, not the button: the button's own transform holds its place
+      state = check(state, { made, three });
+      if (!made) {
+        const [x] = path.at(-1);
+        message.textContent = x < RIM.front - 4 ? 'Not far enough. Try a longer swipe!' : 'Too far! Try a shorter swipe.';
       } else if (state.status === 'won') {
         message.textContent = `✓ ${state.score} points! Nothing but net!`;
-        ball.disabled = true;
         container.classList.add('finished');
         onDone({ status: 'won', misses: 0, helped: 0 });
       } else {
         message.textContent = `✓ Swish! ${state.last.points} points!`;
         session.save?.({ score: state.score });
       }
+      draw();
     }
 
     // Some players ask their device for less motion: show the result with no flight.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return land();
     flying = true;
-    const began = performance.now();
-    const frame = (now) => {
-      const t = Math.min((now - began) / FLIGHT_MS, 1.5);
-      if (t <= 1) {
-        // Up in an arc: a straight line to the hoop, lifted most in the middle.
-        place(from.x + (to.x - from.x) * t, from.y + (to.y - from.y) * t - t * (1 - t), 1 - 0.4 * t);
-      } else {
-        // Then down: through the net, or bouncing off to the side.
-        const fall = (t - 1) * 2;
-        place(to.x + (result === 'in' ? 0 : side * 0.2 * fall), to.y + 0.25 * fall, 0.6);
-      }
-      if (t < 1.5) requestAnimationFrame(frame);
-      else land();
+    let at = 0;
+    const frame = () => {
+      at = Math.min(at + 2, path.length - 1); // the path has 120 points a second; the screen shows 60
+      put(path[at]);
+      if (at < path.length - 1) requestAnimationFrame(frame);
+      else setTimeout(land, 250);
     };
     requestAnimationFrame(frame);
   }
 
-  // Swiping: finger down on the ball, drag, lift.
-  ball.addEventListener('pointerdown', (event) => {
-    grab = { x: event.clientX, y: event.clientY };
-    // Keep getting the finger even after it slides off the ball.
-    try { ball.setPointerCapture(event.pointerId); } catch { /* fine without it */ }
-  });
-  ball.addEventListener('pointerup', (event) => {
-    if (!grab) return;
+  // Swiping: a finger anywhere on the court, moved up, then lifted.
+  const units = (event) => {
     const box = court.getBoundingClientRect();
-    shoot({ dx: (event.clientX - grab.x) / box.width, dy: (grab.y - event.clientY) / box.height });
+    return { x: ((event.clientX - box.left) / box.width) * 100, y: ((box.bottom - event.clientY) / box.height) * 70 };
+  };
+  const swipeTo = (event) => {
+    const now = units(event);
+    return { up: now.y - grab.y, toward: now.x - grab.x };
+  };
+  court.addEventListener('pointerdown', (event) => {
+    if (flying || state.status !== 'playing') return;
+    grab = units(event);
+    // Keep getting the finger even after it slides off the court.
+    try { court.setPointerCapture(event.pointerId); } catch { /* fine without it */ }
+  });
+  court.addEventListener('pointermove', (event) => { if (grab) showAim(swipeTo(event)); });
+  court.addEventListener('pointerup', (event) => {
+    if (!grab) return;
+    const swipe = swipeTo(event);
     grab = null;
+    if (swipe.up > 4) shoot(swipe);
+    else dots.replaceChildren(); // a tap, not a swipe
   });
-  ball.addEventListener('pointercancel', () => { grab = null; });
+  court.addEventListener('pointercancel', () => {
+    grab = null;
+    dots.replaceChildren();
+  });
 
-  // The keyboard: arrows slide the ball, and Enter or Space (a click with no finger) shoots straight up.
-  ball.addEventListener('keydown', (event) => {
-    const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
-    if (!step || flying || state.status !== 'playing') return;
-    event.preventDefault();
-    slides = Math.min(Math.max(slides + step, -MOST_SLIDES), MOST_SLIDES);
-    draw();
+  // The keyboard: arrows change the shot (the dots show it), Enter or Space shoots.
+  court.addEventListener('keydown', (event) => {
+    if (flying || state.status !== 'playing') return;
+    const change = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      shoot(aim);
+    } else if (change) {
+      event.preventDefault();
+      // Harder or softer moves along the swipe; higher or flatter turns it.
+      const length = Math.min(Math.max(Math.hypot(aim.up, aim.toward) + change[0] * 1.5, 5), 60);
+      const turn = Math.min(Math.max(Math.atan2(aim.toward, aim.up) + change[1] * 0.12, 0), Math.PI / 2);
+      aim = { up: length * Math.cos(turn), toward: length * Math.sin(turn) };
+      showAim(aim);
+    }
   });
-  ball.addEventListener('click', (event) => { if (event.detail === 0) shoot({ dx: 0, dy: 1 }); });
 
   draw();
 }

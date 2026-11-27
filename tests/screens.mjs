@@ -232,23 +232,19 @@ const PLAYS = {
         G.querySelector('.pv-check')?.click(); await wait(); // a wrong answer first: no blocks yet (level 1 starts with a "build" round)
     for (let round = 0; round < 4; round++) await playRound();`,
   'hoop-shots': `
-        const ball = G.querySelector('.hs-ball');
-    const press = (name) => ball.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true }));
-    // A miss first: slide the ball off to the side and shoot straight up.
-    for (let i = 0; i < 3; i++) press('ArrowRight');
-    ball.click(); await wait(900);
-    if (G.querySelector('.hs-score').textContent !== '0 of 20') throw new Error('a shot from the side should miss');
-    for (let i = 0; i < 3; i++) press('ArrowLeft');
-    // One swipe: finger down on the ball, then up 150px, straight.
-    const box = ball.getBoundingClientRect();
-    const at = { clientX: box.left + 28, clientY: box.top + 28, pointerId: 1, bubbles: true };
-    ball.dispatchEvent(new PointerEvent('pointerdown', at));
-    ball.dispatchEvent(new PointerEvent('pointerup', { ...at, clientY: at.clientY - 150 }));
-    await wait(900);
-    if (G.querySelector('.hs-score').textContent !== '2 of 20') throw new Error('a straight swipe should score 2');
-    // The rest as 3 points, with the keyboard.
-    G.querySelector('.hs-pick:last-child').click(); await wait();
-    for (let shot = 0; shot < 12 && !ball.disabled; shot++) { ball.click(); await wait(900); }`,
+    const court = G.querySelector('.hs-court');
+    const score = () => G.querySelector('.hs-score').textContent;
+    const said = () => G.querySelector('.hs-message').textContent;
+    // Shoot, then wait until the ball has landed (the score or the message changes).
+    const shoot = async (go) => { const before = score() + said(); go(); for (let i = 0; i < 80 && score() + said() === before; i++) await wait(100); };
+    const enter = () => court.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    // A miss first: a short flick falls in front of the hoop.
+    const box = court.getBoundingClientRect();
+    const at = { clientX: box.left + box.width / 2, clientY: box.bottom - 20, pointerId: 1, bubbles: true };
+    await shoot(() => { court.dispatchEvent(new PointerEvent('pointerdown', at)); court.dispatchEvent(new PointerEvent('pointerup', { ...at, clientY: at.clientY - 25 })); });
+    if (score() !== '0 of 20') throw new Error('a short flick should miss');
+    // Then the keyboard's starting shot, which scores 2, until 20.
+    for (let shot = 0; shot < 12 && !G.classList.contains('finished'); shot++) await shoot(enter);`,
   'pattern-train': `
     for (let train = 0; train < 4; train++) { await tapUntilRight('.pt-choice'); await next(); }`,
   'fraction-pizza': `
