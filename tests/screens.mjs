@@ -77,13 +77,16 @@ function startChrome() {
   ]);
   return new Promise((resolve, reject) => {
     let text = '';
+    const tooSlow = setTimeout(() => { chrome.kill(); reject(new Error('Chrome did not start in 60 seconds')); }, 60000);
     chrome.stderr.on('data', (chunk) => {
       text += chunk;
       const found = text.match(/DevTools listening on (ws:\/\/\S+)/);
-      if (found) resolve({ chrome, wsUrl: found[1] });
+      if (found) {
+        clearTimeout(tooSlow); // started: Chrome must keep running for the whole check
+        resolve({ chrome, wsUrl: found[1] });
+      }
     });
-    chrome.on('exit', () => reject(new Error(`Chrome stopped early:\n${text}`)));
-    setTimeout(() => { chrome.kill(); reject(new Error('Chrome did not start in 60 seconds')); }, 60000);
+    chrome.on('exit', () => { clearTimeout(tooSlow); reject(new Error(`Chrome stopped early:\n${text}`)); });
   });
 }
 // A busy test computer is sometimes slow to start Chrome, so try 3 times before failing.
