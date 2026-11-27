@@ -8,7 +8,7 @@
 import { dateKey, seedFor, hashString } from './seed.js';
 import * as progressStore from './progress.js';
 import { pondPads } from './pond.js';
-import { make, button } from './ui.js';
+import { make, button, liveMessage } from './ui.js';
 import { nextSticker } from './stickers.js';
 import { drawStickerBook, stickerArt, TIER_MARKS } from './sticker-book.js';
 import { todaysSet, SET_SIZE } from './today.js';
@@ -761,6 +761,48 @@ function drawGrownUps() {
     list.append(row);
   }
   area.append(list);
+
+  // Backup: progress lives only in this browser, which can clear it. A code
+  // to copy somewhere safe, and a box to paste one back. Nothing is sent anywhere.
+  area.append(make('h2', 'gu-heading', 'Backup'));
+  area.append(make('p', 'gu-level', 'Keep a copy of the lily pads, stickers, and levels, for a new device or in case this browser clears them.'));
+  const backupNote = liveMessage('gu-backup-note', '');
+  const code = make('textarea', 'gu-code');
+  code.setAttribute('aria-label', 'Backup code');
+  code.rows = 3;
+  code.hidden = true;
+  const restore = button('lw-button gu-restore', 'Restore from this code', () => {
+    const restored = progressStore.fromBackup(code.value);
+    if (!restored) {
+      backupNote.textContent = 'That is not a backup code. Paste the whole code, starting with lilypad:';
+      return;
+    }
+    progressStore.save(restored);
+    location.hash = '';
+    location.reload();
+  });
+  restore.hidden = true;
+  const copy = button('lw-button', 'Copy backup code', () => {
+    code.value = progressStore.toBackup(progress);
+    code.readOnly = true;
+    code.hidden = false;
+    restore.hidden = true;
+    code.select();
+    const copied = navigator.clipboard?.writeText(code.value);
+    backupNote.textContent = 'Keep this code in a note or a message to yourself.';
+    copied?.then(() => { backupNote.textContent = 'Copied. Paste it in a note or a message to yourself.'; }, () => {});
+  });
+  const paste = button('lw-button', 'Restore…', () => {
+    code.value = '';
+    code.readOnly = false;
+    code.hidden = false;
+    restore.hidden = false;
+    backupNote.textContent = 'Paste a backup code. Restoring replaces the progress on this device.';
+    code.focus();
+  });
+  const backupButtons = make('div', 'button-row');
+  backupButtons.append(copy, paste);
+  area.append(backupButtons, code, restore, backupNote);
 
   // Start over: asks first, since it can't be undone.
   const ask = make('div', 'gu-confirm');

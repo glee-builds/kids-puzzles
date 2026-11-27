@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, recordReview, dueItems, weekSummary, itemsThisWeek, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS,
+  emptyProgress, daysBetween, recordFinish, currentStreak, isFinished, addSticker, rate, recordResult, levelOf, trend, recordReview, dueItems, weekSummary, itemsThisWeek, RESULTS_KEPT, load, save, STORAGE_KEY, KEEP_DAYS, toBackup, fromBackup,
 } from '../src/progress.js';
 
 // A stand-in for the browser's localStorage, so tests run in Node.
@@ -341,4 +341,18 @@ test('a day from earlier in the week can be filled in: the frog hops, the streak
   assert.equal(p.streak, 2);
   assert.equal(p.lastDay, '2026-11-09');
   assert.deepEqual(p.finished['2026-11-05'], ['maze']);
+});
+
+test('a backup code brings back the same progress, and a bad code brings back nothing', () => {
+  let progress = recordFinish(emptyProgress(), '2026-11-20', 'maze');
+  progress = { ...progress, stickers: [[0, 1], [3, 7]], levels: { 'word-search': { now: 2, was: 1, since: '2026-11-19' } } };
+  const code = toBackup(progress);
+  assert.match(code, /^lilypad:[A-Za-z0-9+/=]+$/);
+  assert.deepEqual(fromBackup(code), progress);
+  assert.deepEqual(fromBackup(`  ${code}\n`), progress); // spaces around a pasted code are fine
+  assert.equal(fromBackup('lilypad:nonsense'), null);
+  assert.equal(fromBackup(''), null);
+  assert.equal(fromBackup(toBackup({ hello: 1 })), null); // not progress
+  // An older backup without the newer parts gets them filled in.
+  assert.deepEqual(fromBackup(toBackup({ streak: 2, finished: {} })).rainbow, []);
 });
