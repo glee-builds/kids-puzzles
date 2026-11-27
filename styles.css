@@ -53,6 +53,11 @@
   }
 }
 
+/* Older browsers (Safari before 16.2, on iPads that stop at iPadOS 15) can't
+   mix colors with color-mix, and would draw those rules with no color or in
+   black. After each such rule, an "@supports not" line gives a plain color
+   for them. Newer browsers skip those lines. */
+
 * {
   box-sizing: border-box;
 }
@@ -949,6 +954,7 @@ button {
 .mz-glow {
   background: color-mix(in srgb, var(--star) 45%, var(--surface));
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .mz-glow { background: var(--star); } }
 
 /* Start: a green dot. Goal: a star. Head of the path: a white dot. Each is
    big enough to spot in a maze with small squares, even if it spills over its square. */
@@ -1049,6 +1055,7 @@ button {
 .ws-found {
   background: color-mix(in srgb, var(--here) 30%, transparent);
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .ws-found { box-shadow: inset 0 0 0 2px var(--here); } }
 
 .ws-pick {
   background: var(--words);
@@ -1281,6 +1288,7 @@ button {
   border-color: var(--here);
   background: color-mix(in srgb, var(--here) 18%, var(--surface));
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .gu-day-played { box-shadow: inset 0 0 0 2px var(--here); } }
 
 .gu-today {
   box-shadow: 0 0 0 2px var(--text);
@@ -1838,6 +1846,7 @@ button {
   box-shadow: 0 3px 0 var(--words);
   cursor: pointer;
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .so-card { background: var(--surface); box-shadow: 0 3px 0 var(--words), inset 0 0 0 2px var(--words); } }
 
 .so-card:active {
   transform: translateY(2px);
@@ -2431,6 +2440,7 @@ button {
   border-color: var(--here);
   background: color-mix(in srgb, var(--here) 12%, var(--surface));
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .fm-fixed { background: var(--surface); } }
 
 .fm-shown {
   border-color: var(--elsewhere);
@@ -2624,6 +2634,7 @@ button.wp-number {
   color: inherit;
   font-weight: 800;
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .wc-word { box-shadow: inset 0 -3px 0 var(--words); } }
 
 .wc-blank {
   display: inline-block;
@@ -2759,6 +2770,7 @@ button.fs-word {
   border-color: var(--here);
   background: color-mix(in srgb, var(--here) 12%, var(--surface));
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .fs-fixed { background: var(--surface); } }
 
 .fs-fixed::after {
   content: "✓";
@@ -3386,6 +3398,7 @@ button.gr-row {
   background: color-mix(in srgb, var(--page) 20%, var(--surface));
   border: 2px solid color-mix(in srgb, var(--page) 45%, var(--surface));
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .sb-album { background: var(--surface); border: 2px solid var(--page); } }
 
 .sb-album-0 { --page: var(--pad); }
 .sb-album-1 { --page: var(--numbers); }
@@ -3417,6 +3430,7 @@ button.gr-row {
   font: inherit;
   cursor: pointer;
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .sb-cover { background: var(--surface); border: 2px solid var(--page); } }
 
 .sb-cover-name {
   font-weight: 700;
@@ -3439,6 +3453,7 @@ button.gr-row {
   border-color: var(--star);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--star) 45%, transparent);
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .sb-cover-new { box-shadow: 0 0 0 3px var(--star); } }
 
 .sb-back {
   margin: 0 0 10px;
@@ -3511,6 +3526,7 @@ button.gr-row {
   border-radius: 50%;
   background: radial-gradient(circle, color-mix(in srgb, var(--star) 55%, transparent) 0 45%, transparent 70%);
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .sb-new { background: radial-gradient(circle, var(--star) 0 30%, transparent 60%); } }
 
 .sb-new .sticker-art { animation: sticker-new 900ms ease-out; }
 
@@ -4387,6 +4403,7 @@ button.gr-row {
 .dd-line-done {
   fill: color-mix(in srgb, var(--star) 45%, transparent);
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .dd-line-done { fill: var(--star); fill-opacity: 0.45; } }
 
 /* A dot: a 48px place to tap, with a smaller circle drawn inside it. */
 .dd-dot {
@@ -4467,6 +4484,7 @@ button.gr-row {
   font-size: calc(var(--cell) * 0.55);
   line-height: 1;
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .ps-cell { background: var(--water); } }
 
 .ps-cell:nth-child(4n + 2) { margin-right: 8px; }
 .ps-cell:nth-child(n + 5):nth-child(-n + 8) { margin-bottom: 8px; }
@@ -4609,6 +4627,7 @@ button.gr-row {
   stroke: var(--bank);
   stroke-width: 1.5;
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .fp-cheese { fill: var(--star); fill-opacity: 0.3; } }
 
 .fp-topped .fp-cheese { fill: var(--go); }
 .fp-topping { display: none; fill: var(--numbers-ink); }
@@ -4663,6 +4682,7 @@ button.gr-row {
   border-radius: 50%;
   background: conic-gradient(var(--go) 0 75%, color-mix(in srgb, var(--star) 30%, var(--surface)) 0);
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .pizza-art { background: conic-gradient(var(--go) 0 75%, var(--surface) 0); } }
 
 /* ---------- Pattern Train ---------- */
 
@@ -4705,6 +4725,7 @@ button.gr-row {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--go) 35%, transparent);
   color: var(--numbers-ink);
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .pt-empty { box-shadow: 0 0 0 3px var(--go); } }
 
 .pt-filled {
   border-color: var(--here);
@@ -4878,9 +4899,13 @@ button.gr-row {
 }
 
 .hs-wall { fill: color-mix(in srgb, var(--water) 55%, var(--surface)); }
+@supports not (color: color-mix(in srgb, red, blue)) { .hs-wall { fill: var(--water); } }
 .hs-pad { fill: color-mix(in srgb, var(--water) 70%, var(--muted)); opacity: 0.55; }
+@supports not (color: color-mix(in srgb, red, blue)) { .hs-pad { fill: var(--water); } }
 .hs-floor { fill: color-mix(in srgb, var(--star) 45%, var(--bank)); }
+@supports not (color: color-mix(in srgb, red, blue)) { .hs-floor { fill: var(--bank); } }
 .hs-plank { stroke: color-mix(in srgb, var(--numbers-ink) 25%, transparent); stroke-width: 0.25; }
+@supports not (color: color-mix(in srgb, red, blue)) { .hs-plank { stroke: var(--numbers-ink); stroke-opacity: 0.25; } }
 .hs-mark { fill: var(--white); }
 .hs-pole { fill: var(--muted); }
 .hs-arm { stroke: var(--muted); stroke-width: 1.4; }
@@ -5632,6 +5657,7 @@ button.gr-row {
   stroke-width: 0.12;
   stroke-dasharray: 0.22 0.1;
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .tp-glow { fill: var(--star); fill-opacity: 0.45; } }
 
 .tp-place-done,
 .tp-piece polygon,
@@ -5724,6 +5750,7 @@ button.gr-row {
   line-height: 1;
   cursor: pointer;
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .lp-cell { background: var(--water); } }
 
 /* Each pair has its own color; its path squares also show its own mark. */
 .lp-p0 { --ink: var(--here); }
@@ -5744,12 +5771,14 @@ button.gr-row {
   border: 2px dashed var(--ink);
   background: color-mix(in srgb, var(--ink) 30%, var(--surface));
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .lp-path { background: var(--surface); } }
 
 /* A joined pair: a solid look, and a check mark on both animals. */
 .lp-joined {
   border-style: solid;
   background: color-mix(in srgb, var(--ink) 65%, var(--surface));
 }
+@supports not (color: color-mix(in srgb, red, blue)) { .lp-joined { background: var(--ink); } }
 
 .lp-end.lp-joined::after {
   content: "✓";
