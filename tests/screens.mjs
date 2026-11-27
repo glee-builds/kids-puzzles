@@ -1,8 +1,8 @@
 // screens.mjs: open every screen in a real browser and check it draws.
 //
 // The other tests check puzzle logic. This one checks the screens: it
-// starts the app, opens the home screen and every puzzle at phone size
-// (today's and yesterday's), and fails if a screen doesn't draw, shows the
+// starts the app, opens the home screen and every puzzle at phone size,
+// and fails if a screen doesn't draw, shows the
 // "Oops" message, logs an error, or (for a puzzle) doesn't fit the screen.
 // At the end it turns its web server off and opens every screen again, to
 // prove the app works with no internet.
@@ -497,13 +497,12 @@ try {
   const games = allGames.filter(wanted);
   if (!games.length) problems.push(`--only=${ONLY}: there is no puzzle called that`);
 
-  for (const day of ['', '?day=yesterday']) {
-    for (const game of games) {
-      const label = `${game}${day ? ' (yesterday)' : ''}`;
-      // Drawn means: the "Getting today's puzzle" line is gone and something replaced it.
-      const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
-      await checkScreen(label, `${day}#${game}`, { ready, fits: true, play: !day && PLAYS[game] ? game : null, poke: day ? null : game, tip: !day });
-    }
+  // Each puzzle on the fixed date. Earlier days are checked once further down
+  // (they use the same screens); add --days=30 to see whether more days fit.
+  for (const game of games) {
+    // Drawn means: the "Getting today's puzzle" line is gone and something replaced it.
+    const ready = `!document.querySelector('#game-${game} .loading') && document.querySelector('#game-${game}').children.length > 0`;
+    await checkScreen(game, `#${game}`, { ready, fits: true, play: PLAYS[game] ? game : null, poke: game, tip: true });
   }
   // The app's other screens; --only skips them.
   if (!ONLY) {
