@@ -5611,12 +5611,10 @@ button.gr-row {
   stroke-linejoin: round;
 }
 
-/* An empty place has a dashed edge; a filled one has a solid dark edge. */
+/* An empty place is not drawn (working out where pieces go is the puzzle); a filled one has a solid dark edge. */
 .tp-place {
   fill: transparent;
-  stroke: var(--muted);
-  stroke-width: 0.04;
-  stroke-dasharray: 0.14 0.1;
+  stroke: none;
   pointer-events: all;
   cursor: pointer;
 }

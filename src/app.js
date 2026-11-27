@@ -497,7 +497,7 @@ const GAMES = {
   },
   'tangram-pond': {
     title: "Tangram Pond", kind: 'fun', legend: "Fit the shapes to make a picture", data: () => [DAY],
-    how: ["Tap a piece, then tap the place with the same shape.", "Fill every place to see the picture!"],
+    how: ["Tap a piece, then tap where it fits in the picture.", "Fill the whole picture!"],
     art: "<svg class=\"tp-art\" viewBox=\"0 0 6 6\" aria-hidden=\"true\"><polygon class=\"tp-go\" points=\"1,3 3,1 5,3\"/><polygon class=\"tp-here\" points=\"1,3 3,3 3,5 1,5\"/><polygon class=\"tp-star\" points=\"3,3 5,3 5,5 3,5\"/></svg>",
   },
   'lily-pad-paths': {
