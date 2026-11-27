@@ -11,17 +11,19 @@ const sample = generate(seed('2026-11-26'));
 const twelve = { frogs: 3, each: 4, ask: 'each', choices: [4, 3, 5] };
 const turned = { frogs: 5, each: 4, ask: 'frogs', choices: [5, 4, 6] };
 
-test('every day for two years, at every level, makes 3 valid rounds in that level\'s numbers', () => {
+test('every day for two years, at every level, makes 3 valid rounds sharing among 2 to 5 frogs', () => {
   for (const level of [1, 2, 3]) {
     everyDay((key) => {
       const puzzle = generate(seed(key), level);
       assertValid(verify(puzzle), `level ${level}, ${key}`);
       for (const round of puzzle.rounds) {
-        assert.ok(FROGS[level - 1].includes(round.frogs));
+        assert.ok(FROGS[0].includes(round.frogs));
         assert.ok(round.frogs <= 10 && total(round) <= MOST_BERRIES);
         assert.equal(round.choices.filter((n) => n === answerOf(round)).length, 1);
         assert.ok(round.choices.every((n) => n > 0));
       }
+      // Each round shares among a different number of frogs, so a day mixes them.
+      assert.equal(new Set(puzzle.rounds.map((round) => round.frogs)).size, 3);
       // Only level 3 turns a question around, and only one a day.
       assert.equal(puzzle.rounds.filter((round) => round.ask === 'frogs').length, level === 3 ? 1 : 0);
     });

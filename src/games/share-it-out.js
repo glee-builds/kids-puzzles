@@ -6,11 +6,11 @@
 //      frog a berry at once. Check is right when the pile is empty and every
 //      frog has the same number.
 //   2. The fact: 12 ÷ 3 = ? with 3 choices, then the times fact it comes from.
-//   level 1: sharing among 2, 5, or 10
-//   level 2: among 3, 4, or 6
-//   level 3: among 2 to 9, and one round is turned around: "Each frog gets 4.
-//            How many frogs can have some?"
-// Never more than 10 frogs or 50 berries, so everything stays big enough to tap.
+// Every level shares among 2, 3, 4, or 5 frogs (the owner's pick for now),
+// with a different number of frogs in each round so a day mixes them.
+//   level 3: one round is turned around: "Each frog gets 4. How many frogs
+//            can have some?"
+// Never more than 50 berries, so everything stays big enough to tap.
 
 import { createRandom, forLevel } from '../seed.js';
 import { nextRound } from '../rounds.js';
@@ -18,8 +18,8 @@ import { make, button, wiggle, roundFrame, markRight } from '../ui.js';
 
 export const ROUNDS = 3;
 export const MOST_BERRIES = 50;
-// How many frogs can share at each level.
-export const FROGS = [[2, 5, 10], [3, 4, 6], [2, 3, 4, 5, 6, 7, 8, 9]];
+// How many frogs can share (one list for every level, for now).
+export const FROGS = [[2, 3, 4, 5]];
 const EACH = [2, 9];  // berries for each frog (from, to): within the 9 × 9 table
 const SPARE_PADS = 9; // pads shown when the question is "how many frogs?"
 
@@ -37,7 +37,7 @@ export function generate(seed, level = 1) {
   const rounds = [];
   while (rounds.length < ROUNDS) {
     const round = { frogs: random.pick(forLevel(FROGS, level)), each: random.int(...EACH) };
-    if (total(round) > MOST_BERRIES || rounds.some((r) => total(r) === total(round))) continue;
+    if (total(round) > MOST_BERRIES || rounds.some((r) => total(r) === total(round) || r.frogs === round.frogs)) continue;
     round.ask = rounds.length === turned ? 'frogs' : 'each';
     // Wrong choices are real mistakes: picking the number in the question,
     // taking away instead of sharing, or being one off.
